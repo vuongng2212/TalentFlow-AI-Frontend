@@ -64,9 +64,6 @@ Bạn đang **implement feature** và cần reference?
 - ➡️ [**CONTRIBUTING.md**](./CONTRIBUTING.md) - Code standards, Git workflow
 - ➡️ [**SRS.md**](./SRS.md) Section 6 - Clean Architecture layers
 
-**Skills Support:**
-- ➡️ [**RECOMMENDED_SKILLS.md**](./RECOMMENDED_SKILLS.md) - Claude skills cho từng task
-
 ---
 
 ### 🔒 Dành cho Security Review

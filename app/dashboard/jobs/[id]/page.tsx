@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { getMockJob, mockCandidates } from "@/lib/mock-data";
+import { mockJobs, mockCandidates } from "@/lib/mock-data";
 import {
   ArrowLeft,
   MapPin,
@@ -14,10 +14,10 @@ import {
   Calendar,
   Users,
   Briefcase,
-  Clock,
+  Upload,
   Edit,
-  Trash2,
   Share2,
+  Trash2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
@@ -26,27 +26,20 @@ export default function JobDetailPage() {
   const router = useRouter();
   const jobId = params.id as string;
 
-  const job = getMockJob(jobId);
+  const job = mockJobs.find((j) => j.id === jobId);
 
   if (!job) {
     return (
-      <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.back()}>
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Briefcase className="h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-2xl font-bold mb-2">Job Not Found</h2>
+        <p className="text-muted-foreground mb-6">
+          The job you&apos;re looking for doesn&apos;t exist
+        </p>
+        <Button onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          Go Back
         </Button>
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Briefcase className="h-16 w-16 text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-2">Job not found</p>
-            <p className="text-sm text-muted-foreground mb-6">
-              The job you're looking for doesn't exist or has been removed.
-            </p>
-            <Link href="/dashboard/jobs">
-              <Button>Back to Jobs</Button>
-            </Link>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -59,8 +52,8 @@ export default function JobDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="ghost" onClick={() => router.back()}>
-        <ArrowLeft className="h-4 w-4 mr-2" />
+      <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+        <ArrowLeft className="h-4 w-4" />
         Back to Jobs
       </Button>
 
@@ -68,6 +61,7 @@ export default function JobDetailPage() {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold">{job.title}</h1>
             <Badge
               variant={
                 job.status === "OPEN"
@@ -79,38 +73,42 @@ export default function JobDetailPage() {
             >
               {job.status}
             </Badge>
-            <span className="text-sm text-muted-foreground">
-              Posted {formatDate(job.createdAt)}
-            </span>
           </div>
-          <h1 className="text-4xl font-bold mb-2">{job.title}</h1>
-          <div className="flex items-center gap-4 text-muted-foreground">
+          <div className="flex flex-wrap gap-4 text-muted-foreground">
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               <span>{job.location}</span>
             </div>
-            {job.salaryRange && (
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                <span>{job.salaryRange}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span>{job.salaryRange}</span>
+            </div>
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              <span>{job.applicationCount} applications</span>
+              <span>{job.applicationCount} applicants</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>Posted {formatDate(job.createdAt)}</span>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2">
+          <Link href="/dashboard/upload">
+            <Button className="gap-2">
+              <Upload className="h-4 w-4" />
+              Upload CV
+            </Button>
+          </Link>
+          <Button variant="outline" className="gap-2">
+            <Edit className="h-4 w-4" />
+            Edit
+          </Button>
           <Button variant="outline" size="icon">
             <Share2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon">
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="text-destructive">
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -124,10 +122,8 @@ export default function JobDetailPage() {
             <CardHeader>
               <CardTitle>Job Description</CardTitle>
             </CardHeader>
-            <CardContent className="prose prose-sm max-w-none">
-              <p className="text-muted-foreground leading-relaxed">
-                {job.description}
-              </p>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+              <p>{job.description}</p>
             </CardContent>
           </Card>
 
@@ -136,31 +132,39 @@ export default function JobDetailPage() {
             <CardHeader>
               <CardTitle>Requirements</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Skills</h4>
-                <div className="flex flex-wrap gap-2">
-                  {job.requirements.skills.map((skill) => (
-                    <Badge key={skill} variant="outline">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
+            <CardContent>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                  <span className="text-sm">
+                    <strong>Experience:</strong> {job.requirements.experience}
+                  </span>
+                </li>
+                {job.requirements.education && (
+                  <li className="flex items-start gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <span className="text-sm">
+                      <strong>Education:</strong> {job.requirements.education}
+                    </span>
+                  </li>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Skills */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Required Skills</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {job.requirements.skills.map((skill) => (
+                  <Badge key={skill} variant="outline">
+                    {skill}
+                  </Badge>
+                ))}
               </div>
-              <div>
-                <h4 className="font-semibold mb-2">Experience</h4>
-                <p className="text-sm text-muted-foreground">
-                  {job.requirements.experience}
-                </p>
-              </div>
-              {job.requirements.education && (
-                <div>
-                  <h4 className="font-semibold mb-2">Education</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {job.requirements.education}
-                  </p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
@@ -178,8 +182,15 @@ export default function JobDetailPage() {
             </CardHeader>
             <CardContent>
               {applicants.length === 0 ? (
-                <div className="text-center py-8 text-sm text-muted-foreground">
-                  No applicants yet
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No applicants yet</p>
+                  <Link href="/dashboard/upload">
+                    <Button variant="outline" size="sm" className="mt-4 gap-2">
+                      <Upload className="h-4 w-4" />
+                      Upload First CV
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -198,20 +209,14 @@ export default function JobDetailPage() {
                         <p className="font-medium truncate">
                           {candidate.fullName}
                         </p>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {candidate.email}
+                        <p className="text-sm text-muted-foreground">
+                          Applied {formatDate(candidate.appliedDate)}
                         </p>
                       </div>
-                      <div className="text-right">
-                        {candidate.aiScore && (
-                          <div className="text-sm font-medium mb-1">
-                            {candidate.aiScore}% match
-                          </div>
-                        )}
-                        <Badge variant="outline" className="text-xs">
-                          {candidate.stage}
-                        </Badge>
-                      </div>
+                      {candidate.aiScore && (
+                        <Badge>AI Score: {candidate.aiScore}%</Badge>
+                      )}
+                      <Badge variant="outline">{candidate.stage}</Badge>
                     </Link>
                   ))}
                 </div>
@@ -225,80 +230,97 @@ export default function JobDetailPage() {
           {/* Quick Stats */}
           <Card>
             <CardHeader>
-              <CardTitle>Overview</CardTitle>
+              <CardTitle className="text-base">Quick Stats</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm">Applications</span>
-                </div>
-                <span className="font-semibold">{job.applicationCount}</span>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Total Applications
+                </p>
+                <p className="text-2xl font-bold">{job.applicationCount}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm">Posted</span>
-                </div>
-                <span className="text-sm">{formatDate(job.createdAt)}</span>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Active Candidates
+                </p>
+                <p className="text-2xl font-bold">{applicants.length}</p>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-sm">Last Updated</span>
-                </div>
-                <span className="text-sm">{formatDate(job.updatedAt)}</span>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Avg. AI Score
+                </p>
+                <p className="text-2xl font-bold">
+                  {applicants.length > 0
+                    ? Math.round(
+                        applicants.reduce(
+                          (sum, c) => sum + (c.aiScore || 0),
+                          0,
+                        ) / applicants.length,
+                      )
+                    : 0}
+                  %
+                </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Posted By */}
+          {/* Hiring Team */}
           <Card>
             <CardHeader>
-              <CardTitle>Posted By</CardTitle>
+              <CardTitle className="text-base">Hiring Team</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
                 <Avatar
-                  src={job.createdBy.avatar}
-                  alt={job.createdBy.fullName}
-                  fallback={job.createdBy.fullName.charAt(0)}
-                  size="lg"
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=recruiter"
+                  alt="Jane Recruiter"
+                  fallback="J"
                 />
                 <div>
-                  <p className="font-medium">{job.createdBy.fullName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {job.createdBy.role}
+                  <p className="font-medium text-sm">Jane Recruiter</p>
+                  <p className="text-xs text-muted-foreground">
+                    Lead Recruiter
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Avatar
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=john"
+                  alt="John Tech Lead"
+                  fallback="J"
+                />
+                <div>
+                  <p className="font-medium text-sm">John Tech Lead</p>
+                  <p className="text-xs text-muted-foreground">
+                    Hiring Manager
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Actions */}
+          {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+              <CardTitle className="text-base">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="default">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Job
-              </Button>
-              <Button className="w-full" variant="outline">
-                <Share2 className="h-4 w-4 mr-2" />
+              <Link href="/dashboard/upload">
+                <Button variant="outline" size="sm" className="w-full gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload CV
+                </Button>
+              </Link>
+              <Link href="/dashboard/candidates">
+                <Button variant="outline" size="sm" className="w-full gap-2">
+                  <Users className="h-4 w-4" />
+                  View Candidates
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <Share2 className="h-4 w-4" />
                 Share Job
               </Button>
-              {job.status === "OPEN" && (
-                <Button className="w-full" variant="outline">
-                  Close Applications
-                </Button>
-              )}
-              {job.status === "DRAFT" && (
-                <Button className="w-full" variant="default">
-                  Publish Job
-                </Button>
-              )}
             </CardContent>
           </Card>
         </div>

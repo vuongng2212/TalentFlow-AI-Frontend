@@ -12,6 +12,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Upload,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { Avatar } from "@/components/ui/avatar";
@@ -22,6 +23,11 @@ const navItems = [
     icon: LayoutDashboard,
     label: "Dashboard",
     href: ROUTES.DASHBOARD,
+  },
+  {
+    icon: Upload,
+    label: "Upload CV",
+    href: "/dashboard/upload",
   },
   {
     icon: Briefcase,

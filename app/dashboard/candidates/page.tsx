@@ -1,22 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { KanbanColumn } from "@/components/candidates/KanbanColumn";
+import { CandidateCardOverlay } from "@/components/candidates/CandidateCard";
 import { mockKanbanColumns } from "@/lib/mock-data";
-import type { Candidate, ApplicationStage, KanbanColumn } from "@/types";
-import {
-  Mail,
-  Phone,
-  FileText,
-  Star,
-  Upload,
-  GripVertical,
-} from "lucide-react";
-import { formatRelativeTime } from "@/lib/utils";
+import type { Candidate, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import { Upload, Users, TrendingUp, Clock, Filter, Search } from "lucide-react";
+import { toast } from "sonner";
 import {
   DndContext,
   DragEndEvent,
@@ -26,31 +20,34 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  DragOverEvent,
 } from "@dnd-kit/core";
 
 export default function CandidatesPage() {
-  const [columns, setColumns] = useState<KanbanColumn[]>(mockKanbanColumns);
-  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(
-    null,
-  );
+  const [columns, setColumns] = useState<KanbanColumnType[]>(mockKanbanColumns);
+  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    }),
+    })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const candidate = columns
       .flatMap((col) => col.candidates)
       .find((c) => c.id === active.id);
     setActiveCandidate(candidate || null);
-  };
+  }, [columns]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    // Optional: Add visual feedback during drag
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     setActiveCandidate(null);
 
@@ -61,7 +58,7 @@ export default function CandidatesPage() {
 
     // Find current column
     const sourceColumn = columns.find((col) =>
-      col.candidates.some((c) => c.id === candidateId),
+      col.candidates.some((c) => c.id === candidateId)
     );
 
     if (!sourceColumn || sourceColumn.id === newStage) return;
@@ -87,170 +84,130 @@ export default function CandidatesPage() {
           };
         }
         return col;
-      }),
+      })
     );
-  };
 
-  const getStageColor = (stage: ApplicationStage): string => {
-    const colors = {
-      APPLIED: "bg-blue-500/10 border-blue-500/20",
-      SCREENING: "bg-yellow-500/10 border-yellow-500/20",
-      INTERVIEW: "bg-purple-500/10 border-purple-500/20",
-      OFFER: "bg-green-500/10 border-green-500/20",
-      HIRED: "bg-emerald-500/10 border-emerald-500/20",
-      REJECTED: "bg-red-500/10 border-red-500/20",
-    };
-    return colors[stage];
-  };
+    // Show toast notification
+    toast.success(`${candidate.fullName} moved to ${newStage.toLowerCase()}`, {
+      description: `Successfully updated candidate pipeline stage.`,
+      duration: 3000,
+    });
+  }, [columns]);
+
+  // Calculate stats
+  const totalCandidates = columns.reduce((acc, col) => acc + col.count, 0);
+  const inProgressCount = columns
+    .filter((col) => !["HIRED", "REJECTED"].includes(col.id))
+    .reduce((acc, col) => acc + col.count, 0);
+  const hiredCount = columns.find((col) => col.id === "HIRED")?.count || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Candidates Pipeline</h1>
-          <p className="text-muted-foreground mt-1">
-            Drag and drop candidates to move them through stages
+          <h1 className="text-2xl font-bold tracking-tight">
+            Candidates Pipeline
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Drag and drop candidates to move them through hiring stages
           </p>
         </div>
-        <Link href="/dashboard/upload">
-          <Button className="gap-2">
-            <Upload className="h-4 w-4" />
-            Upload CV
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Filter className="h-3.5 w-3.5" />
+            Filter
           </Button>
-        </Link>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Search className="h-3.5 w-3.5" />
+            Search
+          </Button>
+          <Link href="/dashboard/upload">
+            <Button size="sm" className="gap-2 shadow-soft-sm hover:shadow-primary transition-shadow">
+              <Upload className="h-3.5 w-3.5" />
+              Upload CV
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* Kanban Board with DnD */}
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="shadow-soft-sm hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{totalCandidates}</p>
+                <p className="text-xs text-muted-foreground">Total Candidates</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-soft-sm hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                <Clock className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{inProgressCount}</p>
+                <p className="text-xs text-muted-foreground">In Progress</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-soft-sm hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                <TrendingUp className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tabular-nums">{hiredCount}</p>
+                <p className="text-xs text-muted-foreground">Hired</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-soft-sm hover-lift">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+                <Badge variant="outline" className="h-10 w-10 text-lg font-bold border-purple-500/30 text-purple-500">
+                  {totalCandidates > 0 ? Math.round((hiredCount / totalCandidates) * 100) : 0}%
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Conversion</p>
+                <p className="text-xs text-muted-foreground">Hire Rate</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Kanban Board */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {columns.map((column) => (
-            <div key={column.id} className="shrink-0 w-80">
-              <Card className={`h-full ${getStageColor(column.id)}`}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold">
-                      {column.title}
-                    </CardTitle>
-                    <Badge variant="secondary">{column.count}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {/* Drop Zone */}
-                  <div
-                    id={column.id}
-                    className="min-h-[200px]"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={() => {}}
-                  >
-                    {column.candidates.length === 0 ? (
-                      <div className="text-center py-8 text-sm text-muted-foreground">
-                        Drop candidates here
-                      </div>
-                    ) : (
-                      column.candidates.map((candidate) => (
-                        <div
-                          key={candidate.id}
-                          id={candidate.id}
-                          draggable
-                          onDragStart={(e) => {
-                            e.dataTransfer.effectAllowed = "move";
-                            e.dataTransfer.setData("text/plain", candidate.id);
-                          }}
-                          className="mb-3 last:mb-0"
-                        >
-                          <Card className="p-4 hover:shadow-md transition-smooth cursor-grab active:cursor-grabbing group border-2 border-transparent hover:border-primary/20">
-                            {/* Drag Handle */}
-                            <div className="flex items-start gap-2 mb-3">
-                              <GripVertical className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
-                              <div className="flex items-start gap-3 flex-1 min-w-0">
-                                <Avatar
-                                  src={candidate.avatar}
-                                  alt={candidate.fullName}
-                                  fallback={candidate.fullName.charAt(0)}
-                                  size="md"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <Link
-                                    href={`/dashboard/candidates/${candidate.id}`}
-                                    className="font-semibold truncate group-hover:text-primary transition-smooth block"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {candidate.fullName}
-                                  </Link>
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {candidate.appliedPosition}
-                                  </p>
-                                </div>
-                                {candidate.aiScore && (
-                                  <div className="flex items-center gap-1 text-xs font-medium flex-shrink-0">
-                                    <Star className="h-3 w-3 text-yellow-500" />
-                                    <span>{candidate.aiScore}%</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Candidate Info */}
-                            <div className="space-y-1.5 text-xs text-muted-foreground mb-3">
-                              {candidate.email && (
-                                <div className="flex items-center gap-2 truncate">
-                                  <Mail className="h-3 w-3 shrink-0" />
-                                  <span className="truncate">
-                                    {candidate.email}
-                                  </span>
-                                </div>
-                              )}
-                              {candidate.phone && (
-                                <div className="flex items-center gap-2">
-                                  <Phone className="h-3 w-3 shrink-0" />
-                                  <span>{candidate.phone}</span>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-3 w-3 shrink-0" />
-                                <span>
-                                  Applied{" "}
-                                  {formatRelativeTime(candidate.appliedDate)}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Skills */}
-                            {candidate.skills &&
-                              candidate.skills.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {candidate.skills.slice(0, 2).map((skill) => (
-                                    <Badge
-                                      key={skill}
-                                      variant="outline"
-                                      className="text-xs px-2 py-0"
-                                    >
-                                      {skill}
-                                    </Badge>
-                                  ))}
-                                  {candidate.skills.length > 2 && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-xs px-2 py-0"
-                                    >
-                                      +{candidate.skills.length - 2}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-                          </Card>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2">
+          {columns.map((column, index) => (
+            <div
+              key={column.id}
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <KanbanColumn column={column} />
             </div>
           ))}
         </div>
@@ -258,43 +215,61 @@ export default function CandidatesPage() {
         {/* Drag Overlay */}
         <DragOverlay>
           {activeCandidate && (
-            <Card className="p-4 w-80 opacity-80 rotate-3 shadow-lg">
-              <div className="flex items-start gap-3">
-                <Avatar
-                  src={activeCandidate.avatar}
-                  alt={activeCandidate.fullName}
-                  fallback={activeCandidate.fullName.charAt(0)}
-                  size="md"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold truncate">
-                    {activeCandidate.fullName}
-                  </h4>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {activeCandidate.appliedPosition}
-                  </p>
-                </div>
-              </div>
-            </Card>
+            <CandidateCardOverlay candidate={activeCandidate} />
           )}
         </DragOverlay>
       </DndContext>
 
-      {/* Summary Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pipeline Summary</CardTitle>
+      {/* Pipeline Summary */}
+      <Card className="shadow-soft-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+            Pipeline Overview
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            {columns.map((column) => (
-              <div key={column.id} className="text-center">
-                <div className="text-2xl font-bold">{column.count}</div>
-                <div className="text-xs text-muted-foreground">
-                  {column.title}
+          <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-muted">
+            {columns
+              .filter((col) => col.count > 0)
+              .map((column) => {
+                const percentage = (column.count / totalCandidates) * 100;
+                const colorMap: Record<ApplicationStage, string> = {
+                  APPLIED: "bg-blue-500",
+                  SCREENING: "bg-amber-500",
+                  INTERVIEW: "bg-purple-500",
+                  OFFER: "bg-teal-500",
+                  HIRED: "bg-emerald-500",
+                  REJECTED: "bg-rose-500",
+                };
+                return (
+                  <div
+                    key={column.id}
+                    className={`h-full transition-all duration-500 ${colorMap[column.id]}`}
+                    style={{ width: `${percentage}%` }}
+                    title={`${column.title}: ${column.count}`}
+                  />
+                );
+              })}
+          </div>
+          <div className="flex flex-wrap gap-4 mt-4">
+            {columns.map((column) => {
+              const colorMap: Record<ApplicationStage, string> = {
+                APPLIED: "bg-blue-500",
+                SCREENING: "bg-amber-500",
+                INTERVIEW: "bg-purple-500",
+                OFFER: "bg-teal-500",
+                HIRED: "bg-emerald-500",
+                REJECTED: "bg-rose-500",
+              };
+              return (
+                <div key={column.id} className="flex items-center gap-2 text-xs">
+                  <div className={`h-2.5 w-2.5 rounded-full ${colorMap[column.id]}`} />
+                  <span className="text-muted-foreground">{column.title}</span>
+                  <span className="font-semibold tabular-nums">{column.count}</span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

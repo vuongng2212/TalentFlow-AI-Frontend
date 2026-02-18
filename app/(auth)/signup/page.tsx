@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -24,7 +25,9 @@ export default function SignupPage() {
     e.preventDefault();
 
     if (!agreedToTerms) {
-      alert("Please agree to terms and conditions");
+      toast.warning("Please agree to terms and conditions", {
+        description: "You must accept the Terms of Service and Privacy Policy to continue.",
+      });
       return;
     }
 

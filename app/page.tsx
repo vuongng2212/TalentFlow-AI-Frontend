@@ -1,29 +1,37 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES } from "@/lib/constants";
+import LandingPage from "./(marketing)/landing/page";
 
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Redirect based on authentication status
+    // Check auth status and redirect if authenticated
     if (isAuthenticated) {
       router.push(ROUTES.DASHBOARD);
     } else {
-      router.push(ROUTES.LOGIN);
+      setIsLoading(false);
     }
   }, [isAuthenticated, router]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-        <p className="mt-4 text-muted-foreground">Redirecting...</p>
+  // Show loading while checking auth
+  if (isLoading && isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+          <p className="mt-4 text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Show landing page for non-authenticated users
+  return <LandingPage />;
 }

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,9 +23,15 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      toast.success("Welcome back!", {
+        description: "You have successfully signed in.",
+      });
       router.push(ROUTES.DASHBOARD);
     } catch (err) {
       setError("Invalid credentials. Try: recruiter@talentflow.ai");
+      toast.error("Sign in failed", {
+        description: "Please check your credentials and try again.",
+      });
     }
   };
 

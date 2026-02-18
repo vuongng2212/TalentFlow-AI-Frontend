@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +21,10 @@ import {
   TrendingUp,
   Play,
   ChevronRight,
+  ChevronDown,
   Quote,
+  Menu,
+  X,
 } from "lucide-react";
 
 // ============================================
@@ -625,6 +631,107 @@ function PricingSection() {
 }
 
 // ============================================
+// FAQ SECTION
+// ============================================
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: "How accurate is the AI screening?",
+      answer:
+        "Our AI models achieve 89% accuracy in matching candidates to job requirements. We continuously train on millions of successful placements to improve precision.",
+    },
+    {
+      question: "Can I customize the AI matching criteria?",
+      answer:
+        "Yes! You can adjust skill weights, define must-have vs nice-to-have requirements, and create custom scoring rubrics tailored to your hiring needs.",
+    },
+    {
+      question: "How long does it take to process a resume?",
+      answer:
+        "Most resumes are processed within 10 seconds. For bulk uploads of 100+ CVs, processing typically completes within 5 minutes.",
+    },
+    {
+      question: "Is my data secure?",
+      answer:
+        "Absolutely. We're SOC 2 Type II certified with end-to-end encryption. Your data is stored in secure, GDPR-compliant data centers.",
+    },
+    {
+      question: "Can I integrate with my existing ATS?",
+      answer:
+        "Yes, we offer native integrations with major ATS platforms including Workday, Greenhouse, Lever, and more. We also provide a REST API for custom integrations.",
+    },
+    {
+      question: "What happens after my free trial ends?",
+      answer:
+        "Your data remains accessible. You can choose to upgrade to a paid plan or export your data. We never delete candidate data without your consent.",
+    },
+  ];
+
+  return (
+    <section className="py-24 lg:py-32">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <Badge variant="outline" className="mb-4">
+            FAQ
+          </Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            Frequently asked questions
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Everything you need to know about TalentFlow AI.
+          </p>
+        </div>
+
+        {/* FAQ Items */}
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="border border-border/50 rounded-xl overflow-hidden bg-card"
+            >
+              <button
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
+              >
+                <span className="font-medium pr-4">{faq.question}</span>
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                    openIndex === index ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-200 ${
+                  openIndex === index ? "max-h-96" : "max-h-0"
+                }`}
+              >
+                <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                  {faq.answer}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Still have questions */}
+        <div className="mt-12 text-center p-6 rounded-xl bg-muted/30 border border-border/50">
+          <p className="text-sm text-muted-foreground mb-3">
+            Still have questions?
+          </p>
+          <Button variant="outline" size="sm" className="gap-2">
+            Contact Support
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================
 // CTA SECTION
 // ============================================
 function CTASection() {
@@ -761,6 +868,25 @@ function Footer() {
 // NAVBAR
 // ============================================
 function Navbar() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      setMobileMenuOpen(false);
+    }
+  };
+
+  const navLinks = [
+    { href: "features", label: "Features" },
+    { href: "how-it-works", label: "How It Works" },
+    { href: "pricing", label: "Pricing" },
+    { href: "testimonials", label: "Testimonials" },
+    { href: "faq", label: "FAQ" },
+  ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -775,22 +901,20 @@ function Navbar() {
 
           {/* Nav Links - Desktop */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              How It Works
-            </a>
-            <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </a>
-            <a href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Testimonials
-            </a>
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={`#${link.href}`}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
           </div>
 
-          {/* Auth Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Auth Buttons - Desktop */}
+          <div className="hidden md:flex items-center gap-3">
             <Link href={ROUTES.LOGIN}>
               <Button variant="ghost" size="sm">
                 Sign In
@@ -802,6 +926,51 @@ function Navbar() {
                 <ChevronRight className="h-3 w-3" />
               </Button>
             </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        <div
+          className={`md:hidden overflow-hidden transition-all duration-300 ${
+            mobileMenuOpen ? "max-h-96 pb-4" : "max-h-0"
+          }`}
+        >
+          <div className="space-y-1 pt-2">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={`#${link.href}`}
+                onClick={(e) => handleSmoothScroll(e, link.href)}
+                className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="pt-4 space-y-2">
+              <Link href={ROUTES.LOGIN} className="block">
+                <Button variant="outline" size="sm" className="w-full">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href={ROUTES.SIGNUP} className="block">
+                <Button size="sm" className="w-full gap-1">
+                  Get Started
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -831,6 +1000,9 @@ export default function LandingPage() {
         </section>
         <section id="pricing">
           <PricingSection />
+        </section>
+        <section id="faq">
+          <FAQSection />
         </section>
         <CTASection />
       </main>

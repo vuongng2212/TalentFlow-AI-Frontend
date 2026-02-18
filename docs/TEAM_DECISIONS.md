@@ -1,25 +1,29 @@
 # Team Decisions & Action Plan
 
 **Ngày quyết định:** 2026-02-01
-**Team:** 2 Full-stack Developers
+**Team:** 3 Full-stack Developers (NestJS, Spring Boot, ASP.NET Core)
 **Dự án:** TalentFlow AI
 
 ---
 
 ## ✅ Các Quyết định Chính Thức
 
-### 1. Message Queue: Apache Kafka ✅
-**Quyết định:** Sử dụng Kafka từ đầu (như đã tài liệu hóa)
+### 1. Message Queue: RabbitMQ (AMQP) ✅
+**Quyết định:** Sử dụng RabbitMQ (AMQP) cho polyglot architecture
 **Lý do:**
-- Đầu tư học ngay từ đầu
-- Ready cho Phase 2 (AI matching)
-- Event streaming cho future features
+- Polyglot 3-service architecture (NestJS + Spring Boot + ASP.NET Core)
+- Native support cho Java (Spring AMQP), C# (RabbitMQ.Client), Node.js (amqplib)
+- Built-in DLQ (Dead Letter Queue) cho CV processing retries
+- Excellent Management UI tại http://localhost:15672
+- BullMQ chỉ hỗ trợ Node.js, không phù hợp với polyglot
+
+**Note:** BullMQ vẫn valid cho Node.js-only projects (xem ADR-007)
 
 **Action Items:**
-- [ ] Team học Kafka basics (6 giờ)
-- [ ] Follow hướng dẫn setup trong docker-compose.yml
-- [ ] Tạo simplified Kafka setup guide
-- [ ] Document common Kafka troubleshooting
+- [x] Team học RabbitMQ basics (2-3 giờ)
+- [x] Thêm RabbitMQ vào docker-compose.yml
+- [ ] Document RabbitMQ topology patterns
+- [ ] Setup RabbitMQ Management UI monitoring
 
 ---
 
@@ -490,3 +494,9 @@
 #### Next Week (Tuần 1):
 - 🚀 **Start Sprint 1**: Frontend Prototype
 - 🎯 **Goal**: Demo cho khách hàng end of Week 2
+
+---
+
+**Prepared By:** Claude
+**Date:** 2026-02-01
+**Next Review:** Start of Sprint 2 (Week 3)

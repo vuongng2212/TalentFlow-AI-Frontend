@@ -15,7 +15,7 @@
 - [Frontend Deployment (Vercel)](#frontend-deployment-vercel)
 - [Backend Deployment (Railway)](#backend-deployment-railway)
 - [Database Setup (Neon)](#database-setup-neon)
-- [Kafka Setup (Upstash)](#kafka-setup-upstash)
+- [RabbitMQ Setup](#rabbitmq-setup)
 - [Monitoring Setup](#monitoring-setup)
 - [Post-Deployment Verification](#post-deployment-verification)
 - [Rollback Procedure](#rollback-procedure)
@@ -36,12 +36,81 @@
 |------|-------------|---------|
 | **Week 2** | Vercel (Frontend) | Demo #1 - UI prototype |
 | **Week 4** | Railway (Backend) + Neon | Demo #2 - Working API |
-| **Week 6** | Full stack + Kafka | Demo #3 - CV upload |
+| **Week 6** | Full stack + RabbitMQ | Demo #3 - CV upload |
 | **Week 8** | Production + Monitoring | Demo #4 - MVP launch |
 
 ---
 
 ## 🏗️ Deployment Architecture
+
+### Infrastructure Diagram
+
+```mermaid
+graph TB
+    %% Users
+    Users[👥 End Users]
+
+    %% CDN
+    CDN[🌐 Cloudflare CDN<br/>Optional Edge Cache]
+
+    %% Frontend
+    subgraph "Vercel Edge Network"
+        Frontend[🖥️ Frontend<br/>Next.js 16<br/>app.talentflow.ai]
+    end
+
+    %% Backend Services
+    subgraph "Railway (US Region)"
+        API[⚙️ API Gateway<br/>NestJS:3000<br/>api.talentflow.ai]
+        Parser[🔧 CV Parser<br/>Spring Boot:8080 OR<br/>ASP.NET Core:5000]
+        Notif[📬 Notification<br/>NestJS:3001 OR<br/>ASP.NET Core:5001]
+        Redis[⚡ Redis<br/>:6379<br/>Cache only]
+    end
+
+    %% Database
+    subgraph "Neon (Serverless)"
+        DB[(🗄️ PostgreSQL<br/>Prisma/EF Core)]
+    end
+
+    %% External Services
+    subgraph "External Services"
+        R2[☁️ Cloudflare R2<br/>CV Storage]
+        Claude[🤖 Anthropic Claude<br/>AI API]
+        SendGrid[📧 SendGrid<br/>Email]
+    end
+
+    %% Connections
+    Users -->|HTTPS| CDN
+    CDN -->|Cache Miss| Frontend
+    Frontend -->|API Calls| API
+
+    API -->|TCP| DB
+    API -->|Pub/Sub| Redis
+    API -->|Upload| R2
+
+    Redis -->|Events| Parser
+    Redis -->|Events| Notif
+
+    Parser -->|Read| R2
+    Parser -->|AI Requests| Claude
+    Parser -->|Update| DB
+
+    Notif -->|Send| SendGrid
+    Notif -->|Read| DB
+    Notif -->|WebSocket| Frontend
+
+    %% Styling
+    classDef frontend fill:#1168BD,stroke:#0B4884,color:#fff
+    classDef service fill:#438DD5,stroke:#2E6295,color:#fff
+    classDef storage fill:#6DB33F,stroke:#4D7F2C,color:#fff
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff
+
+    class Frontend frontend
+    class API,Parser,Notif service
+    class DB,Redis storage
+    class R2,Claude,SendGrid,CDN external
+```
+
+### ASCII Architecture Diagram (Legacy)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -63,24 +132,24 @@
 └─────────────────────┘    - GraphQL (Phase 2)
       ↓                    - WebSocket Gateway
 ┌─────────────────────┐
-│  Upstash Kafka      │ → Event Streaming
+│  Railway Redis      │ → Cache only
 │  Serverless         │
 └─────────────────────┘
       ↓
 ┌─────────────────────┐
-│  Railway            │ → NestJS AI Worker
+│  Railway            │ → CV Parser (Spring Boot/ASP.NET)
 │  (Background)       │    - CV Processing
 └─────────────────────┘
       ↓
 ┌─────────────────────┐
-│  Neon PostgreSQL    │ → Database (Prisma)
+│  Neon PostgreSQL    │ → Database (Prisma/EF Core)
 │  Serverless         │
 └─────────────────────┘
 
 External Services:
-├── AWS S3                → File storage
-├── Upstash Redis         → Caching
-└── ELK + Grafana         → Monitoring (Self-hosted hoặc managed)
+├── Cloudflare R2         → File storage
+├── Anthropic Claude      → AI API
+└── SendGrid              → Email notifications
 ```
 
 ---
@@ -321,64 +390,77 @@ railway run npx prisma db pull
 
 ---
 
-## 📨 Kafka Setup (Upstash)
+## 📨 RabbitMQ Setup
 
-### Step 1: Create Upstash Kafka Cluster
+### Step 1: Use Railway Redis + RabbitMQ
 
-1. Đi tới [upstash.com](https://upstash.com)
-2. Create Kafka cluster
+**Option 1: Add RabbitMQ to Docker Compose (Local Development)**
+```yaml
+# docker-compose.yml
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: talentflow-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+```
+
+**Option 2: CloudAMQP (Production - Managed RabbitMQ)**
+1. Đi tới [cloudamqp.com](https://cloudamqp.com)
+2. Create instance (Free tier: Little Lemur)
 3. Region: US East (same as Railway)
-4. Plan: Free tier (10K messages/day)
+4. Copy AMQP URL
 
-### Step 2: Get Credentials
-
-```bash
-# Upstash Dashboard → Details
-KAFKA_BROKER=creative-fox-12345-us1-kafka.upstash.io:9092
-KAFKA_USERNAME=Y3JlYXRpdmUtZm94...
-KAFKA_PASSWORD=YourPasswordHere
-KAFKA_SASL_MECHANISM=SCRAM-SHA-256
-```
-
-### Step 3: Add to Railway
+### Step 2: Get RabbitMQ URL
 
 ```bash
-# Railway → Variables (API Gateway & AI Worker)
-KAFKA_BROKERS=creative-fox-12345-us1-kafka.upstash.io:9092
-KAFKA_USERNAME=Y3JlYXRpdmUtZm94...
-KAFKA_PASSWORD=YourPasswordHere
-KAFKA_SASL_MECHANISM=SCRAM-SHA-256
+# Local Development:
+RABBITMQ_URL=amqp://rabbitmq:rabbitmq@localhost:5672
+
+# Production (CloudAMQP):
+RABBITMQ_URL=amqps://user:password@fox.rmq.cloudamqp.com/vhost
 ```
 
-### Step 4: Create Topics
+### Step 3: Add to Railway Environment Variables
 
 ```bash
-# Upstash Dashboard → Topics → Create Topic
-
-Topics to create:
-1. cv.uploaded       (3 partitions, retention: 7 days)
-2. cv.parsed         (3 partitions, retention: 7 days)
-3. cv.processed      (3 partitions, retention: 7 days)
+# Railway → Variables (All services)
+RABBITMQ_URL=amqps://user:password@fox.rmq.cloudamqp.com/vhost
 ```
 
-### Step 5: Test Connection
+### Step 4: RabbitMQ Topology
 
-```bash
-# Railway → Run command
-railway run node -e "
-const { Kafka } = require('kafkajs');
-const kafka = new Kafka({
-  brokers: [process.env.KAFKA_BROKERS],
-  sasl: {
-    mechanism: 'scram-sha-256',
-    username: process.env.KAFKA_USERNAME,
-    password: process.env.KAFKA_PASSWORD,
-  },
-  ssl: true,
-});
-kafka.admin().listTopics().then(console.log);
-"
-```
+RabbitMQ exchanges and queues are created by the application on startup:
+
+**Exchange:** `cv-events` (type: topic)
+
+**Queues:**
+- `cv-processing` (routing key: `cv.uploaded`) → CV Parser (Spring Boot)
+- `cv-notifications` (routing key: `cv.*`) → Notification Service (ASP.NET Core)
+- `cv-parsing-dlq` (Dead Letter Queue)
+
+### Step 5: Monitor Queues
+
+**RabbitMQ Management UI:**
+- **Local:** http://localhost:15672 (rabbitmq/rabbitmq)
+- **CloudAMQP:** Via CloudAMQP Dashboard
+
+**Features:**
+- View queue depths
+- Monitor message rates
+- Check consumer connections
+- Purge/delete queues if needed
 
 ---
 
@@ -562,13 +644,10 @@ JWT_SECRET=<generate-with-openssl-rand-base64-64>
 JWT_ACCESS_EXPIRATION=15m
 JWT_REFRESH_EXPIRATION=7d
 
-# Kafka (Upstash)
-KAFKA_BROKERS=creative-fox-12345-us1-kafka.upstash.io:9092
-KAFKA_USERNAME=Y3JlYXRpdmUtZm94...
-KAFKA_PASSWORD=YourStrongPasswordHere
-KAFKA_SASL_MECHANISM=SCRAM-SHA-256
+# RabbitMQ
+RABBITMQ_URL=amqp://rabbitmq:rabbitmq@localhost:5672
 
-# Redis (Upstash)
+# Redis (for caching)
 REDIS_URL=rediss://default:token@us1-token-12345.upstash.io:6379
 
 # S3 (AWS)
@@ -663,44 +742,45 @@ curl https://api.talentflow.ai/health
 
 ---
 
-### Week 6: Kafka + AI Worker
+### Week 6: RabbitMQ + CV Parser
 
-#### A. Setup Upstash Kafka
+#### A. Setup RabbitMQ
 
 ```bash
-# 1. Create cluster (Web UI)
-# 2. Create topics:
-#    - cv.uploaded
-#    - cv.processed
-# 3. Copy credentials to Railway
+# Local: Add to docker-compose.yml (see RabbitMQ Setup section)
+docker-compose up -d rabbitmq
+
+# Production: Create CloudAMQP instance
+# Copy AMQP URL to Railway environment variables
 ```
 
-#### B. Deploy AI Worker
+#### B. Deploy CV Parser (Spring Boot)
 
 ```bash
 # Railway → Add New Service
 # Select same repo: talentflow-backend
-# Root directory: /apps/ai-worker
+# Root directory: /cv-parser
 
-# Start command:
-node dist/apps/ai-worker/main.js
+# Build configuration (detected automatically for Spring Boot)
+# Start command: java -jar target/cv-parser.jar
 
 # Deploy
 git push origin main
 ```
 
-#### C. Test Kafka Pipeline
+#### C. Test RabbitMQ Pipeline
 
 ```bash
 # Upload a test CV via frontend
-# Watch Railway logs for AI Worker:
-railway logs --service ai-worker --follow
+# Watch Railway logs for CV Parser:
+railway logs --service cv-parser --follow
 
 # Expected logs:
-[Kafka] Consumed message from cv.uploaded
+[RabbitMQ] Consumed message from cv.uploaded queue
+[Parser] Downloading CV from R2...
 [Parser] Extracting text from PDF...
 [Parser] Text extracted: 1250 characters
-[Kafka] Published message to cv.processed
+[RabbitMQ] Published message to cv.parsed queue
 ```
 
 ---
@@ -757,7 +837,7 @@ curl https://api.talentflow.ai/api/v1/jobs
 # Expected: Job list (may be empty)
 
 # 3. Kafka Status
-# Railway logs should show: [Kafka] Connected to broker
+# Railway logs should show: [RabbitMQ] Connected to broker
 
 # 4. Frontend Loads
 curl -I https://app.talentflow.ai
@@ -866,7 +946,7 @@ railway run psql $DATABASE_URL < previous_migration.sql
 | **Error Rate** | < 1% | Alert if > 5% |
 | **CPU Usage** | < 70% | Alert if > 85% |
 | **Memory Usage** | < 80% | Alert if > 90% |
-| **Kafka Consumer Lag** | < 1000 msgs | Alert if > 5000 |
+| **RabbitMQ Consumer Lag** | < 1000 msgs | Alert if > 5000 |
 | **Database Connections** | < 80% pool | Alert if > 90% |
 
 ### Grafana Dashboards
@@ -881,7 +961,7 @@ railway run psql $DATABASE_URL < previous_migration.sql
 - CPU usage (%)
 - Memory usage (%)
 - Database connections
-- Kafka consumer lag
+- RabbitMQ consumer lag
 
 **Dashboard 3: Business Metrics**
 - Active users
@@ -909,11 +989,11 @@ groups:
         annotations:
           summary: "API response time > 1s"
 
-      - alert: KafkaConsumerLag
-        expr: kafka_consumer_lag > 5000
+      - alert: RabbitMQConsumerLag
+        expr: rabbitmq_queue_messages > 5000
         for: 5m
         annotations:
-          summary: "Kafka consumer lag > 5000 messages"
+          summary: "RabbitMQ queue depth > 5000 messages"
 ```
 
 ---
@@ -1019,14 +1099,16 @@ railway run npx prisma migrate reset --force
 railway run npx prisma migrate deploy
 ```
 
-### Kafka Connection Fails
+### RabbitMQ Connection Fails
 
 ```bash
-# Test Kafka connection
-railway run node -e "console.log(process.env.KAFKA_BROKERS)"
+# Test RabbitMQ connection
+railway run node -e "console.log(process.env.RABBITMQ_URL)"
 
-# Check credentials
-# Verify SASL mechanism matches Upstash settings
+# Check RabbitMQ Management UI is accessible
+curl http://localhost:15672/api/overview
+
+# Verify credentials match docker-compose.yml or CloudAMQP settings
 ```
 
 ---

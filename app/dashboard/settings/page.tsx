@@ -19,6 +19,7 @@ import {
   Save,
   Camera,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -173,7 +174,14 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <Button className="gap-2">
+                  <Button
+                    className="gap-2"
+                    onClick={() =>
+                      toast.success("Profile updated!", {
+                        description: "Your profile changes have been saved.",
+                      })
+                    }
+                  >
                     <Save className="h-4 w-4" />
                     Save Changes
                   </Button>
@@ -212,7 +220,16 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() =>
+                      toast.success("Password updated!", {
+                        description:
+                          "Your password has been changed successfully.",
+                      })
+                    }
+                  >
                     <Shield className="h-4 w-4" />
                     Update Password
                   </Button>
@@ -299,7 +316,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Button className="gap-2">
+                <Button
+                  className="gap-2"
+                  onClick={() =>
+                    toast.success("Preferences saved!", {
+                      description: "Your notification preferences have been updated.",
+                    })
+                  }
+                >
                   <Save className="h-4 w-4" />
                   Save Preferences
                 </Button>
@@ -410,7 +434,14 @@ export default function SettingsPage() {
                     </select>
                   </div>
 
-                  <Button className="gap-2">
+                  <Button
+                    className="gap-2"
+                    onClick={() =>
+                      toast.success("Settings saved!", {
+                        description: "Your regional settings have been updated.",
+                      })
+                    }
+                  >
                     <Save className="h-4 w-4" />
                     Save Settings
                   </Button>

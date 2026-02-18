@@ -20,6 +20,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { toast } from "sonner";
+import { AIScoreBadge } from "@/components/candidates";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -101,14 +103,17 @@ export default function JobDetailPage() {
               Upload CV
             </Button>
           </Link>
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => toast.info("Edit mode coming soon!")}>
             <Edit className="h-4 w-4" />
             Edit
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success("Link copied!", { description: "Job link copied to clipboard." });
+          }}>
             <Share2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="text-destructive">
+          <Button variant="outline" size="icon" className="text-destructive" onClick={() => toast.error("Delete action", { description: "This would delete the job posting." })}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -214,7 +219,7 @@ export default function JobDetailPage() {
                         </p>
                       </div>
                       {candidate.aiScore && (
-                        <Badge>AI Score: {candidate.aiScore}%</Badge>
+                        <AIScoreBadge score={candidate.aiScore} size="sm" />
                       )}
                       <Badge variant="outline">{candidate.stage}</Badge>
                     </Link>

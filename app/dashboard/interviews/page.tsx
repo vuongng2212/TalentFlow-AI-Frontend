@@ -25,6 +25,7 @@ import {
   MapPin,
   Plus,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Mock interview data
 const mockInterviews = [
@@ -116,8 +117,13 @@ export default function InterviewsPage() {
   const upcomingCount = mockInterviews.filter((i) => i.date >= now).length;
 
   const handleScheduleInterview = () => {
-    console.log("Scheduling interview:", newInterview);
     // TODO: Connect to backend API
+    const selectedCandidate = mockCandidates.find(
+      (c) => c.id === newInterview.candidateId,
+    );
+    toast.success("Interview scheduled!", {
+      description: `Interview with ${selectedCandidate?.fullName || "candidate"} on ${newInterview.date} at ${newInterview.time}.`,
+    });
     setScheduleOpen(false);
     setNewInterview({
       candidateId: "",

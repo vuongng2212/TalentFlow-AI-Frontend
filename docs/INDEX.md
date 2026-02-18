@@ -1,7 +1,8 @@
 # 📚 Documentation Index - TalentFlow AI
 
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-02-18
 **Status:** Clean & Organized
+**Architecture:** Polyglot 3-Service (NestJS + Spring Boot + ASP.NET Core)
 
 ---
 
@@ -32,23 +33,31 @@ Bạn vừa join team và cần **setup project**?
 6. ➡️ [**SECURITY.md**](./SECURITY.md) (15 phút) - Security best practices
 
 **Tuần 1:**
-7. ➡️ Đọc 5 ADRs trong folder [**adr/**](./adr/) (30 phút) - Hiểu tại sao chọn tech stack này
+7. ➡️ Đọc Active ADRs trong folder [**adr/**](./adr/) (30 phút) - Hiểu current architecture
+   - **Start with ADR-006** (core architecture)
+   - Skip ADR-001, ADR-002 (superseded - chỉ đọc nếu cần historical context)
 
 ---
 
 ### 🏗️ Dành cho Architect / Tech Lead
 Bạn cần hiểu **quyết định kiến trúc** và **lý do**?
 
-**Architecture Decisions:**
-1. ➡️ [**ADR-001**](./adr/ADR-001-nestjs-monorepo.md) - Tại sao NestJS Monorepo?
-2. ➡️ [**ADR-002**](./adr/ADR-002-kafka-message-queue.md) - Tại sao Apache Kafka?
-3. ➡️ [**ADR-003**](./adr/ADR-003-prisma-orm.md) - Tại sao Prisma ORM?
-4. ➡️ [**ADR-004**](./adr/ADR-004-deployment-strategy.md) - Deployment: Vercel + Railway
-5. ➡️ [**ADR-005**](./adr/ADR-005-separate-repos.md) - Tại sao tách repos FE/BE?
+**🟢 Active ADRs (Current Architecture):**
+1. ⭐ [**ADR-006: Polyglot 3-Service Architecture**](./adr/ADR-006-hybrid-microservices.md) - **CORE ARCHITECTURE**
+2. ⭐ [**ADR-009: RabbitMQ for Polyglot**](./adr/ADR-009-rabbitmq-polyglot.md) - **Message Queue** 🆕
+3. ✅ [**ADR-008: Cloudflare R2 Storage**](./adr/ADR-008-cloudflare-r2.md) - File storage strategy
+4. ✅ [**ADR-003: Prisma ORM**](./adr/ADR-003-prisma-orm.md) - Database ORM choice
+5. ✅ [**ADR-004: Deployment Strategy**](./adr/ADR-004-deployment-strategy.md) - Vercel + Railway
+6. ✅ [**ADR-005: Separate Repos**](./adr/ADR-005-separate-repos.md) - Frontend/Backend separation
+
+**⚠️ Superseded/Partial ADRs (Historical Reference):**
+- ⚠️ [**ADR-007: BullMQ over Kafka**](./adr/ADR-007-bullmq-over-kafka.md) → Partially superseded by ADR-009 (still valid for Node.js-only)
+- ⚠️ [**ADR-001: NestJS Monorepo**](./adr/ADR-001-nestjs-monorepo.md) → Superseded by ADR-006
+- ⚠️ [**ADR-002: Apache Kafka**](./adr/ADR-002-kafka-message-queue.md) → Superseded by ADR-007
 
 **Technical Deep Dive:**
-6. ➡️ [**SRS.md**](./SRS.md) - System architecture & monorepo structure
-7. ➡️ [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) - Database design, indexes, migrations
+7. ➡️ [**SRS.md**](./SRS.md) - System architecture & service structure
+8. ➡️ [**DATABASE_SCHEMA.md**](./DATABASE_SCHEMA.md) - Database design, indexes, migrations
 
 ---
 
@@ -111,10 +120,14 @@ talentflow-backend/
     │   ├── SRS.md
     │   ├── DATABASE_SCHEMA.md
     │   ├── API_REFERENCE.md
-    │   └── SECURITY.md
+    │   ├── SECURITY.md
+    │   ├── MONITORING.md              🆕 Monitoring & observability
+    │   └── PERFORMANCE.md             🆕 Performance optimization
     │
     ├── 👨‍💻 Development
     │   ├── CONTRIBUTING.md
+    │   ├── TESTING_STRATEGY.md
+    │   ├── DEPLOYMENT.md
     │   └── RECOMMENDED_SKILLS.md
     │
     ├── 📊 Project Management
@@ -123,11 +136,15 @@ talentflow-backend/
     │
     └── 🏛️ Architecture Decisions
         └── adr/
-            ├── ADR-001-nestjs-monorepo.md
-            ├── ADR-002-kafka-message-queue.md
-            ├── ADR-003-prisma-orm.md
-            ├── ADR-004-deployment-strategy.md
-            └── ADR-005-separate-repos.md
+            ├── 🟢 ADR-003-prisma-orm.md (Active)
+            ├── 🟢 ADR-004-deployment-strategy.md (Active)
+            ├── 🟢 ADR-005-separate-repos.md (Active)
+            ├── ⭐ ADR-006-hybrid-microservices.md (CURRENT ARCHITECTURE)
+            ├── ⚠️ ADR-007-bullmq-over-kafka.md (Partial - Node.js only)
+            ├── 🟢 ADR-008-cloudflare-r2.md (Active)
+            ├── ⭐ ADR-009-rabbitmq-polyglot.md (CURRENT - Message Queue) 🆕
+            ├── ⚠️ ADR-001-nestjs-monorepo.md (SUPERSEDED → See ADR-006)
+            └── ⚠️ ADR-002-kafka-message-queue.md (SUPERSEDED → See ADR-007)
 ```
 
 ---
@@ -165,7 +182,7 @@ talentflow-backend/
 |---------|----------|
 | Setup project local | README.md |
 | Hiểu product | PRD.md |
-| Hiểu kiến trúc | SRS.md + ADRs |
+| Hiểu kiến trúc | SRS.md + ADR-006 (current) |
 | Implement API endpoint | API_REFERENCE.md + DATABASE_SCHEMA.md |
 | Git workflow | CONTRIBUTING.md |
 | Security policy | SECURITY.md |
@@ -174,29 +191,49 @@ talentflow-backend/
 | Database schema | DATABASE_SCHEMA.md |
 | Environment config | .env.example |
 | Local infrastructure | docker-compose.yml |
+| **Setup monitoring** | **MONITORING.md** 🆕 |
+| **Performance optimization** | **PERFORMANCE.md** 🆕 |
+| **Load testing** | **PERFORMANCE.md** 🆕 |
+| **Deploy to production** | **DEPLOYMENT.md** |
 
 ---
 
 ## 📊 Tóm Tắt Tài Liệu
 
-### Tổng Số Files: 14
+### Tổng Số Files: 21 (Updated!)
 
-#### Must Read (5):
-1. ⭐ README.md
-2. ⭐ PROJECT_SUMMARY.md
-3. ⭐ CONTRIBUTING.md
-4. ⭐ TEAM_DECISIONS.md
-5. ⭐ SECURITY.md
+#### Must Read - Start Here (5):
+1. ⭐ README.md - Setup guide
+2. ⭐ PROJECT_SUMMARY.md - Quick overview
+3. ⭐ CONTRIBUTING.md - Code standards
+4. ⭐ TEAM_DECISIONS.md - Roadmap & decisions
+5. ⭐ SECURITY.md - Security policy
 
-#### Reference Docs (5):
-6. SRS.md
-7. DATABASE_SCHEMA.md
-8. API_REFERENCE.md
-9. PRD.md
-10. RECOMMENDED_SKILLS.md
+#### Technical Reference (7):
+6. SRS.md - Technical specification
+7. DATABASE_SCHEMA.md - Database design
+8. API_REFERENCE.md - API endpoints
+9. PRD.md - Product requirements
+10. RECOMMENDED_SKILLS.md - Claude skills
+11. **MONITORING.md** 🆕 - Monitoring & observability
+12. **PERFORMANCE.md** 🆕 - Performance optimization
 
-#### Architecture (5):
-11-15. ADR-001 to ADR-005
+#### Operations & Deployment (2):
+13. DEPLOYMENT.md - Deployment guide
+14. TESTING_STRATEGY.md - Testing strategies
+
+#### Architecture Decisions - Active (7):
+11. ⭐ ADR-006 - **Polyglot 3-Service** (CURRENT)
+12. ⭐ ADR-009 - **RabbitMQ Queue** (CURRENT) 🆕
+13. ADR-008 - **Cloudflare R2** (CURRENT)
+14. ADR-003 - Prisma ORM
+15. ADR-004 - Deployment Strategy
+16. ADR-005 - Separate FE/BE Repos
+17. ⚠️ ADR-007 - **BullMQ** (Node.js-only, see ADR-009 for polyglot)
+
+#### Architecture Decisions - Superseded (2):
+18. ⚠️ ADR-001 - NestJS Monorepo (Historical - See ADR-006)
+19. ⚠️ ADR-002 - Apache Kafka (Historical - See ADR-007)
 
 ---
 
@@ -216,11 +253,16 @@ talentflow-backend/
 **Nếu bạn là:**
 - 👨‍💼 **Product Manager** → Đọc [PRD.md](./PRD.md)
 - 👨‍💻 **Developer** → Đọc [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md) → [README.md](../README.md)
-- 🏗️ **Architect** → Đọc [SRS.md](./SRS.md) + tất cả [ADRs](./adr/)
+- 🏗️ **Architect** → Đọc [ADR-006](./adr/ADR-006-hybrid-microservices.md) ⭐ → [SRS.md](./SRS.md) → Active ADRs
 - 📊 **Project Lead** → Đọc [TEAM_DECISIONS.md](./TEAM_DECISIONS.md)
 
 **Chưa biết bắt đầu từ đâu?**
 👉 Đọc [**PROJECT_SUMMARY.md**](./PROJECT_SUMMARY.md) trước!
+
+**Quick Architecture Reference:**
+📖 **Current Architecture:** [ADR-006: Polyglot 3-Service](./adr/ADR-006-hybrid-microservices.md)
+📖 **Queue (Polyglot):** [ADR-009: RabbitMQ](./adr/ADR-009-rabbitmq-polyglot.md) 🆕
+📖 **Storage:** [ADR-008: Cloudflare R2](./adr/ADR-008-cloudflare-r2.md)
 
 ---
 

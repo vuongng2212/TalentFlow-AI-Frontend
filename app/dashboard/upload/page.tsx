@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { mockJobs } from "@/lib/mock-data";
+import { toast } from "sonner";
 import {
   Upload,
   File,
@@ -60,7 +61,9 @@ export default function UploadCVPage() {
 
   const handleUpload = async () => {
     if (files.length === 0 || !selectedJob) {
-      alert("Please select at least one CV and choose a job position");
+      toast.error("Missing required information", {
+        description: "Please select at least one CV and choose a job position.",
+      });
       return;
     }
 
@@ -71,6 +74,10 @@ export default function UploadCVPage() {
 
     setUploading(false);
     setUploadSuccess(true);
+
+    toast.success("Upload successful!", {
+      description: `${files.length} CV${files.length > 1 ? "s" : ""} uploaded and processing...`,
+    });
 
     // Reset and redirect after 2 seconds
     setTimeout(() => {

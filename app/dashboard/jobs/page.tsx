@@ -28,6 +28,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { toast } from "sonner";
 
 export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,8 +61,10 @@ export default function JobsPage() {
   };
 
   const handleCreateJob = () => {
-    console.log("Creating job:", newJob);
     // TODO: Connect to backend API
+    toast.success("Job created successfully!", {
+      description: `"${newJob.title}" has been added to your job postings.`,
+    });
     setCreateJobOpen(false);
     setNewJob({
       title: "",

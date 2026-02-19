@@ -217,7 +217,7 @@ export default function CandidateDetailPage() {
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-purple transition-all"
+                        className="h-full gradient-primary transition-all"
                         style={{ width: `${(item.score / item.max) * 100}%` }}
                       />
                     </div>

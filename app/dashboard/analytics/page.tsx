@@ -162,7 +162,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-purple transition-all"
+                    className="h-full gradient-primary transition-all"
                     style={{ width: `${item.rate}%` }}
                   />
                 </div>
@@ -245,7 +245,7 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="text-4xl font-bold mb-2">32%</div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-purple w-[32%]" />
+              <div className="h-full gradient-primary w-[32%]" />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               8 offers from 25 interviews

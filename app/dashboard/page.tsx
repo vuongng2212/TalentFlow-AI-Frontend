@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { mockJobs, mockCandidates } from "@/lib/mock-data";
 import { Briefcase, Users, Calendar, TrendingUp } from "lucide-react";
 import { WelcomeBanner } from "@/components/shared/WelcomeBanner";
+import { AIScoreBadge } from "@/components/candidates";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function DashboardPage() {
@@ -156,16 +157,14 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   {candidate.aiScore && (
-                    <div className="text-right">
-                      <p className="text-sm font-medium">
-                        AI Score: {candidate.aiScore}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Applied{" "}
-                        {new Date(candidate.appliedDate).toLocaleDateString()}
-                      </p>
-                    </div>
+                    <AIScoreBadge score={candidate.aiScore} size="sm" />
                   )}
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">
+                      Applied{" "}
+                      {new Date(candidate.appliedDate).toLocaleDateString()}
+                    </p>
+                  </div>
                   <Badge>{candidate.stage}</Badge>
                 </div>
               </Link>

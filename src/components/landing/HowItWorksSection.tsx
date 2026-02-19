@@ -1,4 +1,11 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import {
+  useScrollAnimation,
+  useStaggeredAnimation,
+} from "@/hooks/use-scroll-animation";
 
 const steps = [
   {
@@ -32,11 +39,21 @@ const steps = [
 ];
 
 export function HowItWorksSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: stepsRef, isVisible: stepsVisible, getStaggerStyle } =
+    useStaggeredAnimation(steps.length, { staggerDelay: 150 });
+
   return (
     <section className="py-24 lg:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={cn(
+            "text-center max-w-2xl mx-auto mb-16 scroll-animate",
+            headerVisible && "is-visible"
+          )}
+        >
           <Badge variant="outline" className="mb-4">
             How It Works
           </Badge>
@@ -50,9 +67,16 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div ref={stepsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {steps.map((step, index) => (
-            <div key={step.number} className="relative">
+            <div
+              key={step.number}
+              className={cn(
+                "relative scroll-stagger-item",
+                stepsVisible && "is-visible"
+              )}
+              style={getStaggerStyle(index)}
+            >
               {/* Connector Line */}
               {index < steps.length - 1 ? (
                 <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />

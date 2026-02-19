@@ -1,6 +1,13 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import {
+  useScrollAnimation,
+  useStaggeredAnimation,
+} from "@/hooks/use-scroll-animation";
 import { CheckCircle2 } from "lucide-react";
 
 const plans = [
@@ -56,11 +63,21 @@ const plans = [
 ];
 
 export function PricingSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
+    useStaggeredAnimation(plans.length, { staggerDelay: 120 });
+
   return (
     <section className="py-24 lg:py-32 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={cn(
+            "text-center max-w-2xl mx-auto mb-16 scroll-animate",
+            headerVisible && "is-visible"
+          )}
+        >
           <Badge variant="outline" className="mb-4">
             Pricing
           </Badge>
@@ -73,15 +90,18 @@ export function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {plans.map((plan) => (
+        <div ref={gridRef} className="grid md:grid-cols-3 gap-6 lg:gap-8">
+          {plans.map((plan, index) => (
             <Card
               key={plan.name}
-              className={`relative ${
+              className={cn(
+                "relative scroll-stagger-item",
+                gridVisible && "is-visible",
                 plan.popular
                   ? "border-primary shadow-soft-lg scale-105"
                   : "border-border/50"
-              }`}
+              )}
+              style={getStaggerStyle(index)}
             >
               {plan.popular ? (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">

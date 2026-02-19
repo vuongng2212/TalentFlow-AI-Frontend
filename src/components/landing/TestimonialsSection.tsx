@@ -1,5 +1,12 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import {
+  useScrollAnimation,
+  useStaggeredAnimation,
+} from "@/hooks/use-scroll-animation";
 import { Star, Quote } from "lucide-react";
 
 const testimonials = [
@@ -30,11 +37,21 @@ const testimonials = [
 ];
 
 export function TestimonialsSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
+    useStaggeredAnimation(testimonials.length, { staggerDelay: 120 });
+
   return (
     <section className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={cn(
+            "text-center max-w-2xl mx-auto mb-16 scroll-animate",
+            headerVisible && "is-visible"
+          )}
+        >
           <Badge variant="outline" className="mb-4">
             Testimonials
           </Badge>
@@ -47,12 +64,15 @@ export function TestimonialsSection() {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div ref={gridRef} className="grid md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <Card
               key={testimonial.author}
-              className="hover-lift animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className={cn(
+                "hover-lift scroll-stagger-item",
+                gridVisible && "is-visible"
+              )}
+              style={getStaggerStyle(index)}
             >
               <CardContent className="p-6">
                 {/* Rating */}

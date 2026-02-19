@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  useScrollAnimation,
+  useStaggeredAnimation,
+} from "@/hooks/use-scroll-animation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 
 const faqs = [
@@ -40,12 +45,21 @@ const faqs = [
 
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: faqsRef, isVisible: faqsVisible, getStaggerStyle } =
+    useStaggeredAnimation(faqs.length, { staggerDelay: 80 });
 
   return (
     <section className="py-24 lg:py-32">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div
+          ref={headerRef}
+          className={cn(
+            "text-center mb-16 scroll-animate",
+            headerVisible && "is-visible"
+          )}
+        >
           <Badge variant="outline" className="mb-4">
             FAQ
           </Badge>
@@ -58,11 +72,15 @@ export function FAQSection() {
         </div>
 
         {/* FAQ Items */}
-        <div className="space-y-4">
+        <div ref={faqsRef} className="space-y-4">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="border border-border/50 rounded-xl overflow-hidden bg-card"
+              className={cn(
+                "border border-border/50 rounded-xl overflow-hidden bg-card scroll-stagger-item",
+                faqsVisible && "is-visible"
+              )}
+              style={getStaggerStyle(index)}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -70,15 +88,17 @@ export function FAQSection() {
               >
                 <span className="font-medium pr-4">{faq.question}</span>
                 <ChevronDown
-                  className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
-                    openIndex === index ? "rotate-180" : ""
-                  }`}
+                  className={cn(
+                    "h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200",
+                    openIndex === index && "rotate-180"
+                  )}
                 />
               </button>
               <div
-                className={`overflow-hidden transition-all duration-200 ${
+                className={cn(
+                  "overflow-hidden transition-all duration-200",
                   openIndex === index ? "max-h-96" : "max-h-0"
-                }`}
+                )}
               >
                 <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
                   {faq.answer}

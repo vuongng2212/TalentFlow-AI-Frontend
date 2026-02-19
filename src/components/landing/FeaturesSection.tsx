@@ -1,5 +1,12 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import {
+  useScrollAnimation,
+  useStaggeredAnimation,
+} from "@/hooks/use-scroll-animation";
 import {
   Brain,
   Zap,
@@ -61,11 +68,21 @@ const features = [
 ];
 
 export function FeaturesSection() {
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
+  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
+    useStaggeredAnimation(features.length, { staggerDelay: 80 });
+
   return (
     <section className="py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div
+          ref={headerRef}
+          className={cn(
+            "text-center max-w-2xl mx-auto mb-16 scroll-animate",
+            headerVisible && "is-visible"
+          )}
+        >
           <Badge variant="outline" className="mb-4">
             Features
           </Badge>
@@ -79,12 +96,15 @@ export function FeaturesSection() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <Card
               key={feature.title}
-              className="group hover-lift border-border/50 animate-slide-up"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className={cn(
+                "group hover-lift border-border/50 scroll-stagger-item",
+                gridVisible && "is-visible"
+              )}
+              style={getStaggerStyle(index)}
             >
               <CardContent className="p-6">
                 <div

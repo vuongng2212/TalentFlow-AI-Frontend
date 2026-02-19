@@ -1,13 +1,25 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { ROUTES } from "@/lib/constants";
 import { ArrowRight } from "lucide-react";
 
 export function CTASection() {
+  const { ref, isVisible } = useScrollAnimation();
+
   return (
     <section className="py-24 lg:py-32">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="relative rounded-3xl bg-gradient-to-r from-primary to-indigo-600 p-12 lg:p-16 overflow-hidden">
+        <div
+          ref={ref}
+          className={cn(
+            "relative rounded-3xl bg-gradient-to-r from-primary to-indigo-600 p-12 lg:p-16 overflow-hidden scroll-scale",
+            isVisible && "is-visible"
+          )}
+        >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl" />

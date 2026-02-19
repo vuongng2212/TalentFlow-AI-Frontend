@@ -115,6 +115,13 @@ export default function CandidatesPage() {
     return filteredColumns.flatMap((col) => col.candidates);
   }, [filteredColumns]);
 
+  const hasActiveFilters = searchQuery !== "" || scoreFilter !== "all";
+
+  // Get all candidates for list view
+  const allFilteredCandidates = useMemo(() => {
+    return filteredColumns.flatMap((col) => col.candidates);
+  }, [filteredColumns]);
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="space-y-6 animate-fade-in">

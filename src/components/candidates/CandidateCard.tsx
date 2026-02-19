@@ -18,7 +18,7 @@ interface CandidateCardProps {
   className?: string;
 }
 
-export function CandidateCard({
+export const CandidateCard = React.memo(function CandidateCard({
   candidate,
   isDragging = false,
   isOverlay = false,
@@ -175,10 +175,14 @@ export function CandidateCard({
       </Link>
     </Card>
   );
-}
+});
 
-// Simplified overlay version for drag preview
-export function CandidateCardOverlay({ candidate }: { candidate: Candidate }) {
+// Simplified overlay version for drag preview - memoized to prevent re-renders
+export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
+  candidate
+}: {
+  candidate: Candidate
+}) {
   return (
     <Card className="w-72 p-3 shadow-soft-xl rotate-3 opacity-95 border-primary/30">
       <div className="flex items-center gap-3">
@@ -194,10 +198,10 @@ export function CandidateCardOverlay({ candidate }: { candidate: Candidate }) {
             {candidate.appliedPosition}
           </p>
         </div>
-        {candidate.aiScore && (
+        {candidate.aiScore ? (
           <AIScoreBadge score={candidate.aiScore} size="sm" showBreakdown={false} />
-        )}
+        ) : null}
       </div>
     </Card>
   );
-}
+});

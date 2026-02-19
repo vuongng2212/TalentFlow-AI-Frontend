@@ -85,7 +85,7 @@ export default function CandidatesPage() {
     .reduce((acc, col) => acc + col.count, 0);
   const hiredCount = columns.find((col) => col.id === "HIRED")?.count || 0;
 
-  const hasActiveFilters = searchQuery !== "" || scoreFilter !== "all";
+
 
   // Stable callbacks
   const handleSearchChange = useCallback((query: string) => {
@@ -110,17 +110,13 @@ export default function CandidatesPage() {
     setShowFilters(false);
   }, []);
 
+
   // Get all candidates for list view
   const allFilteredCandidates = useMemo(() => {
     return filteredColumns.flatMap((col) => col.candidates);
   }, [filteredColumns]);
 
   const hasActiveFilters = searchQuery !== "" || scoreFilter !== "all";
-
-  // Get all candidates for list view
-  const allFilteredCandidates = useMemo(() => {
-    return filteredColumns.flatMap((col) => col.candidates);
-  }, [filteredColumns]);
 
   return (
     <TooltipProvider delayDuration={300}>

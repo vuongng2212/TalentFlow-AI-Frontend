@@ -570,6 +570,105 @@ h4, h5, h6 {
 .stagger-5 { animation-delay: 250ms; }
 
 /* ============================================ */
+/* SCROLL-TRIGGERED ANIMATIONS                  */
+/* Used with useScrollAnimation hook            */
+/* ============================================ */
+
+/* Base state - hidden before scroll into view */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 600ms var(--ease-out-expo),
+    transform 600ms var(--ease-out-expo);
+}
+
+.scroll-animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Fade only variant */
+.scroll-fade {
+  opacity: 0;
+  transition: opacity 500ms var(--ease-out-expo);
+}
+
+.scroll-fade.is-visible {
+  opacity: 1;
+}
+
+/* Scale variant */
+.scroll-scale {
+  opacity: 0;
+  transform: scale(0.95);
+  transition:
+    opacity 500ms var(--ease-out-expo),
+    transform 500ms var(--ease-out-expo);
+}
+
+.scroll-scale.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Slide from left */
+.scroll-slide-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition:
+    opacity 600ms var(--ease-out-expo),
+    transform 600ms var(--ease-out-expo);
+}
+
+.scroll-slide-left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Slide from right */
+.scroll-slide-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition:
+    opacity 600ms var(--ease-out-expo),
+    transform 600ms var(--ease-out-expo);
+}
+
+.scroll-slide-right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Staggered children - use with getStaggerStyle */
+.scroll-stagger-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 400ms var(--ease-out-expo),
+    transform 400ms var(--ease-out-expo);
+}
+
+.scroll-stagger-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-animate,
+  .scroll-fade,
+  .scroll-scale,
+  .scroll-slide-left,
+  .scroll-slide-right,
+  .scroll-stagger-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ============================================ */
 /* SONNER TOAST OVERRIDES                       */
 /* ============================================ */
 

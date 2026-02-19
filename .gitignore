@@ -42,7 +42,7 @@ next-env.d.ts
 
 .claude/
 .gemini/
-.agent/
+.agents/
 .playwright-mcp
 
 CLAUDE.md

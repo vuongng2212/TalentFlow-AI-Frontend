@@ -24,6 +24,22 @@ interface AIScoreBadgeProps {
   className?: string;
 }
 
+// Seeded random function for deterministic breakdown generation
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+// Generate deterministic breakdown based on score
+function generateBreakdown(score: number): AIScoreBreakdown {
+  return {
+    skillsMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 1) * 10) - 5)),
+    experienceMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 2) * 15) - 7)),
+    educationMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 3) * 12) - 6)),
+    cultureFit: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 4) * 8) - 4)),
+  };
+}
+
 function getScoreLevel(score: number): {
   label: string;
   colorClass: string;
@@ -79,7 +95,7 @@ function ScoreBar({ value, label, icon: Icon }: { value: number; label: string; 
   );
 }
 
-export function AIScoreBadge({
+export const AIScoreBadge = React.memo(function AIScoreBadge({
   score,
   breakdown,
   showBreakdown = true,
@@ -87,6 +103,12 @@ export function AIScoreBadge({
   className,
 }: AIScoreBadgeProps) {
   const { label, colorClass, bgClass } = getScoreLevel(score);
+
+  // Memoize breakdown to prevent recalculation on each render
+  const stableBreakdown = React.useMemo(() => {
+    if (breakdown) return breakdown;
+    return generateBreakdown(score);
+  }, [score, breakdown]);
 
   const sizeClasses = {
     sm: "h-5 min-w-5 px-1.5 text-[10px]",
@@ -117,17 +139,9 @@ export function AIScoreBadge({
     </div>
   );
 
-  if (!showBreakdown || !breakdown) {
+  if (!showBreakdown) {
     return badge;
   }
-
-  // Generate mock breakdown if not provided
-  const defaultBreakdown: AIScoreBreakdown = breakdown || {
-    skillsMatch: Math.min(100, score + Math.floor(Math.random() * 10) - 5),
-    experienceMatch: Math.min(100, score + Math.floor(Math.random() * 15) - 7),
-    educationMatch: Math.min(100, score + Math.floor(Math.random() * 12) - 6),
-    cultureFit: Math.min(100, score + Math.floor(Math.random() * 8) - 4),
-  };
 
   return (
     <HoverCard openDelay={200} closeDelay={100}>
@@ -163,29 +177,29 @@ export function AIScoreBadge({
 
           <div className="space-y-3">
             <ScoreBar
-              value={defaultBreakdown.skillsMatch}
+              value={stableBreakdown.skillsMatch}
               label="Skills Match"
               icon={Target}
             />
             <ScoreBar
-              value={defaultBreakdown.experienceMatch}
+              value={stableBreakdown.experienceMatch}
               label="Experience"
               icon={Briefcase}
             />
-            {defaultBreakdown.educationMatch && (
+            {stableBreakdown.educationMatch ? (
               <ScoreBar
-                value={defaultBreakdown.educationMatch}
+                value={stableBreakdown.educationMatch}
                 label="Education"
                 icon={GraduationCap}
               />
-            )}
-            {defaultBreakdown.cultureFit && (
+            ) : null}
+            {stableBreakdown.cultureFit ? (
               <ScoreBar
-                value={defaultBreakdown.cultureFit}
+                value={stableBreakdown.cultureFit}
                 label="Culture Fit"
                 icon={TrendingUp}
               />
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -198,4 +212,4 @@ export function AIScoreBadge({
       </HoverCardContent>
     </HoverCard>
   );
-}
+});

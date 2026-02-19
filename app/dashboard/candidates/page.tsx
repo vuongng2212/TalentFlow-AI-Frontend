@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { KanbanColumn } from "@/components/candidates/KanbanColumn";
-import { CandidateCardOverlay } from "@/components/candidates/CandidateCard";
+import { KanbanSkeleton } from "@/components/candidates/KanbanSkeleton";
 import { mockKanbanColumns } from "@/lib/mock-data";
-import type { Candidate, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import type { ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
 import {
   Upload,
   Users,
@@ -29,34 +29,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { toast } from "sonner";
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCorners,
-  DragOverEvent,
-} from "@dnd-kit/core";
+
+// Dynamic import for KanbanBoard - code-splits @dnd-kit from initial bundle
+const KanbanBoard = dynamic(
+  () => import("@/components/candidates/KanbanBoard"),
+  {
+    ssr: false,
+    loading: () => <KanbanSkeleton />,
+  }
+);
+
+// Preload function for hover optimization
+const preloadKanbanBoard = () => {
+  void import("@/components/candidates/KanbanBoard");
+};
 
 export default function CandidatesPage() {
   const [columns, setColumns] = useState<KanbanColumnType[]>(mockKanbanColumns);
-  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<"all" | "high" | "medium" | "low">("all");
   const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
 
   // Filter columns based on search and score
   const filteredColumns = useMemo(() => {
@@ -97,65 +90,6 @@ export default function CandidatesPage() {
       }).length,
     }));
   }, [columns, searchQuery, scoreFilter]);
-
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const { active } = event;
-    const candidate = columns
-      .flatMap((col) => col.candidates)
-      .find((c) => c.id === active.id);
-    setActiveCandidate(candidate || null);
-  }, [columns]);
-
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    // Optional: Add visual feedback during drag
-  }, []);
-
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveCandidate(null);
-
-    if (!over) return;
-
-    const candidateId = active.id as string;
-    const newStage = over.id as ApplicationStage;
-
-    // Find current column
-    const sourceColumn = columns.find((col) =>
-      col.candidates.some((c) => c.id === candidateId)
-    );
-
-    if (!sourceColumn || sourceColumn.id === newStage) return;
-
-    // Move candidate
-    const candidate = sourceColumn.candidates.find((c) => c.id === candidateId);
-    if (!candidate) return;
-
-    setColumns((prev) =>
-      prev.map((col) => {
-        if (col.id === sourceColumn.id) {
-          return {
-            ...col,
-            candidates: col.candidates.filter((c) => c.id !== candidateId),
-            count: col.count - 1,
-          };
-        }
-        if (col.id === newStage) {
-          return {
-            ...col,
-            candidates: [...col.candidates, { ...candidate, stage: newStage }],
-            count: col.count + 1,
-          };
-        }
-        return col;
-      })
-    );
-
-    // Show toast notification
-    toast.success(`${candidate.fullName} moved to ${newStage.toLowerCase()}`, {
-      description: `Successfully updated candidate pipeline stage.`,
-      duration: 3000,
-    });
-  }, [columns]);
 
   // Calculate stats
   const totalCandidates = columns.reduce((acc, col) => acc + col.count, 0);
@@ -198,6 +132,8 @@ export default function CandidatesPage() {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setViewMode("kanban")}
+                  onMouseEnter={preloadKanbanBoard}
+                  onFocus={preloadKanbanBoard}
                   className={`p-1.5 rounded-md transition-all ${
                     viewMode === "kanban"
                       ? "bg-background shadow-soft-sm text-primary"
@@ -344,11 +280,11 @@ export default function CandidatesPage() {
                 Showing <strong className="text-foreground">{filteredTotal}</strong> of{" "}
                 <strong className="text-foreground">{totalCandidates}</strong> candidates
               </span>
-              {searchQuery && (
+              {searchQuery ? (
                 <span>
-                  Search: "<strong className="text-foreground">{searchQuery}</strong>"
+                  Search: &quot;<strong className="text-foreground">{searchQuery}</strong>&quot;
                 </span>
-              )}
+              ) : null}
             </div>
           )}
         </CardContent>
@@ -415,34 +351,12 @@ export default function CandidatesPage() {
         </Card>
       </div>
 
-      {/* Kanban Board */}
+      {/* Kanban Board - dynamically loaded to reduce initial bundle */}
       {viewMode === "kanban" ? (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 min-h-125">
-            {filteredColumns.map((column, index) => (
-              <div
-                key={column.id}
-                className="animate-slide-up"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <KanbanColumn column={column} />
-              </div>
-            ))}
-          </div>
-
-          {/* Drag Overlay */}
-          <DragOverlay>
-            {activeCandidate && (
-              <CandidateCardOverlay candidate={activeCandidate} />
-            )}
-          </DragOverlay>
-        </DndContext>
+        <KanbanBoard
+          columns={filteredColumns}
+          onColumnsChange={setColumns}
+        />
       ) : (
         /* List View */
         <Card className="shadow-soft-sm">

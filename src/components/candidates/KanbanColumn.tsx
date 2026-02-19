@@ -74,8 +74,12 @@ const stageConfig: Record<
   },
 };
 
-// Sortable Candidate Item
-function SortableCandidateItem({ candidate }: { candidate: Candidate }) {
+// Sortable Candidate Item - memoized for performance
+const SortableCandidateItem = React.memo(function SortableCandidateItem({
+  candidate
+}: {
+  candidate: Candidate
+}) {
   const {
     attributes,
     listeners,
@@ -104,9 +108,12 @@ function SortableCandidateItem({ candidate }: { candidate: Candidate }) {
       <CandidateCard candidate={candidate} isDragging={isDragging} />
     </div>
   );
-}
+});
 
-export function KanbanColumn({ column, className }: KanbanColumnProps) {
+export const KanbanColumn = React.memo(function KanbanColumn({
+  column,
+  className
+}: KanbanColumnProps) {
   const config = stageConfig[column.id];
   const Icon = config.icon;
 
@@ -207,4 +214,4 @@ export function KanbanColumn({ column, className }: KanbanColumnProps) {
     </div>
     </TooltipProvider>
   );
-}
+});

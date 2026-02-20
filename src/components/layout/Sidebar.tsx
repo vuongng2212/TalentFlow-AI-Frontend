@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ROUTES } from "../../lib/constants";
-import { Badge } from "@/components/ui/badge";
+// Removed unused function isNavItemActive per bundle optimization best practice
+// import { ROUTES } from "../../lib/constants";
+// Removed unused function NavTooltip per bundle optimization best practice
+// import { Badge } from "@/components/ui/badge";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
@@ -18,49 +20,6 @@ import {
 
 // Tooltip component for collapsed state
 // Removed unused function NavTooltip per bundle optimization best practice
-
-function isNavItemActive(pathname: string, href: string): boolean {
-  if (href === ROUTES.DASHBOARD) {
-    return pathname === href;
-  }
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-// Tooltip component for collapsed state
-function NavTooltip({
-  visible,
-  label,
-  badge,
-}: {
-  visible: boolean;
-  label: string;
-  badge?: number;
-}) {
-  if (!visible) return null;
-
-  return (
-    <div
-      role="tooltip"
-      className={cn(
-        "pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2",
-        "flex items-center gap-2",
-        "rounded-lg border border-border bg-popover px-3 py-1.5",
-        "text-sm font-medium text-popover-foreground",
-        "shadow-soft-md",
-        "opacity-0 scale-95 transition-all duration-150",
-        "group-hover:opacity-100 group-hover:scale-100",
-        "group-focus-within:opacity-100 group-focus-within:scale-100"
-      )}
-    >
-      {label}
-      {badge && (
-        <Badge variant="default" className="h-4 min-w-4 px-1 text-[9px]">
-          {badge}
-        </Badge>
-      )}
-    </div>
-  );
-}
 
 export function Sidebar() {
   const pathname = usePathname() ?? "";

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Star, TrendingUp, LucideIcon } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
-import { Candidate, ApplicationStage } from "@/types";
+import { Candidate } from "@/types";
 
 interface TimelineItem {
   date: Date;

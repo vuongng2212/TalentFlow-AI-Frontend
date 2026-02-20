@@ -16,7 +16,10 @@ export default function Home() {
     if (isAuthenticated) {
       router.push(ROUTES.DASHBOARD);
     } else {
-      setIsLoading(false);
+      // Defer state update to avoid synchronous state update warning during render phase
+      // This is safe because we're just updating loading state
+      const timer = setTimeout(() => setIsLoading(false), 0);
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, router]);
 

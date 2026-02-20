@@ -1,4 +1,4 @@
-import type { User, Job, Candidate, Application, KanbanColumn } from "@/types";
+import type { User, Job, Candidate, KanbanColumn } from "@/types";
 
 // ============================================
 // MOCK USERS

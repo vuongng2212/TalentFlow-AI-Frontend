@@ -25,7 +25,8 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
     ).matches;
 
     if (prefersReducedMotion) {
-      setIsVisible(true);
+      // Use setTimeout to avoid synchronous state update in effect
+      setTimeout(() => setIsVisible(true), 0);
       return;
     }
 

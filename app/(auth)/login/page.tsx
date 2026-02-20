@@ -27,7 +27,7 @@ export default function LoginPage() {
         description: "You have successfully signed in.",
       });
       router.push(ROUTES.DASHBOARD);
-    } catch (err) {
+    } catch (err: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
       setError("Invalid credentials. Try: recruiter@talentflow.ai");
       toast.error("Sign in failed", {
         description: "Please check your credentials and try again.",
@@ -161,7 +161,7 @@ export default function LoginPage() {
 
           {/* Sign Up Link */}
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href={ROUTES.SIGNUP}
               className="text-primary font-medium hover:underline"

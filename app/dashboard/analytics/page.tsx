@@ -10,23 +10,21 @@ import {
   Briefcase,
   Clock,
   Target,
-  Calendar,
-  DollarSign,
 } from "lucide-react";
 
 export default function AnalyticsPage() {
   // Calculate metrics from mock data
-  const totalJobs = mockJobs.length;
-  const openJobs = mockJobs.filter((j) => j.status === "OPEN").length;
-  const totalCandidates = mockCandidates.length;
-  const activeCandidates = mockCandidates.filter(
-    (c) => c.stage !== "HIRED" && c.stage !== "REJECTED",
-  ).length;
   const hiredCount = mockCandidates.filter((c) => c.stage === "HIRED").length;
   const avgAIScore = Math.round(
     mockCandidates.reduce((sum, c) => sum + (c.aiScore || 0), 0) /
       mockCandidates.length,
   );
+
+  const activeCandidates = mockCandidates.filter(
+    (c) => c.stage !== "HIRED" && c.stage !== "REJECTED",
+  ).length;
+
+  const totalCandidates = mockCandidates.length;
 
   // Mock time-to-hire data
   const avgTimeToHire = 21; // days
@@ -42,6 +40,8 @@ export default function AnalyticsPage() {
     { stage: "Interview → Offer", rate: 32, count: "8/25" },
     { stage: "Offer → Hired", rate: 88, count: "7/8" },
   ];
+
+  const openJobs = mockJobs.filter((j) => j.status === "OPEN").length;
 
   // Top performing jobs
   const topJobs = mockJobs

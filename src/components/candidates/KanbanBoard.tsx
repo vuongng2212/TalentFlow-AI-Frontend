@@ -14,7 +14,6 @@ import {
   useSensor,
   useSensors,
   closestCorners,
-  DragOverEvent,
 } from "@dnd-kit/core";
 
 interface KanbanBoardProps {

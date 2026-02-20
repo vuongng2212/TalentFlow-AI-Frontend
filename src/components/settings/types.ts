@@ -1,5 +1,3 @@
-import { User } from "@/types";
-
 export type SettingsTab = "profile" | "notifications" | "team" | "preferences";
 
 export interface TeamMember {

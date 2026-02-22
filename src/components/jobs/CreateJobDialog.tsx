@@ -42,7 +42,7 @@ export function CreateJobDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button className="gap-2">
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Create Job
         </Button>
       </DialogTrigger>
@@ -60,11 +60,12 @@ export function CreateJobDialog({
             <Label htmlFor="title">Job Title *</Label>
             <Input
               id="title"
-              placeholder="e.g. Senior Frontend Developer"
+              placeholder="e.g., Senior Frontend Developer…"
               value={formData.title}
               onChange={(e) =>
                 onFormChange({ ...formData, title: e.target.value })
               }
+              autoComplete="off"
             />
           </div>
 
@@ -74,22 +75,24 @@ export function CreateJobDialog({
               <Label htmlFor="location">Location *</Label>
               <Input
                 id="location"
-                placeholder="e.g. Remote, San Francisco"
+                placeholder="e.g., Remote, San Francisco…"
                 value={formData.location}
                 onChange={(e) =>
                   onFormChange({ ...formData, location: e.target.value })
                 }
+                autoComplete="off"
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="salary">Salary Range</Label>
               <Input
                 id="salary"
-                placeholder="e.g. $100k - $150k"
+                placeholder="e.g., $100k – $150k…"
                 value={formData.salaryRange}
                 onChange={(e) =>
                   onFormChange({ ...formData, salaryRange: e.target.value })
                 }
+                autoComplete="off"
               />
             </div>
           </div>
@@ -99,12 +102,13 @@ export function CreateJobDialog({
             <Label htmlFor="description">Job Description *</Label>
             <Textarea
               id="description"
-              placeholder="Describe the role, responsibilities, and what you're looking for..."
+              placeholder="Describe the role, responsibilities, and requirements…"
               rows={4}
               value={formData.description}
               onChange={(e) =>
                 onFormChange({ ...formData, description: e.target.value })
               }
+              autoComplete="off"
             />
           </div>
 
@@ -114,22 +118,24 @@ export function CreateJobDialog({
               <Label htmlFor="experience">Experience Required *</Label>
               <Input
                 id="experience"
-                placeholder="e.g. 3+ years"
+                placeholder="e.g., 3+ years…"
                 value={formData.experience}
                 onChange={(e) =>
                   onFormChange({ ...formData, experience: e.target.value })
                 }
+                autoComplete="off"
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="education">Education</Label>
               <Input
                 id="education"
-                placeholder="e.g. Bachelor's degree"
+                placeholder="e.g., Bachelor's degree…"
                 value={formData.education}
                 onChange={(e) =>
                   onFormChange({ ...formData, education: e.target.value })
                 }
+                autoComplete="off"
               />
             </div>
           </div>
@@ -139,11 +145,12 @@ export function CreateJobDialog({
             <Label htmlFor="skills">Required Skills *</Label>
             <Input
               id="skills"
-              placeholder="e.g. React, TypeScript, Node.js (comma-separated)"
+              placeholder="e.g., React, TypeScript, Node.js…"
               value={formData.skills}
               onChange={(e) =>
                 onFormChange({ ...formData, skills: e.target.value })
               }
+              autoComplete="off"
             />
             <p className="text-xs text-muted-foreground">
               Separate multiple skills with commas

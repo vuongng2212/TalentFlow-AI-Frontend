@@ -33,7 +33,7 @@ export function LandingNavbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
+              <Sparkles className="h-4 w-4 text-white" aria-hidden="true" />
             </div>
             <span className="font-bold text-lg">{APP_NAME}</span>
           </Link>
@@ -62,22 +62,26 @@ export function LandingNavbar() {
             <Link href={ROUTES.SIGNUP}>
               <Button size="sm" className="gap-1">
                 Get Started
-                <ChevronRight className="h-3 w-3" />
+                <ChevronRight className="h-3 w-3" aria-hidden="true" />
               </Button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            className="md:hidden"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5" aria-hidden="true" />
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Mobile Menu */}
@@ -106,7 +110,7 @@ export function LandingNavbar() {
               <Link href={ROUTES.SIGNUP} className="block">
                 <Button size="sm" className="w-full gap-1">
                   Get Started
-                  <ChevronRight className="h-3 w-3" />
+                  <ChevronRight className="h-3 w-3" aria-hidden="true" />
                 </Button>
               </Link>
             </div>

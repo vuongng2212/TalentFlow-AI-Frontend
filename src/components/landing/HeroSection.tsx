@@ -22,14 +22,14 @@ export function HeroSection() {
         <div className="text-center max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-8 animate-fade-in">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
             <span className="text-sm font-medium text-primary">
               AI-Powered Recruitment Platform
             </span>
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up [text-wrap:balance]">
             Hire{" "}
             <span className="bg-gradient-to-r from-primary via-indigo-500 to-purple-500 bg-clip-text text-transparent">
               Smarter
@@ -49,11 +49,11 @@ export function HeroSection() {
             <Link href={ROUTES.SIGNUP}>
               <Button size="lg" className="gap-2 shadow-primary hover:shadow-lg transition-shadow h-12 px-8">
                 Start Free Trial
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Button>
             </Link>
             <Button variant="outline" size="lg" className="gap-2 h-12 px-8">
-              <Play className="h-4 w-4" />
+              <Play className="h-4 w-4" aria-hidden="true" />
               Watch Demo
             </Button>
           </div>
@@ -61,15 +61,15 @@ export function HeroSection() {
           {/* Trust Badges */}
           <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground animate-fade-in stagger-3">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
               <span>No credit card required</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
               <span>14-day free trial</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
               <span>Cancel anytime</span>
             </div>
           </div>
@@ -88,7 +88,7 @@ function HeroDashboardPreview() {
       <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
       <div className="relative rounded-2xl border border-border/50 shadow-soft-xl overflow-hidden bg-card">
         {/* Mock Dashboard Header */}
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30" aria-hidden="true">
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-yellow-400" />
@@ -103,15 +103,15 @@ function HeroDashboardPreview() {
           {/* Stats Cards */}
           <div className="col-span-1 space-y-4">
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
-              <p className="text-2xl font-bold text-primary">247</p>
+              <p className="text-2xl font-bold text-primary tabular-nums">247</p>
               <p className="text-xs text-muted-foreground">Active Candidates</p>
             </div>
             <div className="p-4 rounded-lg bg-success/5 border border-success/10">
-              <p className="text-2xl font-bold text-success">89%</p>
+              <p className="text-2xl font-bold text-success tabular-nums">89%</p>
               <p className="text-xs text-muted-foreground">AI Accuracy</p>
             </div>
             <div className="p-4 rounded-lg bg-warning/5 border border-warning/10">
-              <p className="text-2xl font-bold text-warning">12</p>
+              <p className="text-2xl font-bold text-warning tabular-nums">12</p>
               <p className="text-xs text-muted-foreground">Open Positions</p>
             </div>
           </div>

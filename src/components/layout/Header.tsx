@@ -30,18 +30,20 @@ export function Header({ onMenuClick }: HeaderProps) {
         size="icon"
         className="lg:hidden"
         onClick={onMenuClick}
+        aria-label="Open menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5" aria-hidden="true" />
       </Button>
 
       {/* Search Bar */}
       <div className="flex-1 max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
             type="search"
-            placeholder="Search candidates, jobs..."
+            placeholder="Search candidates, jobs…"
             className="pl-10 w-full"
+            aria-label="Search candidates and jobs"
           />
         </div>
       </div>
@@ -53,17 +55,18 @@ export function Header({ onMenuClick }: HeaderProps) {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          title="Toggle theme"
+          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
         >
-          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {isDark ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
         </Button>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+          <Bell className="h-5 w-5" aria-hidden="true" />
           <Badge
             variant="destructive"
             className="absolute -right-1 -top-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
+            aria-hidden="true"
           >
             3
           </Badge>

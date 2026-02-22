@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload, FileText, X } from "lucide-react";
 
@@ -47,7 +48,7 @@ export function FileDropZone({
         >
           <div className="flex flex-col items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Upload className="h-8 w-8 text-primary" />
+              <Upload className="h-8 w-8 text-primary" aria-hidden="true" />
             </div>
             <div>
               <p className="text-lg font-medium mb-1">
@@ -64,7 +65,7 @@ export function FileDropZone({
                 </label>
               </p>
               <p className="text-sm text-muted-foreground">
-                Support: PDF, DOC, DOCX (Max 10MB each)
+                Support: PDF, DOC, DOCX (Max 10&#160;MB each)
               </p>
             </div>
           </div>
@@ -82,19 +83,22 @@ export function FileDropZone({
                   key={index}
                   className="flex items-center gap-3 p-3 rounded-lg border border-border bg-accent/50"
                 >
-                  <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                  <FileText className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{file.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onRemoveFile(index)}
-                    className="p-1 hover:bg-destructive/10 rounded transition-smooth"
+                    className="h-8 w-8 hover:bg-destructive/10"
+                    aria-label={`Remove ${file.name}`}
                   >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                  </button>
+                    <X className="h-4 w-4 text-muted-foreground hover:text-destructive" aria-hidden="true" />
+                  </Button>
                 </div>
               ))}
             </div>

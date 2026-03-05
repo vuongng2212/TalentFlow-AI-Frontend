@@ -27,7 +27,7 @@ export function WelcomeBanner({ userName }: WelcomeBannerProps) {
         </Button>
 
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
 

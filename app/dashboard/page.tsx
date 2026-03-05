@@ -14,7 +14,7 @@ export default function DashboardPage() {
   // Calculate stats
   const openJobs = mockJobs.filter((job) => job.status === "OPEN").length;
   const totalApplications = mockJobs.reduce(
-    (sum, job) => sum + job.applicationCount,
+    (sum, job) => sum + (job.applicationCount ?? 0),
     0,
   );
   const activeCandidates = mockCandidates.filter(
@@ -161,8 +161,7 @@ export default function DashboardPage() {
                   )}
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">
-                      Applied{" "}
-                      {new Date(candidate.appliedDate).toLocaleDateString()}
+                      {candidate.appliedDate ? `Applied ${new Date(candidate.appliedDate).toLocaleDateString()}` : ""}
                     </p>
                   </div>
                   <Badge>{candidate.stage}</Badge>

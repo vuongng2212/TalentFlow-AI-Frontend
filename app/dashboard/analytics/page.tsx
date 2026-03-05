@@ -46,7 +46,7 @@ export default function AnalyticsPage() {
   // Top performing jobs
   const topJobs = mockJobs
     .filter((j) => j.status === "OPEN")
-    .sort((a, b) => b.applicationCount - a.applicationCount)
+    .sort((a, b) => (b.applicationCount ?? 0) - (a.applicationCount ?? 0))
     .slice(0, 5);
 
   // Source effectiveness (mock)

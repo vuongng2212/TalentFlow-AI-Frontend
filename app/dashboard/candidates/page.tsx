@@ -46,7 +46,7 @@ export default function CandidatesPage() {
         const matchesSearch =
           searchQuery === "" ||
           candidate.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          candidate.appliedPosition.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (candidate.appliedPosition ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
           candidate.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
         // Score filter
@@ -64,7 +64,7 @@ export default function CandidatesPage() {
         const matchesSearch =
           searchQuery === "" ||
           candidate.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          candidate.appliedPosition.toLowerCase().includes(searchQuery.toLowerCase());
+          (candidate.appliedPosition ?? "").toLowerCase().includes(searchQuery.toLowerCase());
         let matchesScore = true;
         if (scoreFilter !== "all" && candidate.aiScore) {
           if (scoreFilter === "high") matchesScore = candidate.aiScore >= 85;

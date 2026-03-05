@@ -42,6 +42,10 @@ export const mockJobs: Job[] = [
     description:
       "We are looking for an experienced full-stack developer to join our growing team. You will work on cutting-edge technologies including Next.js, NestJS, and PostgreSQL.",
     status: "OPEN",
+    department: "Engineering",
+    employmentType: "FULL_TIME",
+    salaryMin: 100000,
+    salaryMax: 150000,
     salaryRange: "$100k - $150k",
     location: "Remote",
     requirements: {
@@ -60,6 +64,10 @@ export const mockJobs: Job[] = [
     description:
       "Join our frontend team and help build beautiful, user-friendly interfaces. Experience with React, Next.js 16, and TailwindCSS required.",
     status: "OPEN",
+    department: "Engineering",
+    employmentType: "FULL_TIME",
+    salaryMin: 80000,
+    salaryMax: 120000,
     salaryRange: "$80k - $120k",
     location: "Hybrid - San Francisco",
     requirements: {
@@ -77,6 +85,10 @@ export const mockJobs: Job[] = [
     description:
       "We're seeking a backend engineer with strong Node.js skills. You'll design and implement scalable microservices architecture.",
     status: "OPEN",
+    department: "Engineering",
+    employmentType: "FULL_TIME",
+    salaryMin: 120000,
+    salaryMax: 160000,
     salaryRange: "$120k - $160k",
     location: "Remote",
     requirements: {
@@ -95,6 +107,10 @@ export const mockJobs: Job[] = [
     description:
       "Build and maintain our cloud infrastructure. Experience with AWS, Kubernetes, and CI/CD pipelines essential.",
     status: "OPEN",
+    department: "Infrastructure",
+    employmentType: "FULL_TIME",
+    salaryMin: 110000,
+    salaryMax: 145000,
     salaryRange: "$110k - $145k",
     location: "Remote",
     requirements: {
@@ -112,6 +128,10 @@ export const mockJobs: Job[] = [
     description:
       "Create stunning user experiences for our recruitment platform. Proficiency in Figma and design systems required.",
     status: "DRAFT",
+    department: "Design",
+    employmentType: "FULL_TIME",
+    salaryMin: 85000,
+    salaryMax: 115000,
     salaryRange: "$85k - $115k",
     location: "Hybrid - New York",
     requirements: {

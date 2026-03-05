@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Job } from "@/types";
 
 interface JobDescriptionCardProps {
-  description: string;
+  description: string | null;
 }
 
 export function JobDescriptionCard({ description }: JobDescriptionCardProps) {
@@ -13,7 +13,7 @@ export function JobDescriptionCard({ description }: JobDescriptionCardProps) {
         <CardTitle>Job Description</CardTitle>
       </CardHeader>
       <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-        <p>{description}</p>
+          <p>{description || "No description available."}</p>
       </CardContent>
     </Card>
   );
@@ -24,6 +24,12 @@ interface JobRequirementsCardProps {
 }
 
 export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) {
+  if (!requirements) {
+    return null;
+  }
+
+  const reqs = requirements as Record<string, unknown>;
+
   return (
     <Card>
       <CardHeader>
@@ -31,17 +37,19 @@ export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) 
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
-          <li className="flex items-start gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-            <span className="text-sm">
-              <strong>Experience:</strong> {requirements.experience}
-            </span>
-          </li>
-          {requirements.education ? (
+          {reqs.experience ? (
             <li className="flex items-start gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+              <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
               <span className="text-sm">
-                <strong>Education:</strong> {requirements.education}
+                <strong>Experience:</strong> {String(reqs.experience)}
+              </span>
+            </li>
+          ) : null}
+          {reqs.education ? (
+            <li className="flex items-start gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
+              <span className="text-sm">
+                <strong>Education:</strong> {String(reqs.education)}
               </span>
             </li>
           ) : null}

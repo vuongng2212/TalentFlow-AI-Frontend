@@ -50,7 +50,7 @@ export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
           ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span>{job.applicationCount} applications</span>
+            <span>{job.applicationCount ?? 0} applications</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
@@ -60,14 +60,14 @@ export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
 
         {/* Skills */}
         <div className="flex flex-wrap gap-2">
-          {job.requirements.skills.slice(0, 3).map((skill) => (
+          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).slice(0, 3).map((skill: string) => (
             <Badge key={skill} variant="outline" className="text-xs">
               {skill}
             </Badge>
           ))}
-          {job.requirements.skills.length > 3 ? (
+          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length > 3 ? (
             <Badge variant="outline" className="text-xs">
-              +{job.requirements.skills.length - 3}
+              +{(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length - 3}
             </Badge>
           ) : null}
         </div>

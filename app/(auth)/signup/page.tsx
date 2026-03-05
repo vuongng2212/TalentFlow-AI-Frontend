@@ -9,15 +9,16 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
 import { toast } from "sonner";
+import { SignupRequest } from "@/lib/api/types";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signup, isLoading } = useAuthStore();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignupRequest>({
     fullName: "",
     email: "",
     password: "",
-    role: "RECRUITER" as "RECRUITER" | "INTERVIEWER",
+    role: "RECRUITER",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
@@ -50,7 +51,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             {APP_NAME}
           </h1>
           <p className="text-muted-foreground">

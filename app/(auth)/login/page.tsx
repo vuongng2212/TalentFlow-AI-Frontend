@@ -23,7 +23,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await login(email, password);
+      await login({ email, password });
       toast.success("Welcome back!", {
         description: "You have successfully signed in.",
       });
@@ -41,7 +41,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-fold mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             {APP_NAME}
           </h1>
           <p className="text-muted-foreground">

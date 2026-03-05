@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { SignupRequest } from "@/lib/api/types";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, isLoading } = useAuthStore();
+  const { signup, isLoading, error, clearError, isAuthenticated } = useAuthStore();
   const [formData, setFormData] = useState<SignupRequest>({
     fullName: "",
     email: "",
@@ -22,8 +22,21 @@ export default function SignupPage() {
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(ROUTES.DASHBOARD);
+    }
+  }, [isAuthenticated, router]);
+
+  // Clear error on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
 
     if (!agreedToTerms) {
       toast.warning("Please agree to terms and conditions", {
@@ -34,9 +47,16 @@ export default function SignupPage() {
 
     try {
       await signup(formData);
+      toast.success("Account created!", {
+        description: "Welcome to TalentFlow. Redirecting to dashboard...",
+      });
       router.push(ROUTES.DASHBOARD);
     } catch (err) {
-      console.error("Signup error:", err);
+      // Error is already set in the store
+      const errorMessage = err instanceof Error ? err.message : "Please try again.";
+      toast.error("Signup failed", {
+        description: errorMessage,
+      });
     }
   };
 
@@ -128,6 +148,13 @@ export default function SignupPage() {
                 <option value="INTERVIEWER">Interviewer</option>
               </select>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
 
             {/* Terms & Conditions */}
             <div className="flex items-start">

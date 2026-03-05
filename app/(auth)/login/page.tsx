@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
+import { featureFlags } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(ROUTES.DASHBOARD);
+    }
+  }, [isAuthenticated, router]);
+
+  // Clear error on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    clearError();
 
     try {
       await login({ email, password });
@@ -28,10 +40,11 @@ export default function LoginPage() {
         description: "You have successfully signed in.",
       });
       router.push(ROUTES.DASHBOARD);
-    } catch (err: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
-      setError("Invalid credentials. Try: recruiter@talentflow.ai");
+    } catch (err: unknown) {
+      // Error is already set in the store
+      const errorMessage = err instanceof Error ? err.message : "Please check your credentials and try again.";
       toast.error("Sign in failed", {
-        description: "Please check your credentials and try again.",
+        description: errorMessage,
       });
     }
   };
@@ -183,11 +196,13 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Credentials */}
-        <div className="mt-4 p-4 glass rounded-lg text-sm text-muted-foreground">
-          <p className="font-medium mb-1">Demo Credentials:</p>
-          <p>📧 recruiter@talentflow.ai</p>
-          <p>🔑 Any password works (demo mode)</p>
-        </div>
+        {featureFlags.enableMockApi && (
+          <div className="mt-4 p-4 glass rounded-lg text-sm text-muted-foreground">
+            <p className="font-medium mb-1">Demo Credentials:</p>
+            <p>Email: recruiter@talentflow.ai</p>
+            <p>Password: Any password works (demo mode)</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -43,7 +43,7 @@ export const CandidateCard = React.memo(function CandidateCard({
       <div
         className={cn(
           "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg",
-          "bg-gradient-to-b from-primary/60 to-primary/30",
+          "bg-linear-to-b from-primary/60 to-primary/30",
           "opacity-0 transition-opacity duration-200",
           (isHovered || isDragging) && "opacity-100"
         )}
@@ -63,7 +63,7 @@ export const CandidateCard = React.memo(function CandidateCard({
 
           {/* Avatar */}
           <Avatar
-            src={candidate.avatar}
+            src={candidate.avatar ?? undefined}
             alt={candidate.fullName}
             fallback={candidate.fullName.charAt(0)}
             size="md"
@@ -85,7 +85,7 @@ export const CandidateCard = React.memo(function CandidateCard({
                   {candidate.fullName}
                 </Link>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">
-                  {candidate.appliedPosition}
+                  {candidate.appliedPosition ?? ""}
                 </p>
               </div>
 
@@ -98,7 +98,7 @@ export const CandidateCard = React.memo(function CandidateCard({
             {/* Applied time - subtle */}
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
               <Clock className="h-2.5 w-2.5" />
-              <span>{formatRelativeTime(candidate.appliedDate)}</span>
+              <span>{candidate.appliedDate ? formatRelativeTime(new Date(candidate.appliedDate)) : ""}</span>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@ export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
     <Card className="w-72 p-3 shadow-soft-xl rotate-3 opacity-95 border-primary/30">
       <div className="flex items-center gap-3">
         <Avatar
-          src={candidate.avatar}
+          src={candidate.avatar ?? undefined}
           alt={candidate.fullName}
           fallback={candidate.fullName.charAt(0)}
           size="md"
@@ -195,7 +195,7 @@ export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
         <div className="flex-1 min-w-0">
           <h4 className="font-semibold text-sm truncate">{candidate.fullName}</h4>
           <p className="text-xs text-muted-foreground truncate">
-            {candidate.appliedPosition}
+            {candidate.appliedPosition ?? ""}
           </p>
         </div>
         {candidate.aiScore ? (

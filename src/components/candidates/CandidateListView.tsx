@@ -43,7 +43,7 @@ const CandidateListItem = React.memo(function CandidateListItem({
       </div>
       <Badge
         variant="outline"
-        className={`text-[10px] px-2 py-0.5 ${stageColorMap[candidate.stage]}`}
+        className={`text-[10px] px-2 py-0.5 ${candidate.stage ? stageColorMap[candidate.stage] : ""}`}
       >
         {candidate.stage}
       </Badge>

@@ -32,7 +32,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
         <div
           className={cn(
             "relative flex items-center justify-center rounded-xl",
-            "bg-gradient-to-br from-primary via-indigo-500 to-purple-500",
+            "bg-linear-to-br from-primary via-indigo-500 to-purple-500",
             "shadow-soft-sm",
             "transition-transform duration-200 group-hover:scale-105",
             collapsed ? "h-10 w-10" : "h-9 w-9"
@@ -46,7 +46,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
         {/* App Name */}
         {!collapsed ? (
           <div className="flex flex-col">
-            <span className="text-base font-bold tracking-tight bg-gradient-to-r from-primary via-indigo-500 to-purple-500 bg-clip-text text-transparent">
+            <span className="text-base font-bold tracking-tight bg-linear-to-r from-primary via-indigo-500 to-purple-500 bg-clip-text text-transparent">
               {APP_NAME}
             </span>
             <span className="text-[9px] text-muted-foreground font-medium -mt-0.5">

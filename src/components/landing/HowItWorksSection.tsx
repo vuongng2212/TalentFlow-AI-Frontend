@@ -79,7 +79,7 @@ export function HowItWorksSection() {
             >
               {/* Connector Line */}
               {index < steps.length - 1 ? (
-                <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-primary/30 to-transparent" />
+                <div className="hidden lg:block absolute top-12 left-1/2 w-full h-0.5 bg-linear-to-r from-primary/30 to-transparent" />
               ) : null}
 
               <div className="text-center">

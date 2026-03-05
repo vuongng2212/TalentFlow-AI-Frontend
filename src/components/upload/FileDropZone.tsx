@@ -83,7 +83,7 @@ export function FileDropZone({
                   key={index}
                   className="flex items-center gap-3 p-3 rounded-lg border border-border bg-accent/50"
                 >
-                  <FileText className="h-5 w-5 text-primary flex-shrink-0" aria-hidden="true" />
+                  <FileText className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{file.name}</p>
                     <p className="text-xs text-muted-foreground">

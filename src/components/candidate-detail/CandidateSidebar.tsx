@@ -26,7 +26,7 @@ export function CandidateSidebar({ candidate }: CandidateSidebarProps) {
         </CardHeader>
         <CardContent className="space-y-2">
           <select className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-            <option value={candidate.stage}>{candidate.stage}</option>
+            <option value={candidate.stage ?? ""}>{candidate.stage ?? "—"}</option>
             {stageOptions
               .filter((stage) => stage !== candidate.stage)
               .map((stage) => (

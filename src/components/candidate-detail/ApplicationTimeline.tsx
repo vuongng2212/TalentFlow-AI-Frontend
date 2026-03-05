@@ -17,24 +17,28 @@ interface ApplicationTimelineProps {
 
 export function ApplicationTimeline({ candidate }: ApplicationTimelineProps) {
   const timeline = useMemo<TimelineItem[]>(() => {
+    const appliedDate = candidate.appliedDate
+      ? new Date(candidate.appliedDate)
+      : new Date();
+
     const items: TimelineItem[] = [
       {
-        date: candidate.appliedDate,
+        date: appliedDate,
         title: "Application Submitted",
-        description: `Applied for ${candidate.appliedPosition}`,
+        description: `Applied for ${candidate.appliedPosition ?? "position"}`,
         icon: CheckCircle2,
       },
       {
-        date: new Date(candidate.appliedDate.getTime() + 1 * 24 * 60 * 60 * 1000),
+        date: new Date(appliedDate.getTime() + 1 * 24 * 60 * 60 * 1000),
         title: "Resume Reviewed",
         description: "AI screening completed - High match score",
         icon: Star,
       },
     ];
 
-    if (candidate.stage !== "APPLIED") {
+    if (candidate.stage && candidate.stage !== "APPLIED") {
       items.push({
-        date: new Date(candidate.appliedDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+        date: new Date(appliedDate.getTime() + 2 * 24 * 60 * 60 * 1000),
         title: "Moved to Screening",
         description: "Recruiter initiated screening process",
         icon: TrendingUp,

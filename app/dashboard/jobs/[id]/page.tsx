@@ -3,7 +3,6 @@
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { mockJobs, mockCandidates } from "@/lib/mock-data";
 import { ArrowLeft } from "lucide-react";
 import {
   JobNotFound,
@@ -14,21 +13,43 @@ import {
   ApplicantsList,
   JobSidebar,
 } from "@/components/job-detail";
+import { useJob } from "@/services/jobs";
+import { useApplications } from "@/services/applications";
+import { Loader2 } from "lucide-react";
+import { Candidate } from "@/types";
 
 export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
   const jobId = params.id as string;
 
-  const job = mockJobs.find((j) => j.id === jobId);
+  const { data: job, isLoading: isJobLoading, error: jobError } = useJob(jobId);
+  const { data: applications = [], isLoading: isAppsLoading } = useApplications({ jobId });
 
-  // Get applicants for this job with memoization
+  // Map applications to Candidate-like objects for the existing UI components
   const applicants = useMemo(() => {
-    if (!job) return [];
-    return mockCandidates.filter((c) => c.appliedPosition === job.title);
-  }, [job]);
+    return applications.map(app => {
+      if (!app.candidate) return null;
+      return {
+        ...app.candidate,
+        stage: app.stage,
+        appliedDate: app.appliedAt,
+        appliedPosition: job?.title || "",
+      } as Candidate;
+    }).filter(Boolean) as Candidate[];
+  }, [applications, job]);
 
-  if (!job) {
+  const isLoading = isJobLoading || isAppsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (jobError || !job) {
     return <JobNotFound onBack={() => router.back()} />;
   }
 
@@ -48,7 +69,7 @@ export default function JobDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <JobDescriptionCard description={job.description} />
           <JobRequirementsCard requirements={job.requirements} />
-          <JobSkillsCard skills={job.requirements.skills} />
+          <JobSkillsCard skills={(job.requirements as Record<string, unknown>)?.skills as string[] ?? []} />
           <ApplicantsList applicants={applicants} />
         </div>
 

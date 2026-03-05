@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { mockJobs } from "@/lib/mock-data";
 import { toast } from "sonner";
 import {
   CreateJobDialog,
@@ -12,8 +11,11 @@ import {
   NewJobForm,
   JobStatusFilter,
 } from "@/components/jobs";
+import { useJobs } from "@/services/jobs";
+import { Loader2 } from "lucide-react";
 
 export default function JobsPage() {
+  const { data: jobs = [], isLoading, error } = useJobs();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<JobStatusFilter>("ALL");
   const [createJobOpen, setCreateJobOpen] = useState(false);
@@ -21,10 +23,10 @@ export default function JobsPage() {
 
   // Filter jobs with memoization
   const filteredJobs = useMemo(() => {
-    return mockJobs.filter((job) => {
+    return jobs.filter((job) => {
       const matchesSearch =
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchQuery.toLowerCase());
+        (job.description ?? "").toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || job.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -33,11 +35,11 @@ export default function JobsPage() {
 
   // Calculate status counts
   const statusCounts = useMemo(() => ({
-    ALL: mockJobs.length,
-    OPEN: mockJobs.filter((j) => j.status === "OPEN").length,
-    DRAFT: mockJobs.filter((j) => j.status === "DRAFT").length,
-    CLOSED: mockJobs.filter((j) => j.status === "CLOSED").length,
-  }), []);
+    ALL: jobs.length,
+    OPEN: jobs.filter((j) => j.status === "OPEN").length,
+    DRAFT: jobs.filter((j) => j.status === "DRAFT").length,
+    CLOSED: jobs.filter((j) => j.status === "CLOSED").length,
+  }), [jobs]);
 
   // Stable callbacks
   const handleSearchChange = useCallback((query: string) => {
@@ -63,6 +65,26 @@ export default function JobsPage() {
   const handleOpenCreate = useCallback(() => {
     setCreateJobOpen(true);
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
+        <div className="rounded-full bg-destructive/10 p-3 text-destructive">
+          <Loader2 className="h-8 w-8 rotate-45" />
+        </div>
+        <h3 className="text-xl font-semibold">Failed to load jobs</h3>
+        <p className="text-muted-foreground">Please try again later or contact support.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

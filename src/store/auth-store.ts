@@ -1,24 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
+import { api, endpoints } from "@/lib/api";
 import { getMockUser } from "@/lib/mock-data";
-import { sleep } from "@/lib/utils";
+import { LoginRequest, SignupRequest, ApiResponse, LoginResponseData, SignupResponseData } from "@/lib/api/types";
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
-  logout: () => void;
+  login: (data: LoginRequest) => Promise<void>;
+  signup: (data: SignupRequest) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
-interface SignupData {
-  email: string;
-  password: string;
-  fullName: string;
-  role?: "RECRUITER" | "INTERVIEWER";
-}
+const ENABLE_MOCK = process.env.NEXT_PUBLIC_ENABLE_MOCK_API === "true";
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -27,64 +24,118 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
 
-      login: async (email: string, _password: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+      login: async (data: LoginRequest) => {
         set({ isLoading: true });
+        try {
+          if (ENABLE_MOCK) {
+            // Simulate API delay
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const mockUser = getMockUser(data.email);
+            if (!mockUser) throw new Error("Invalid credentials");
+            
+            set({
+              user: mockUser,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+            return;
+          }
 
-        // Simulate API call
-        await sleep(1000);
+          const response = await api.post<ApiResponse<LoginResponseData>>(endpoints.auth.login, data);
+          // Backend returns AuthUser in data.data for login (actually backend might return LoginResponseData { user, tokens })
+          // But our client already handles the cookies. We just need the user object.
+          // Let's assume response.data.data.user because of LoginResponseData structure
+          const userData = response.data.user;
 
-        // Mock authentication - accept any password for demo
-        const mockUser = getMockUser(email);
-
-        if (!mockUser) {
+          set({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
           set({ isLoading: false });
-          throw new Error("Invalid credentials");
+          throw error;
         }
-
-        set({
-          user: mockUser,
-          isAuthenticated: true,
-          isLoading: false,
-        });
       },
 
-      signup: async (data: SignupData) => {
+      signup: async (data: SignupRequest) => {
         set({ isLoading: true });
+        try {
+          if (ENABLE_MOCK) {
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            const newUser: User = {
+              id: Math.random().toString(36).substring(2, 11),
+              email: data.email,
+              fullName: data.fullName,
+              role: data.role,
+              createdAt: new Date().toISOString(),
+            };
+            set({
+              user: newUser,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+            return;
+          }
 
-        // Simulate API call
-        await sleep(1200);
+          const response = await api.post<ApiResponse<SignupResponseData>>(endpoints.auth.signup, data);
+          const userData = response.data.user;
 
-        // Create mock user
-        const newUser: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          email: data.email,
-          fullName: data.fullName,
-          role: data.role || "RECRUITER",
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.fullName}`,
-          createdAt: new Date(),
-        };
-
-        set({
-          user: newUser,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+          set({
+            user: userData,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
       },
 
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          if (!ENABLE_MOCK) {
+            await api.post(endpoints.auth.logout);
+          }
+        } catch (error) {
+          console.error("Logout failed:", error);
+        } finally {
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      },
+
+      checkAuth: async () => {
+        if (ENABLE_MOCK) return;
+
+        set({ isLoading: true });
+        try {
+          const response = await api.get<ApiResponse<User>>(endpoints.auth.me);
+          set({
+            user: response.data,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (_error) {
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+          // Don't throw here, just silence if not logged in
+        }
       },
     }),
     {
-      name: "auth-storage",
+      name: "talent-flow-auth",
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
-    },
-  ),
+    }
+  )
 );

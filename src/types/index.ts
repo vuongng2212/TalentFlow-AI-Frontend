@@ -1,5 +1,10 @@
 export type UserRole = "ADMIN" | "RECRUITER" | "INTERVIEWER";
-export type JobStatus = "DRAFT" | "OPEN" | "CLOSED";
+export type JobStatus = "DRAFT" | "OPEN" | "CLOSED" | "ARCHIVED";
+export type EmploymentType =
+  | "FULL_TIME"
+  | "PART_TIME"
+  | "CONTRACT"
+  | "INTERNSHIP";
 export type ApplicationStage =
   | "APPLIED"
   | "SCREENING"
@@ -8,36 +13,68 @@ export type ApplicationStage =
   | "HIRED"
   | "REJECTED";
 export type ApplicationStatus =
-  | "PENDING"
-  | "IN_REVIEW"
+  | "SUBMITTED"
+  | "REVIEWING"
+  | "SHORTLISTED"
+  | "INTERVIEW_SCHEDULED"
+  | "INTERVIEWED"
+  | "OFFERED"
   | "ACCEPTED"
-  | "REJECTED";
+  | "REJECTED"
+  | "WITHDRAWN";
 
 export interface User {
   id: string;
   email: string;
   fullName: string;
   role: UserRole;
+  /** @deprecated Will be removed when backend adds avatar support */
   avatar?: string;
-  createdAt: Date;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
 }
 
+/**
+ * Job as returned by backend GET /jobs and GET /jobs/:id.
+ *
+ * When listing jobs (`findAll`), backend includes:
+ * - `createdBy`: partial User object `{ id, email, fullName }`
+ * - `_count.applications`: number of applications for this job
+ */
 export interface Job {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
+  department: string | null;
+  location: string | null;
+  employmentType: EmploymentType;
+  salaryMin: number | null;
+  salaryMax: number | null;
   status: JobStatus;
-  salaryRange?: string;
-  location: string;
-  requirements: {
-    skills: string[];
-    experience: string;
-    education?: string;
+  requirements: Record<string, unknown> | null;
+  createdById?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  /** Included by backend via Prisma `include` on list queries */
+  createdBy?: {
+    id: string;
+    email: string;
+    fullName: string;
+  } | User;
+  /** Included by backend via Prisma `_count` on list queries */
+  _count?: {
+    applications: number;
   };
-  createdAt: Date;
-  updatedAt: Date;
-  createdBy: User;
-  applicationCount: number;
+  /**
+   * @deprecated Use `salaryMin`/`salaryMax` instead. Kept for mock data compatibility.
+   * Will be removed when mock data is fully replaced by API.
+   */
+  salaryRange?: string;
+  /**
+   * @deprecated Use `_count.applications` instead. Kept for mock data compatibility.
+   * Will be removed when mock data is fully replaced by API.
+   */
+  applicationCount?: number;
 }
 
 export interface Candidate {
@@ -45,27 +82,78 @@ export interface Candidate {
   fullName: string;
   email: string;
   phone?: string;
+  linkedinUrl?: string;
+  resumeUrl?: string;
+  resumeText?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  /**
+   * @deprecated Will be removed when backend adds avatar support.
+   * Kept for mock data compatibility.
+   */
   avatar?: string;
-  resumeUrl: string;
-  appliedPosition: string;
-  appliedDate: Date;
-  stage: ApplicationStage;
-  aiScore?: number; // 0-100
+  /**
+   * @deprecated Use Application.stage instead.
+   * Kept for mock data / kanban compatibility until Phase 4.
+   */
+  stage?: ApplicationStage;
+  /**
+   * @deprecated Will come from CV Parser service scoring.
+   * Kept for mock data compatibility.
+   */
+  aiScore?: number;
+  /**
+   * @deprecated Use Application.job.title instead.
+   * Kept for mock data compatibility.
+   */
+  appliedPosition?: string;
+  /**
+   * @deprecated Use Application.appliedAt instead.
+   * Kept for mock data compatibility.
+   */
+  appliedDate?: Date | string;
+  /**
+   * @deprecated Will come from parsed CV data.
+   * Kept for mock data compatibility.
+   */
   skills?: string[];
 }
 
+/**
+ * Application as returned by backend GET /applications.
+ *
+ * When listing applications (`findAll`), backend includes:
+ * - `job`: partial Job `{ id, title, department, location, employmentType }`
+ * - `candidate`: partial Candidate `{ id, email, fullName }`
+ */
 export interface Application {
   id: string;
   jobId: string;
   candidateId: string;
-  job: Job;
-  candidate: Candidate;
   stage: ApplicationStage;
   status: ApplicationStatus;
-  aiScore?: number;
-  aiSummary?: string;
-  appliedAt: Date;
-  updatedAt: Date;
+  cvFileKey: string | null;
+  cvFileUrl: string | null;
+  coverLetter: string | null;
+  notes: string | null;
+  appliedAt: string;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Included by backend via Prisma `include` on list queries */
+  job?: {
+    id: string;
+    title: string;
+    department: string | null;
+    location: string | null;
+    employmentType: EmploymentType;
+  };
+  /** Included by backend via Prisma `include` on list queries */
+  candidate?: {
+    id: string;
+    email: string;
+    fullName: string;
+  };
 }
 
 export interface KanbanColumn {

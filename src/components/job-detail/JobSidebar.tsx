@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Upload, Users, Share2 } from "lucide-react";
-import { Job, Candidate } from "@/types";
+import { Job, CandidateViewModel } from "@/types";
 
 interface JobSidebarProps {
   job: Job;
-  applicants: Candidate[];
+  applicants: CandidateViewModel[];
 }
 
 interface TeamMember {
@@ -49,7 +49,7 @@ export function JobSidebar({ job, applicants }: JobSidebarProps) {
             <p className="text-sm text-muted-foreground mb-1">
               Total Applications
             </p>
-            <p className="text-2xl font-bold">{job.applicationCount}</p>
+            <p className="text-2xl font-bold">{job._count?.applications ?? applicants.length}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">

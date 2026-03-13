@@ -6,10 +6,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { Users, Upload } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { AIScoreBadge } from "@/components/candidates";
-import { Candidate } from "@/types";
+import { CandidateViewModel } from "@/types";
 
 interface ApplicantsListProps {
-  applicants: Candidate[];
+  applicants: CandidateViewModel[];
 }
 
 export function ApplicantsList({ applicants }: ApplicantsListProps) {
@@ -42,7 +42,7 @@ export function ApplicantsList({ applicants }: ApplicantsListProps) {
             {applicants.slice(0, 5).map((candidate) => (
               <Link
                 key={candidate.id}
-                href={`/dashboard/candidates/${candidate.id}`}
+                href={`/dashboard/candidates/${candidate._applicationId}`}
                 className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent transition-smooth"
               >
                 <Avatar

@@ -7,12 +7,12 @@
 
 import { useFetch, useFetchList, useMutation } from "@/hooks/use-fetch";
 import { endpoints } from "@/lib/api/config";
-import type { JobListParams } from "@/lib/api/types";
+import type { JobListParams, CreateJobRequest, UpdateJobRequest } from "@/lib/api/types";
 import type { Job as DomainJob } from "@/types";
 
 /**
  * Hook for fetching a paginated list of jobs
- * 
+ *
  * @param params Filter and pagination parameters
  * @returns Paginated job data, loading state, and mutate function
  */
@@ -22,7 +22,7 @@ export function useJobs(params?: JobListParams) {
 
 /**
  * Hook for fetching a single job by its ID
- * 
+ *
  * @param id Job ID
  * @returns Job detail, loading state, and mutate function
  */
@@ -34,21 +34,21 @@ export function useJob(id: string | null) {
  * Hook for creating a new job
  */
 export function useCreateJob() {
-  return useMutation<DomainJob, Partial<DomainJob>>(endpoints.jobs.create, "POST");
+  return useMutation<DomainJob, CreateJobRequest>(endpoints.jobs.create, "POST");
 }
 
 /**
  * Hook for updating an existing job
- * 
+ *
  * @param id Job ID
  */
 export function useUpdateJob(id: string) {
-  return useMutation<DomainJob, Partial<DomainJob>>(endpoints.jobs.detail(id), "PUT");
+  return useMutation<DomainJob, UpdateJobRequest>(endpoints.jobs.detail(id), "PUT");
 }
 
 /**
  * Hook for deleting a job
- * 
+ *
  * @param id Job ID
  */
 export function useDeleteJob(id: string) {

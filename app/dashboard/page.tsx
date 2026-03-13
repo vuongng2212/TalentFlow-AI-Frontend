@@ -1,27 +1,49 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockJobs, mockCandidates } from "@/lib/mock-data";
-import { Briefcase, Users, Calendar, TrendingUp } from "lucide-react";
+import { Briefcase, Users, Calendar, TrendingUp, Loader2 } from "lucide-react";
 import { WelcomeBanner } from "@/components/shared/WelcomeBanner";
 import { AIScoreBadge } from "@/components/candidates";
 import { useAuthStore } from "@/store/auth-store";
+import { useJobs } from "@/services/jobs";
+import { useApplications } from "@/services/applications";
+import { mapApplicationToViewModel } from "@/lib/mappers";
+
+function formatSalary(min: number | null, max: number | null): string {
+  if (min && max) return `$${min.toLocaleString()} – $${max.toLocaleString()}`;
+  if (min) return `From $${min.toLocaleString()}`;
+  if (max) return `Up to $${max.toLocaleString()}`;
+  return "Not specified";
+}
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  // Calculate stats
-  const openJobs = mockJobs.filter((job) => job.status === "OPEN").length;
-  const totalApplications = mockJobs.reduce(
-    (sum, job) => sum + job.applicationCount,
+  const { data: jobs = [], isLoading: isJobsLoading } = useJobs();
+  const { data: applications = [], isLoading: isAppsLoading } = useApplications({
+    sortBy: "appliedAt",
+    sortOrder: "desc",
+    limit: 10,
+  });
+
+  const recentCandidates = useMemo(
+    () => applications.map(mapApplicationToViewModel),
+    [applications],
+  );
+
+  // Calculate stats from real API data
+  const openJobs = jobs.filter((job) => job.status === "OPEN").length;
+  const totalApplications = jobs.reduce(
+    (sum, job) => sum + (job._count?.applications ?? 0),
     0,
   );
-  const activeCandidates = mockCandidates.filter(
-    (c) => c.stage !== "HIRED" && c.stage !== "REJECTED",
+  const activeCandidates = applications.filter(
+    (a) => a.stage !== "HIRED" && a.stage !== "REJECTED",
   ).length;
-  const upcomingInterviews = mockCandidates.filter(
-    (c) => c.stage === "INTERVIEW",
+  const upcomingInterviews = applications.filter(
+    (a) => a.stage === "INTERVIEW",
   ).length;
 
   const stats = [
@@ -97,37 +119,48 @@ export default function DashboardPage() {
           <CardTitle>Recent Job Postings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {mockJobs.slice(0, 5).map((job) => (
-              <Link
-                key={job.id}
-                href={`/dashboard/jobs/${job.id}`}
-                className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-smooth"
-              >
-                <div className="flex-1">
-                  <h3 className="font-semibold">{job.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {job.location} • {job.salaryRange}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {job.applicationCount} applications
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(job.createdAt).toLocaleDateString()}
+          {isJobsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {jobs.slice(0, 5).map((job) => (
+                <Link
+                  key={job.id}
+                  href={`/dashboard/jobs/${job.id}`}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-smooth"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{job.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {job.location} &bull; {formatSalary(job.salaryMin, job.salaryMax)}
                     </p>
                   </div>
-                  <Badge
-                    variant={job.status === "OPEN" ? "success" : "secondary"}
-                  >
-                    {job.status}
-                  </Badge>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {job._count?.applications ?? 0} applications
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(job.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={job.status === "OPEN" ? "success" : "secondary"}
+                    >
+                      {job.status}
+                    </Badge>
+                  </div>
+                </Link>
+              ))}
+              {jobs.length === 0 && (
+                <p className="text-center text-muted-foreground py-4">
+                  No job postings yet. Create your first job to get started.
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -137,39 +170,51 @@ export default function DashboardPage() {
           <CardTitle>Recent Candidates</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {mockCandidates.slice(0, 5).map((candidate) => (
-              <Link
-                key={candidate.id}
-                href={`/dashboard/candidates/${candidate.id}`}
-                className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-smooth"
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                    {candidate.fullName.charAt(0)}
+          {isAppsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentCandidates.slice(0, 5).map((candidate) => (
+                <Link
+                  key={candidate._applicationId}
+                  href={`/dashboard/candidates/${candidate._applicationId}`}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-smooth"
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                      {candidate.fullName.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{candidate.fullName}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {candidate.appliedPosition}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{candidate.fullName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {candidate.appliedPosition}
-                    </p>
+                  <div className="flex items-center gap-4">
+                    {candidate.aiScore && (
+                      <AIScoreBadge score={candidate.aiScore} size="sm" />
+                    )}
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">
+                        {candidate.appliedDate
+                          ? `Applied ${new Date(candidate.appliedDate).toLocaleDateString()}`
+                          : ""}
+                      </p>
+                    </div>
+                    {candidate.stage && <Badge>{candidate.stage}</Badge>}
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {candidate.aiScore && (
-                    <AIScoreBadge score={candidate.aiScore} size="sm" />
-                  )}
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">
-                      Applied{" "}
-                      {new Date(candidate.appliedDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Badge>{candidate.stage}</Badge>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+              {recentCandidates.length === 0 && (
+                <p className="text-center text-muted-foreground py-4">
+                  No applications yet. Upload CVs to get started.
+                </p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,14 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-// Removed unused function isNavItemActive per bundle optimization best practice
-// import { ROUTES } from "../../lib/constants";
-// Removed unused function NavTooltip per bundle optimization best practice
-// import { Badge } from "@/components/ui/badge";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 import { toast } from "sonner";
+import { ROUTES } from "@/lib/constants";
 import {
   SidebarHeader,
   SidebarNavItem,
@@ -23,6 +20,7 @@ import {
 
 export function Sidebar() {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -30,12 +28,11 @@ export function Sidebar() {
     setCollapsed((prev) => !prev);
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     toast.info("Logging out...", { duration: 1500 });
-    setTimeout(() => {
-      logout();
-    }, 500);
-  }, [logout]);
+    await logout();
+    router.replace(ROUTES.LOGIN);
+  }, [logout, router]);
 
   return (
     <aside

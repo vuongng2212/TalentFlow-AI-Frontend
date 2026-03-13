@@ -1,90 +1,93 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { User } from "@/types";
-import { getMockUser } from "@/lib/mock-data";
-import { sleep } from "@/lib/utils";
+import { api, endpoints } from "@/lib/api";
+import { getErrorMessage } from "@/lib/api/errors";
+import type { AuthUser, LoginRequest, SignupRequest, ApiResponse, LoginResponseData } from "@/lib/api/types";
 
 interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (data: SignupData) => Promise<void>;
-  logout: () => void;
+  error: string | null;
+  login: (data: LoginRequest) => Promise<void>;
+  signup: (data: SignupRequest) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
+  clearError: () => void;
 }
 
-interface SignupData {
-  email: string;
-  password: string;
-  fullName: string;
-  role?: "RECRUITER" | "INTERVIEWER";
-}
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
+  clearError: () => set({ error: null }),
 
-      login: async (email: string, _password: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-        set({ isLoading: true });
+  login: async (data: LoginRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post<ApiResponse<LoginResponseData>>(endpoints.auth.login, data);
+      const userData = response.data.user;
 
-        // Simulate API call
-        await sleep(1000);
+      set({
+        user: userData,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      set({ isLoading: false, error: errorMessage });
+      throw error;
+    }
+  },
 
-        // Mock authentication - accept any password for demo
-        const mockUser = getMockUser(email);
+  signup: async (data: SignupRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Step 1: Create account
+      await api.post<ApiResponse<{ user: AuthUser }>>(endpoints.auth.signup, data);
 
-        if (!mockUser) {
-          set({ isLoading: false });
-          throw new Error("Invalid credentials");
-        }
+      // Step 2: Auto-login to set HttpOnly cookies
+      const { login } = get();
+      await login({ email: data.email, password: data.password });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      set({ isLoading: false, error: errorMessage });
+      throw error;
+    }
+  },
 
-        set({
-          user: mockUser,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      },
+  logout: async () => {
+    set({ isLoading: true });
+    try {
+      await api.post(endpoints.auth.logout);
+    } catch {
+      // Logout API failure is non-critical - still clear local state
+    } finally {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    }
+  },
 
-      signup: async (data: SignupData) => {
-        set({ isLoading: true });
-
-        // Simulate API call
-        await sleep(1200);
-
-        // Create mock user
-        const newUser: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          email: data.email,
-          fullName: data.fullName,
-          role: data.role || "RECRUITER",
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.fullName}`,
-          createdAt: new Date(),
-        };
-
-        set({
-          user: newUser,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      },
-
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      },
-    }),
-    {
-      name: "auth-storage",
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
-    },
-  ),
-);
+  checkAuth: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get<ApiResponse<{ user: AuthUser }>>(endpoints.auth.me);
+      set({
+        user: response.data.user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+    } catch {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    }
+  },
+}));

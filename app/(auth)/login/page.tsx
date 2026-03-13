@@ -1,37 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
+import { featureFlags } from "@/lib/api";
+import { ApiError } from "@/lib/api/errors";
+import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors: fieldErrors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(ROUTES.DASHBOARD);
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const onSubmit = async (data: LoginFormData) => {
+    clearError();
 
     try {
-      await login(email, password);
+      await login(data);
       toast.success("Welcome back!", {
         description: "You have successfully signed in.",
       });
       router.push(ROUTES.DASHBOARD);
-    } catch (err: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
-      setError("Invalid credentials. Try: recruiter@talentflow.ai");
-      toast.error("Sign in failed", {
-        description: "Please check your credentials and try again.",
-      });
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        // Account lockout detection
+        if (err.message.includes("Account temporarily locked")) {
+          toast.error("Account locked", { description: err.message });
+          return;
+        }
+        // Validation errors from backend
+        if (err.isValidationError && err.validationErrors.length > 0) {
+          toast.error("Validation failed", {
+            description: err.validationErrors.join(". "),
+          });
+          return;
+        }
+        toast.error("Sign in failed", { description: err.message });
+      } else {
+        const errorMessage = err instanceof Error ? err.message : "Please check your credentials and try again.";
+        toast.error("Sign in failed", { description: errorMessage });
+      }
     }
   };
 
@@ -40,7 +75,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-fold mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             {APP_NAME}
           </h1>
           <p className="text-muted-foreground">
@@ -50,7 +85,7 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="glass rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -58,11 +93,13 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register("email")}
                 disabled={isLoading}
+                autoComplete="email"
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive">{fieldErrors.email.message}</p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -77,14 +114,16 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register("password")}
                 disabled={isLoading}
+                autoComplete="current-password"
               />
+              {fieldErrors.password && (
+                <p className="text-xs text-destructive">{fieldErrors.password.message}</p>
+              )}
             </div>
 
-            {/* Error Message */}
+            {/* Store Error */}
             {error && (
               <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
                 {error}
@@ -108,7 +147,14 @@ export default function LoginPage() {
 
             {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
+                  Signing in…
+                </>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
 
@@ -127,7 +173,7 @@ export default function LoginPage() {
           {/* Social Login - Visual Only */}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" disabled>
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -152,6 +198,7 @@ export default function LoginPage() {
                 className="w-5 h-5 mr-2"
                 fill="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
               </svg>
@@ -172,11 +219,13 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Credentials */}
-        <div className="mt-4 p-4 glass rounded-lg text-sm text-muted-foreground">
-          <p className="font-medium mb-1">Demo Credentials:</p>
-          <p>📧 recruiter@talentflow.ai</p>
-          <p>🔑 Any password works (demo mode)</p>
-        </div>
+        {featureFlags.enableMockApi && (
+          <div className="mt-4 p-4 glass rounded-lg text-sm text-muted-foreground">
+            <p className="font-medium mb-1">Demo Credentials:</p>
+            <p>Email: recruiter@talentflow.ai</p>
+            <p>Password: Any password works (demo mode)</p>
+          </div>
+        )}
       </div>
     </div>
   );

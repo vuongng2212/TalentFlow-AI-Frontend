@@ -17,22 +17,22 @@ import { Job } from "@/types";
 
 interface JobHeaderProps {
   job: Job;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function JobHeader({ job }: JobHeaderProps) {
+export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied!", { description: "Job link copied to clipboard." });
   };
 
   const handleEdit = () => {
-    toast.info("Edit mode coming soon!");
+    onEdit?.();
   };
 
   const handleDelete = () => {
-    toast.error("Delete action", {
-      description: "This would delete the job posting.",
-    });
+    onDelete?.();
   };
 
   return (
@@ -59,11 +59,19 @@ export function JobHeader({ job }: JobHeaderProps) {
           </div>
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
-            <span>{job.salaryRange}</span>
+            <span>
+              {job.salaryMin && job.salaryMax
+                ? `$${job.salaryMin.toLocaleString()} – $${job.salaryMax.toLocaleString()}`
+                : job.salaryMin
+                ? `From $${job.salaryMin.toLocaleString()}`
+                : job.salaryMax
+                ? `Up to $${job.salaryMax.toLocaleString()}`
+                : "Not specified"}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            <span>{job.applicationCount} applicants</span>
+            <span>{job._count?.applications ?? 0} applicants</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />

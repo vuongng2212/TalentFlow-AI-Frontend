@@ -16,7 +16,7 @@ export function CTASection() {
         <div
           ref={ref}
           className={cn(
-            "relative rounded-3xl bg-gradient-to-r from-primary to-indigo-600 p-12 lg:p-16 overflow-hidden scroll-scale",
+            "relative rounded-3xl bg-linear-to-r from-primary to-indigo-600 p-12 lg:p-16 overflow-hidden scroll-scale",
             isVisible && "is-visible"
           )}
         >
@@ -43,7 +43,7 @@ export function CTASection() {
                   className="gap-2 h-12 px-8"
                 >
                   Start Free Trial
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </Link>
               <Link href={ROUTES.LOGIN}>

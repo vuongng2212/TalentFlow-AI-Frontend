@@ -1,10 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Linkedin, Github, Globe, MessageSquare } from "lucide-react";
-import { Candidate, ApplicationStage } from "@/types";
+import { FileText, Download, Linkedin, Github, Globe, MessageSquare, UserX } from "lucide-react";
+import { WithdrawDialog } from "@/components/candidates";
+import { CandidateViewModel, ApplicationStage } from "@/types";
 
 interface CandidateSidebarProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
+  applicationId?: string;
+  onStageUpdate?: (stage: ApplicationStage) => void;
+  onWithdrawn?: () => void;
 }
 
 const stageOptions: ApplicationStage[] = [
@@ -16,7 +23,12 @@ const stageOptions: ApplicationStage[] = [
   "REJECTED",
 ];
 
-export function CandidateSidebar({ candidate }: CandidateSidebarProps) {
+export function CandidateSidebar({ candidate, applicationId, onStageUpdate, onWithdrawn }: CandidateSidebarProps) {
+  const [selectedStage, setSelectedStage] = useState<ApplicationStage>(
+    candidate.stage ?? "APPLIED",
+  );
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+
   return (
     <div className="space-y-6">
       {/* Quick Actions */}
@@ -25,17 +37,24 @@ export function CandidateSidebar({ candidate }: CandidateSidebarProps) {
           <CardTitle>Move Candidate</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <select className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm">
-            <option value={candidate.stage}>{candidate.stage}</option>
-            {stageOptions
-              .filter((stage) => stage !== candidate.stage)
-              .map((stage) => (
-                <option key={stage} value={stage}>
-                  {stage}
-                </option>
-              ))}
+          <select
+            aria-label="Select application stage"
+            value={selectedStage}
+            onChange={(e) => setSelectedStage(e.target.value as ApplicationStage)}
+            className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+          >
+            {stageOptions.map((stage) => (
+              <option key={stage} value={stage}>
+                {stage}
+              </option>
+            ))}
           </select>
-          <Button className="w-full">Update Stage</Button>
+          <Button
+            className="w-full"
+            onClick={() => onStageUpdate?.(selectedStage)}
+          >
+            Update Stage
+          </Button>
         </CardContent>
       </Card>
 
@@ -106,6 +125,37 @@ export function CandidateSidebar({ candidate }: CandidateSidebarProps) {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Withdraw Application */}
+      {applicationId && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              className="w-full text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setWithdrawOpen(true)}
+            >
+              <UserX className="h-4 w-4 mr-2" />
+              Withdraw Application
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Withdraw Dialog */}
+      {applicationId && (
+        <WithdrawDialog
+          applicationId={applicationId}
+          candidateName={candidate.fullName}
+          jobTitle={candidate.appliedPosition}
+          open={withdrawOpen}
+          onOpenChange={setWithdrawOpen}
+          onWithdrawn={() => onWithdrawn?.()}
+        />
+      )}
     </div>
   );
 }

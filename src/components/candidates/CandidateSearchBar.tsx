@@ -41,21 +41,25 @@ export function CandidateSearchBar({
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search Input */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               type="search"
-              placeholder="Search candidates by name, position, or email..."
+              placeholder="Search candidates by name, position, or email…"
               className="pl-10 pr-10"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
+              aria-label="Search candidates"
             />
             {searchQuery ? (
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => onSearchChange("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                aria-label="Clear search"
               >
-                <X className="h-4 w-4" />
-              </button>
+                <X className="h-4 w-4" aria-hidden="true" />
+              </Button>
             ) : null}
           </div>
 

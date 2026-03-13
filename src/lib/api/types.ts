@@ -97,7 +97,7 @@ export interface SignupRequest {
  * Backend auth user shape (returned inside login/signup/me responses).
  * Matches backend `{ id, email, fullName, role, createdAt }`.
  */
-import { UserRole } from "@/types";
+import { UserRole, EmploymentType, JobStatus, ApplicationStage, ApplicationStatus, InterviewType, InterviewStatus } from "@/types";
 
 export interface AuthUser {
   id: string;
@@ -127,4 +127,85 @@ export interface SignupResponseData {
 export interface MutationResult<T = void> {
   data: T;
   message: string;
+}
+
+/** Jobs — Create request (matches backend CreateJobDto) */
+export interface CreateJobRequest {
+  title: string;
+  description?: string;
+  department?: string;
+  location?: string;
+  employmentType?: EmploymentType;
+  salaryMin?: number;
+  salaryMax?: number;
+  status?: JobStatus;
+  requirements?: string[] | Record<string, unknown>;
+}
+
+/** Jobs — Update request (all fields optional, matches backend UpdateJobDto = PartialType(CreateJobDto)) */
+export type UpdateJobRequest = Partial<CreateJobRequest>;
+
+/** Applications — Create request (matches backend CreateApplicationDto) */
+export interface CreateApplicationRequest {
+  jobId: string;
+  coverLetter?: string;
+  cvFileKey?: string;
+  cvFileUrl?: string;
+}
+
+/** Applications — Update request (matches backend UpdateApplicationDto) */
+export interface UpdateApplicationRequest {
+  stage?: ApplicationStage;
+  status?: ApplicationStatus;
+  notes?: string;
+  coverLetter?: string;
+}
+
+/** Applications — Upload CV response (matches backend UploadCvResponseDto) */
+export interface UploadCvResponse {
+  applicationId: string;
+  fileKey: string;
+  fileUrl: string;
+  presignedUrl?: string;
+  status: string;
+}
+
+/** Interviews — Create request (matches backend CreateInterviewDto) */
+export interface CreateInterviewRequest {
+  applicationId: string;
+  scheduledAt: string;
+  duration?: number;
+  type?: InterviewType;
+  location?: string;
+  notes?: string;
+  interviewerId?: string;
+}
+
+/** Interviews — Update request (matches backend UpdateInterviewDto) */
+export interface UpdateInterviewRequest {
+  scheduledAt?: string;
+  duration?: number;
+  type?: InterviewType;
+  location?: string;
+  notes?: string;
+  status?: InterviewStatus;
+  interviewerId?: string;
+}
+
+/** Interviews — Query params */
+export interface InterviewListParams extends ListParams {
+  applicationId?: string;
+  interviewerId?: string;
+  type?: InterviewType;
+  status?: InterviewStatus;
+}
+
+/** Users — Update profile request */
+export interface UpdateUserRequest {
+  fullName?: string;
+}
+
+/** Users — Update role request */
+export interface UpdateRoleRequest {
+  role: UserRole;
 }

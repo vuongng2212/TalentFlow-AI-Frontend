@@ -1,51 +1,72 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
 import { featureFlags } from "@/lib/api";
+import { ApiError } from "@/lib/api/errors";
+import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  // Redirect if already authenticated
+  const {
+    register,
+    handleSubmit,
+    formState: { errors: fieldErrors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
   useEffect(() => {
     if (isAuthenticated) {
       router.push(ROUTES.DASHBOARD);
     }
   }, [isAuthenticated, router]);
 
-  // Clear error on mount
   useEffect(() => {
     clearError();
   }, [clearError]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormData) => {
     clearError();
 
     try {
-      await login({ email, password });
+      await login(data);
       toast.success("Welcome back!", {
         description: "You have successfully signed in.",
       });
       router.push(ROUTES.DASHBOARD);
     } catch (err: unknown) {
-      // Error is already set in the store
-      const errorMessage = err instanceof Error ? err.message : "Please check your credentials and try again.";
-      toast.error("Sign in failed", {
-        description: errorMessage,
-      });
+      if (err instanceof ApiError) {
+        // Account lockout detection
+        if (err.message.includes("Account temporarily locked")) {
+          toast.error("Account locked", { description: err.message });
+          return;
+        }
+        // Validation errors from backend
+        if (err.isValidationError && err.validationErrors.length > 0) {
+          toast.error("Validation failed", {
+            description: err.validationErrors.join(". "),
+          });
+          return;
+        }
+        toast.error("Sign in failed", { description: err.message });
+      } else {
+        const errorMessage = err instanceof Error ? err.message : "Please check your credentials and try again.";
+        toast.error("Sign in failed", { description: errorMessage });
+      }
     }
   };
 
@@ -64,7 +85,7 @@ export default function LoginPage() {
 
         {/* Login Card */}
         <div className="glass rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -72,12 +93,13 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="your.email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                {...register("email")}
                 disabled={isLoading}
                 autoComplete="email"
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive">{fieldErrors.email.message}</p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -92,15 +114,16 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                {...register("password")}
                 disabled={isLoading}
                 autoComplete="current-password"
               />
+              {fieldErrors.password && (
+                <p className="text-xs text-destructive">{fieldErrors.password.message}</p>
+              )}
             </div>
 
-            {/* Error Message */}
+            {/* Store Error */}
             {error && (
               <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
                 {error}

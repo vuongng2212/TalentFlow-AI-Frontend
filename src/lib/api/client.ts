@@ -26,7 +26,13 @@ interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
 /** Build URL with query params */
 function buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
   const base = typeof window === "undefined" ? apiConfig.internalUrl : apiConfig.baseUrl;
-  const url = new URL(path.startsWith("/") ? `${base}${path}` : path);
+  const fullPath = path.startsWith("/") ? `${base}${path}` : path;
+
+  // For relative paths (e.g. "/api/v1/auth/login"), use window.location.origin as the base
+  // so `new URL` can parse them. On the server side, `base` is always absolute.
+  const isAbsolute = /^https?:\/\//.test(fullPath);
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const url = isAbsolute ? new URL(fullPath) : new URL(fullPath, origin);
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {

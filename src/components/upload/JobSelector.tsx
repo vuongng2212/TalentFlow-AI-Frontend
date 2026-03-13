@@ -7,12 +7,14 @@ interface JobSelectorProps {
   selectedJob: string;
   onJobChange: (jobId: string) => void;
   jobs: Job[];
+  isLoading?: boolean;
 }
 
 export function JobSelector({
   selectedJob,
   onJobChange,
   jobs,
+  isLoading = false,
 }: JobSelectorProps) {
   const openJobs = jobs.filter((job) => job.status === "OPEN");
 
@@ -30,9 +32,10 @@ export function JobSelector({
             id="job"
             value={selectedJob}
             onChange={(e) => onJobChange(e.target.value)}
+            disabled={isLoading}
             className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
           >
-            <option value="">Select a job...</option>
+            <option value="">{isLoading ? "Loading jobs..." : "Select a job..."}</option>
             {openJobs.map((job) => (
               <option key={job.id} value={job.id}>
                 {job.title} - {job.location}

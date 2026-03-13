@@ -51,7 +51,7 @@ export interface Job {
   salaryMin: number | null;
   salaryMax: number | null;
   status: JobStatus;
-  requirements: Record<string, unknown> | null;
+  requirements: string[] | Record<string, unknown> | null;
   createdById?: string;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -87,36 +87,21 @@ export interface Candidate {
   resumeText?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
-  /**
-   * @deprecated Will be removed when backend adds avatar support.
-   * Kept for mock data compatibility.
-   */
-  avatar?: string;
-  /**
-   * @deprecated Use Application.stage instead.
-   * Kept for mock data / kanban compatibility until Phase 4.
-   */
+}
+
+/**
+ * View-model for UI components that display candidate data derived from
+ * Application records. Extends Candidate with display fields mapped from
+ * the Application and its relations.
+ */
+export interface CandidateViewModel extends Candidate {
+  _applicationId: string;
   stage?: ApplicationStage;
-  /**
-   * @deprecated Will come from CV Parser service scoring.
-   * Kept for mock data compatibility.
-   */
   aiScore?: number;
-  /**
-   * @deprecated Use Application.job.title instead.
-   * Kept for mock data compatibility.
-   */
   appliedPosition?: string;
-  /**
-   * @deprecated Use Application.appliedAt instead.
-   * Kept for mock data compatibility.
-   */
   appliedDate?: Date | string;
-  /**
-   * @deprecated Will come from parsed CV data.
-   * Kept for mock data compatibility.
-   */
   skills?: string[];
+  avatar?: string;
 }
 
 /**
@@ -159,6 +144,76 @@ export interface Application {
 export interface KanbanColumn {
   id: ApplicationStage;
   title: string;
-  candidates: Candidate[];
+  candidates: CandidateViewModel[];
   count: number;
+}
+
+// ─── Analytics Types ───────────────────────────────────────
+
+export interface AnalyticsOverview {
+  totalJobs: number;
+  openJobs: number;
+  totalCandidates: number;
+  totalApplications: number;
+  hiredCount: number;
+  hireRate: number;
+}
+
+export interface PipelineStage {
+  stage: string;
+  count: number;
+}
+
+export interface TrendPoint {
+  date: string;
+  applications: number;
+}
+
+export interface TopJob {
+  id: string;
+  title: string;
+  department: string | null;
+  status: string;
+  applicationCount: number;
+}
+
+// ─── Interview Types ───────────────────────────────────────
+
+export type InterviewType =
+  | "PHONE"
+  | "VIDEO"
+  | "IN_PERSON"
+  | "PANEL"
+  | "TECHNICAL";
+
+export type InterviewStatus =
+  | "SCHEDULED"
+  | "CONFIRMED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "NO_SHOW";
+
+export interface Interview {
+  id: string;
+  applicationId: string;
+  scheduledAt: string;
+  duration: number;
+  type: InterviewType;
+  location: string | null;
+  notes: string | null;
+  status: InterviewStatus;
+  interviewerId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  application?: {
+    id: string;
+    candidate: { id: string; fullName: string; email: string };
+    job: { id: string; title: string };
+  };
+  interviewer?: {
+    id: string;
+    fullName: string;
+    email: string;
+  } | null;
 }

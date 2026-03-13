@@ -1,27 +1,58 @@
+"use client";
+
+import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar } from "@/components/ui/avatar";
-import { Save, Camera, Shield } from "lucide-react";
+import { Save, Camera, Shield, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "@/types";
+import { useUpdateUser } from "@/services/users";
+
+interface ProfileUser {
+  id?: string;
+  fullName: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
 
 interface ProfileTabProps {
-  user: User | null;
+  user: ProfileUser | null;
 }
 
 export function ProfileTab({ user }: ProfileTabProps) {
-  const handleSaveProfile = () => {
-    toast.success("Profile updated!", {
-      description: "Your profile changes have been saved.",
-    });
-  };
+  const [fullName, setFullName] = useState(user?.fullName ?? "");
+  const { trigger: updateUser, isMutating: isSaving } = useUpdateUser(user?.id ?? "");
+
+  const handleSaveProfile = useCallback(async () => {
+    if (!user?.id) {
+      toast.error("User not found");
+      return;
+    }
+
+    if (!fullName.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+
+    try {
+      await updateUser({ fullName: fullName.trim() });
+      toast.success("Profile updated!", {
+        description: "Your profile changes have been saved.",
+      });
+    } catch {
+      toast.error("Failed to update profile", {
+        description: "Please try again later.",
+      });
+    }
+  }, [user?.id, fullName, updateUser]);
 
   const handleUpdatePassword = () => {
-    toast.success("Password updated!", {
-      description: "Your password has been changed successfully.",
+    toast.info("Password change", {
+      description: "Password change via API will be available soon.",
     });
   };
 
@@ -61,7 +92,8 @@ export function ProfileTab({ user }: ProfileTabProps) {
               <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
-                defaultValue={user?.fullName}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
               />
             </div>
@@ -73,31 +105,26 @@ export function ProfileTab({ user }: ProfileTabProps) {
                 type="email"
                 defaultValue={user?.email}
                 placeholder="Enter your email"
+                disabled
+                className="bg-muted"
               />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="timezone">Timezone</Label>
-              <select
-                id="timezone"
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option>UTC-8 (Pacific Time)</option>
-                <option>UTC-5 (Eastern Time)</option>
-                <option>UTC+0 (GMT)</option>
-                <option>UTC+7 (Vietnam)</option>
-              </select>
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed
+              </p>
             </div>
           </div>
 
-          <Button className="gap-2" onClick={handleSaveProfile}>
-            <Save className="h-4 w-4" />
-            Save Changes
+          <Button
+            className="gap-2"
+            onClick={handleSaveProfile}
+            disabled={isSaving || !fullName.trim() || fullName.trim() === user?.fullName}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </CardContent>
       </Card>

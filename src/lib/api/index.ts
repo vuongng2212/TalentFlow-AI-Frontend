@@ -18,6 +18,8 @@ export type {
   AuthUser,
   ApplicationListParams,
   CandidateListParams,
+  CreateApplicationRequest,
+  CreateJobRequest,
   JobListParams,
   ListParams,
   LoginRequest,
@@ -27,4 +29,7 @@ export type {
   PaginationMeta,
   SignupRequest,
   SignupResponseData,
+  UpdateApplicationRequest,
+  UpdateJobRequest,
+  UploadCvResponse,
 } from "./types";

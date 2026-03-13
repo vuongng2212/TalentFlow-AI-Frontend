@@ -2,10 +2,15 @@ import { cn } from "@/lib/utils";
 import { LogOut } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { NavTooltip } from "./NavTooltip";
-import { User } from "@/types";
+
+interface SidebarUser {
+  fullName: string;
+  role: string;
+  avatar?: string;
+}
 
 interface SidebarFooterProps {
-  user: User | null;
+  user: SidebarUser | null;
   collapsed: boolean;
   onLogout: () => void;
 }

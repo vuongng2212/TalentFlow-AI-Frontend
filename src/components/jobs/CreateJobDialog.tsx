@@ -13,8 +13,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Loader2 } from "lucide-react";
 import { NewJobForm } from "./types";
+import type { EmploymentType, JobStatus } from "@/types";
 
 interface CreateJobDialogProps {
   open: boolean;
@@ -22,6 +30,9 @@ interface CreateJobDialogProps {
   formData: NewJobForm;
   onFormChange: (data: NewJobForm) => void;
   onSubmit: () => void;
+  isSubmitting?: boolean;
+  mode?: "create" | "edit";
+  hideTrigger?: boolean;
 }
 
 export function CreateJobDialog({
@@ -30,28 +41,30 @@ export function CreateJobDialog({
   formData,
   onFormChange,
   onSubmit,
+  isSubmitting = false,
+  mode = "create",
+  hideTrigger = false,
 }: CreateJobDialogProps) {
-  const isFormValid =
-    formData.title &&
-    formData.description &&
-    formData.location &&
-    formData.experience &&
-    formData.skills;
+  const isFormValid = formData.title.trim().length > 0;
+  const isEdit = mode === "edit";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Create Job
-        </Button>
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Create Job
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Job</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Job" : "Create New Job"}</DialogTitle>
           <DialogDescription>
-            Fill in the details for your new job posting. Click save when
-            you&apos;re done.
+            {isEdit
+              ? "Update the job posting details. Click save when you\u0027re done."
+              : "Fill in the details for your new job posting. Click save when you\u0027re done."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -60,49 +73,123 @@ export function CreateJobDialog({
             <Label htmlFor="title">Job Title *</Label>
             <Input
               id="title"
-              placeholder="e.g., Senior Frontend Developer…"
+              placeholder="e.g., Senior Frontend Developer"
               value={formData.title}
               onChange={(e) =>
                 onFormChange({ ...formData, title: e.target.value })
               }
               autoComplete="off"
+              maxLength={200}
             />
           </div>
 
-          {/* Location & Salary */}
+          {/* Department & Location */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="location">Location *</Label>
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                placeholder="e.g., Engineering"
+                value={formData.department}
+                onChange={(e) =>
+                  onFormChange({ ...formData, department: e.target.value })
+                }
+                autoComplete="off"
+                maxLength={100}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
-                placeholder="e.g., Remote, San Francisco…"
+                placeholder="e.g., Remote, Ho Chi Minh City"
                 value={formData.location}
                 onChange={(e) =>
                   onFormChange({ ...formData, location: e.target.value })
                 }
                 autoComplete="off"
+                maxLength={100}
+              />
+            </div>
+          </div>
+
+          {/* Employment Type & Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label>Employment Type</Label>
+              <Select
+                value={formData.employmentType}
+                onValueChange={(value) =>
+                  onFormChange({ ...formData, employmentType: value as EmploymentType })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FULL_TIME">Full Time</SelectItem>
+                  <SelectItem value="PART_TIME">Part Time</SelectItem>
+                  <SelectItem value="CONTRACT">Contract</SelectItem>
+                  <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  onFormChange({ ...formData, status: value as JobStatus })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="OPEN">Open</SelectItem>
+                  <SelectItem value="CLOSED">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Salary Range */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="salaryMin">Salary Min ($)</Label>
+              <Input
+                id="salaryMin"
+                type="number"
+                placeholder="e.g., 2000"
+                value={formData.salaryMin}
+                onChange={(e) =>
+                  onFormChange({ ...formData, salaryMin: e.target.value })
+                }
+                min={0}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="salary">Salary Range</Label>
+              <Label htmlFor="salaryMax">Salary Max ($)</Label>
               <Input
-                id="salary"
-                placeholder="e.g., $100k – $150k…"
-                value={formData.salaryRange}
+                id="salaryMax"
+                type="number"
+                placeholder="e.g., 4000"
+                value={formData.salaryMax}
                 onChange={(e) =>
-                  onFormChange({ ...formData, salaryRange: e.target.value })
+                  onFormChange({ ...formData, salaryMax: e.target.value })
                 }
-                autoComplete="off"
+                min={0}
               />
             </div>
           </div>
 
           {/* Description */}
           <div className="grid gap-2">
-            <Label htmlFor="description">Job Description *</Label>
+            <Label htmlFor="description">Job Description</Label>
             <Textarea
               id="description"
-              placeholder="Describe the role, responsibilities, and requirements…"
+              placeholder="Describe the role, responsibilities, and requirements..."
               rows={4}
               value={formData.description}
               onChange={(e) =>
@@ -112,40 +199,12 @@ export function CreateJobDialog({
             />
           </div>
 
-          {/* Experience & Education */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="experience">Experience Required *</Label>
-              <Input
-                id="experience"
-                placeholder="e.g., 3+ years…"
-                value={formData.experience}
-                onChange={(e) =>
-                  onFormChange({ ...formData, experience: e.target.value })
-                }
-                autoComplete="off"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="education">Education</Label>
-              <Input
-                id="education"
-                placeholder="e.g., Bachelor's degree…"
-                value={formData.education}
-                onChange={(e) =>
-                  onFormChange({ ...formData, education: e.target.value })
-                }
-                autoComplete="off"
-              />
-            </div>
-          </div>
-
           {/* Skills */}
           <div className="grid gap-2">
-            <Label htmlFor="skills">Required Skills *</Label>
+            <Label htmlFor="skills">Required Skills</Label>
             <Input
               id="skills"
-              placeholder="e.g., React, TypeScript, Node.js…"
+              placeholder="e.g., React, TypeScript, Node.js"
               value={formData.skills}
               onChange={(e) =>
                 onFormChange({ ...formData, skills: e.target.value })
@@ -158,11 +217,18 @@ export function CreateJobDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={onSubmit} disabled={!isFormValid}>
-            Create Job
+          <Button onClick={onSubmit} disabled={!isFormValid || isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                {isEdit ? "Saving..." : "Creating..."}
+              </>
+            ) : (
+              isEdit ? "Save Changes" : "Create Job"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

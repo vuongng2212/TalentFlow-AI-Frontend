@@ -10,7 +10,7 @@ export function UploadInfoSidebar() {
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="flex gap-3">
-            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
+            <div className="shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
               1
             </div>
             <div>
@@ -22,7 +22,7 @@ export function UploadInfoSidebar() {
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
+            <div className="shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
               2
             </div>
             <div>
@@ -34,7 +34,7 @@ export function UploadInfoSidebar() {
           </div>
 
           <div className="flex gap-3">
-            <div className="flex-shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
+            <div className="shrink-0 h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
               3
             </div>
             <div>
@@ -53,19 +53,19 @@ export function UploadInfoSidebar() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span className="text-muted-foreground">PDF, DOC, DOCX formats</span>
           </div>
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span className="text-muted-foreground">Maximum 10MB per file</span>
           </div>
           <div className="flex items-start gap-2">
-            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
             <span className="text-muted-foreground">Bulk upload supported</span>
           </div>
           <div className="flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
             <span className="text-muted-foreground">
               Processing time: ~10 seconds/CV
             </span>

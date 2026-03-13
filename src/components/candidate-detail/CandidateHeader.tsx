@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Mail, Phone, Calendar, MessageSquare, Video, Download } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
-import { Candidate } from "@/types";
+import { CandidateViewModel } from "@/types";
 
 interface CandidateHeaderProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
 }
 
 export function CandidateHeader({ candidate }: CandidateHeaderProps) {
@@ -16,7 +16,7 @@ export function CandidateHeader({ candidate }: CandidateHeaderProps) {
       <CardContent className="pt-6">
         <div className="flex items-start gap-6">
           <Avatar
-            src={candidate.avatar}
+            src={candidate.avatar ?? undefined}
             alt={candidate.fullName}
             fallback={candidate.fullName.charAt(0)}
             size="lg"
@@ -27,12 +27,14 @@ export function CandidateHeader({ candidate }: CandidateHeaderProps) {
               <div>
                 <h1 className="text-3xl font-bold mb-1">{candidate.fullName}</h1>
                 <p className="text-lg text-muted-foreground">
-                  {candidate.appliedPosition}
+                  {candidate.appliedPosition ?? ""}
                 </p>
               </div>
-              <Badge variant="outline" className="text-base px-3 py-1">
-                {candidate.stage}
-              </Badge>
+              {candidate.stage ? (
+                <Badge variant="outline" className="text-base px-3 py-1">
+                  {candidate.stage}
+                </Badge>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
@@ -58,10 +60,12 @@ export function CandidateHeader({ candidate }: CandidateHeaderProps) {
                   </a>
                 </div>
               ) : null}
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>Applied {formatRelativeTime(candidate.appliedDate)}</span>
-              </div>
+              {candidate.appliedDate ? (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>Applied {formatRelativeTime(new Date(candidate.appliedDate))}</span>
+                </div>
+              ) : null}
             </div>
 
             <div className="flex gap-2">

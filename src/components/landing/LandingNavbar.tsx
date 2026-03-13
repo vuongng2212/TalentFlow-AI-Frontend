@@ -32,7 +32,7 @@ export function LandingNavbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-linear-to-br from-primary to-indigo-500 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-white" aria-hidden="true" />
             </div>
             <span className="font-bold text-lg">{APP_NAME}</span>

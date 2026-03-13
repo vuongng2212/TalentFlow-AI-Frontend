@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { KanbanColumn } from "@/components/candidates/KanbanColumn";
 import { CandidateCardOverlay } from "@/components/candidates/CandidateCard";
-import type { Candidate, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import type { CandidateViewModel, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
 import { toast } from "sonner";
 import {
   DndContext,
@@ -19,15 +19,17 @@ import {
 interface KanbanBoardProps {
   columns: KanbanColumnType[];
   onColumnsChange: (columns: KanbanColumnType[]) => void;
+  onStageDrop?: (candidateId: string, newStage: ApplicationStage) => void;
   className?: string;
 }
 
 export function KanbanBoard({
   columns,
   onColumnsChange,
+  onStageDrop,
   className,
 }: KanbanBoardProps) {
-  const [activeCandidate, setActiveCandidate] = useState<Candidate | null>(null);
+  const [activeCandidate, setActiveCandidate] = useState<CandidateViewModel | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -88,13 +90,14 @@ export function KanbanBoard({
     });
 
     onColumnsChange(newColumns);
+    onStageDrop?.(candidateId, newStage);
 
     // Show toast notification
     toast.success(`${candidate.fullName} moved to ${newStage.toLowerCase()}`, {
       description: `Successfully updated candidate pipeline stage.`,
       duration: 3000,
     });
-  }, [columns, onColumnsChange]);
+  }, [columns, onColumnsChange, onStageDrop]);
 
   return (
     <DndContext

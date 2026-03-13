@@ -17,7 +17,7 @@ export function LandingFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-linear-to-br from-primary to-indigo-500 flex items-center justify-center">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold text-lg">{APP_NAME}</span>

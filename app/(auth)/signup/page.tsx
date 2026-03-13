@@ -1,28 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuthStore } from "@/store/auth-store";
 import { ROUTES, APP_NAME } from "@/lib/constants";
+import { ApiError } from "@/lib/api/errors";
+import { signupSchema, type SignupFormData } from "@/lib/validations/auth";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, isLoading } = useAuthStore();
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    role: "RECRUITER" as "RECRUITER" | "INTERVIEWER",
+  const { signup, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors: fieldErrors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: { fullName: "", email: "", password: "", role: "RECRUITER" },
   });
+
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(ROUTES.DASHBOARD);
+    }
+  }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const onSubmit = async (data: SignupFormData) => {
+    clearError();
 
     if (!agreedToTerms) {
       toast.warning("Please agree to terms and conditions", {
@@ -32,17 +59,31 @@ export default function SignupPage() {
     }
 
     try {
-      await signup(formData);
+      await signup(data);
+      toast.success("Account created!", {
+        description: "Welcome to TalentFlow. Redirecting to dashboard...",
+      });
       router.push(ROUTES.DASHBOARD);
-    } catch (err) {
-      console.error("Signup error:", err);
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        if (err.isConflict) {
+          toast.error("Email already in use", {
+            description: "An account with this email already exists. Please sign in instead.",
+          });
+          return;
+        }
+        if (err.isValidationError && err.validationErrors.length > 0) {
+          toast.error("Validation failed", {
+            description: err.validationErrors.join(". "),
+          });
+          return;
+        }
+        toast.error("Signup failed", { description: err.message });
+      } else {
+        const errorMessage = err instanceof Error ? err.message : "Please try again.";
+        toast.error("Signup failed", { description: errorMessage });
+      }
     }
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -50,7 +91,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             {APP_NAME}
           </h1>
           <p className="text-muted-foreground">
@@ -60,21 +101,21 @@ export default function SignupPage() {
 
         {/* Signup Card */}
         <div className="glass rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
-                name="fullName"
                 type="text"
                 placeholder="John Doe"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
+                {...register("fullName")}
                 disabled={isLoading}
                 autoComplete="name"
               />
+              {fieldErrors.fullName && (
+                <p className="text-xs text-destructive">{fieldErrors.fullName.message}</p>
+              )}
             </div>
 
             {/* Email */}
@@ -82,15 +123,15 @@ export default function SignupPage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="your.email@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
+                {...register("email")}
                 disabled={isLoading}
                 autoComplete="email"
               />
+              {fieldErrors.email && (
+                <p className="text-xs text-destructive">{fieldErrors.email.message}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -98,35 +139,54 @@ export default function SignupPage() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
+                {...register("password")}
                 disabled={isLoading}
                 autoComplete="new-password"
               />
-              <p className="text-xs text-muted-foreground">
-                At least 8 characters with uppercase, lowercase, and numbers
-              </p>
+              {fieldErrors.password ? (
+                <p className="text-xs text-destructive">{fieldErrors.password.message}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  At least 8 characters with uppercase, lowercase, numbers, and special characters (!@#$%^&*)
+                </p>
+              )}
             </div>
 
             {/* Role Selector */}
             <div className="space-y-2">
               <Label htmlFor="role">I am a</Label>
-              <select
-                id="role"
+              <Controller
                 name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-smooth"
-                disabled={isLoading}
-              >
-                <option value="RECRUITER">Recruiter</option>
-                <option value="INTERVIEWER">Interviewer</option>
-              </select>
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="role">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="RECRUITER">Recruiter</SelectItem>
+                      <SelectItem value="INTERVIEWER">Interviewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {fieldErrors.role && (
+                <p className="text-xs text-destructive">{fieldErrors.role.message}</p>
+              )}
             </div>
+
+            {/* Store Error */}
+            {error && (
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
 
             {/* Terms & Conditions */}
             <div className="flex items-start">
@@ -158,7 +218,14 @@ export default function SignupPage() {
               className="w-full"
               disabled={isLoading || !agreedToTerms}
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
+                  Creating account…
+                </>
+              ) : (
+                "Create account"
+              )}
             </Button>
           </form>
 

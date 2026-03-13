@@ -1,40 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/auth-store";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
-import { ROUTES } from "@/lib/constants";
-import { useEffect } from "react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Protect dashboard routes
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push(ROUTES.LOGIN);
-    }
-  }, [isAuthenticated, router]);
-
-  // Don't render dashboard if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          <p className="mt-4  text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen overflow-hidden">

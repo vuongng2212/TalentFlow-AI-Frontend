@@ -5,6 +5,9 @@ export { KanbanColumn } from "./KanbanColumn";
 export { KanbanBoard } from "./KanbanBoard";
 export { KanbanSkeleton } from "./KanbanSkeleton";
 
+// Dialogs
+export { WithdrawDialog } from "./WithdrawDialog";
+
 // Page components
 export { CandidateStatsCards } from "./CandidateStatsCards";
 export { CandidateSearchBar, type ScoreFilter } from "./CandidateSearchBar";

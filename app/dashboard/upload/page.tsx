@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { mockJobs } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { Upload, Loader2 } from "lucide-react";
 import {
@@ -12,6 +11,11 @@ import {
   JobSelector,
   UploadInfoSidebar,
 } from "@/components/upload";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useJobs } from "@/services/jobs";
+import { useUploadCV } from "@/services/applications";
 
 const ACCEPTED_FILE_TYPES = [
   "application/pdf",
@@ -20,10 +24,12 @@ const ACCEPTED_FILE_TYPES = [
 
 export default function UploadCVPage() {
   const router = useRouter();
+  const { data: jobs = [], isLoading: isJobsLoading } = useJobs({ status: "OPEN" });
+  const { trigger: uploadCV, isMutating: isUploading } = useUploadCV();
   const [files, setFiles] = useState<File[]>([]);
   const [selectedJob, setSelectedJob] = useState<string>("");
+  const [coverLetter, setCoverLetter] = useState("");
   const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -73,23 +79,25 @@ export default function UploadCVPage() {
       return;
     }
 
-    setUploading(true);
+    try {
+      for (const file of files) {
+        await uploadCV({ file, jobId: selectedJob, coverLetter: coverLetter || undefined });
+      }
 
-    // Simulate upload process
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+      setUploadSuccess(true);
+      toast.success("Upload successful!", {
+        description: `${files.length} CV${files.length > 1 ? "s" : ""} uploaded and processing...`,
+      });
 
-    setUploading(false);
-    setUploadSuccess(true);
-
-    toast.success("Upload successful!", {
-      description: `${files.length} CV${files.length > 1 ? "s" : ""} uploaded and processing...`,
-    });
-
-    // Reset and redirect after 2 seconds
-    setTimeout(() => {
-      router.push("/dashboard/candidates");
-    }, 2000);
-  }, [files.length, selectedJob, router]);
+      setTimeout(() => {
+        router.push("/dashboard/candidates");
+      }, 2000);
+    } catch {
+      toast.error("Upload failed", {
+        description: "Please check your file and try again.",
+      });
+    }
+  }, [files, selectedJob, coverLetter, uploadCV, router]);
 
   const handleCancel = useCallback(() => {
     router.back();
@@ -127,20 +135,47 @@ export default function UploadCVPage() {
           <JobSelector
             selectedJob={selectedJob}
             onJobChange={handleJobChange}
-            jobs={mockJobs}
+            jobs={jobs}
+            isLoading={isJobsLoading}
           />
+
+          {/* Cover Letter */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Cover Letter (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="cover-letter" className="text-sm text-muted-foreground">
+                  Add a cover letter to strengthen the application
+                </Label>
+                <Textarea
+                  id="cover-letter"
+                  placeholder="Write a brief cover letter explaining why this candidate is a great fit..."
+                  value={coverLetter}
+                  onChange={(e) => setCoverLetter(e.target.value)}
+                  maxLength={2000}
+                  rows={4}
+                  className="resize-none"
+                />
+                <p className="text-xs text-muted-foreground text-right">
+                  {coverLetter.length}/2000
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Upload Button */}
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleCancel} disabled={uploading}>
+            <Button variant="outline" onClick={handleCancel} disabled={isUploading}>
               Cancel
             </Button>
             <Button
               onClick={handleUpload}
-              disabled={files.length === 0 || !selectedJob || uploading}
+              disabled={files.length === 0 || !selectedJob || isUploading}
               className="gap-2"
             >
-              {uploading ? (
+              {isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Processing...

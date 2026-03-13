@@ -26,6 +26,7 @@ export const JOB_STATUS = {
   DRAFT: "Draft",
   OPEN: "Open",
   CLOSED: "Closed",
+  ARCHIVED: "Archived",
 } as const;
 
 export const USER_ROLES = {

@@ -3,15 +3,17 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, DollarSign, Users, Calendar } from "lucide-react";
+import { MapPin, DollarSign, Users, Calendar, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { Job } from "@/types";
 
 interface JobCardProps {
   job: Job;
+  onEdit?: (job: Job) => void;
+  onDelete?: (job: Job) => void;
 }
 
-export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
+export const JobCard = React.memo(function JobCard({ job, onEdit, onDelete }: JobCardProps) {
   return (
     <Card className="hover-lift group cursor-pointer">
       <CardHeader>
@@ -42,15 +44,21 @@ export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
             <MapPin className="h-4 w-4" />
             <span>{job.location}</span>
           </div>
-          {job.salaryRange ? (
+          {job.salaryMin || job.salaryMax ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <DollarSign className="h-4 w-4" />
-              <span>{job.salaryRange}</span>
+              <span>
+                {job.salaryMin && job.salaryMax
+                  ? `$${job.salaryMin.toLocaleString()} – $${job.salaryMax.toLocaleString()}`
+                  : job.salaryMin
+                  ? `From $${job.salaryMin.toLocaleString()}`
+                  : `Up to $${job.salaryMax!.toLocaleString()}`}
+              </span>
             </div>
           ) : null}
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="h-4 w-4" />
-            <span>{job.applicationCount} applications</span>
+            <span>{job._count?.applications ?? 0} applications</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
@@ -60,14 +68,14 @@ export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
 
         {/* Skills */}
         <div className="flex flex-wrap gap-2">
-          {job.requirements.skills.slice(0, 3).map((skill) => (
+          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).slice(0, 3).map((skill: string) => (
             <Badge key={skill} variant="outline" className="text-xs">
               {skill}
             </Badge>
           ))}
-          {job.requirements.skills.length > 3 ? (
+          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length > 3 ? (
             <Badge variant="outline" className="text-xs">
-              +{job.requirements.skills.length - 3}
+              +{(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length - 3}
             </Badge>
           ) : null}
         </div>
@@ -79,8 +87,16 @@ export const JobCard = React.memo(function JobCard({ job }: JobCardProps) {
               View Details
             </Button>
           </Link>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => onEdit?.(job)}>
             Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => onDelete?.(job)}
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>

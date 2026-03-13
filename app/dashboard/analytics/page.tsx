@@ -2,60 +2,89 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockJobs, mockCandidates } from "@/lib/mock-data";
 import {
   TrendingUp,
-  TrendingDown,
   Users,
   Briefcase,
-  Clock,
   Target,
+  Loader2,
+  BarChart3,
 } from "lucide-react";
+import {
+  useAnalyticsOverview,
+  useAnalyticsPipeline,
+  useAnalyticsTopJobs,
+} from "@/services/analytics";
 
 export default function AnalyticsPage() {
-  // Calculate metrics from mock data
-  const hiredCount = mockCandidates.filter((c) => c.stage === "HIRED").length;
-  const avgAIScore = Math.round(
-    mockCandidates.reduce((sum, c) => sum + (c.aiScore || 0), 0) /
-      mockCandidates.length,
-  );
+  const { data: overview, isLoading: overviewLoading, error: overviewError } = useAnalyticsOverview();
+  const { data: pipeline, isLoading: pipelineLoading } = useAnalyticsPipeline();
+  const { data: topJobs, isLoading: topJobsLoading } = useAnalyticsTopJobs(5);
 
-  const activeCandidates = mockCandidates.filter(
-    (c) => c.stage !== "HIRED" && c.stage !== "REJECTED",
-  ).length;
+  const isLoading = overviewLoading || pipelineLoading || topJobsLoading;
 
-  const totalCandidates = mockCandidates.length;
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  // Mock time-to-hire data
-  const avgTimeToHire = 21; // days
-  const prevTimeToHire = 28;
-  const timeToHireChange = Math.round(
-    ((avgTimeToHire - prevTimeToHire) / prevTimeToHire) * 100,
-  );
+  if (overviewError) {
+    return (
+      <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
+        <div className="rounded-full bg-destructive/10 p-3 text-destructive">
+          <BarChart3 className="h-8 w-8" />
+        </div>
+        <h3 className="text-xl font-semibold">Failed to load analytics</h3>
+        <p className="text-muted-foreground">Please try again later.</p>
+      </div>
+    );
+  }
 
-  // Mock pipeline conversion rates
+  // Derived values from real data
+  const totalCandidates = overview?.totalCandidates ?? 0;
+  const totalApplications = overview?.totalApplications ?? 0;
+  const hiredCount = overview?.hiredCount ?? 0;
+  const hireRate = overview?.hireRate ?? 0;
+  const openJobs = overview?.openJobs ?? 0;
+
+  // Calculate pipeline conversion rates from real pipeline data
+  const pipelineData = pipeline ?? [];
+  const stageCountMap = new Map(pipelineData.map((s) => [s.stage, s.count]));
+  const appliedCount = stageCountMap.get("APPLIED") ?? 0;
+  const screeningCount = stageCountMap.get("SCREENING") ?? 0;
+  const interviewCount = stageCountMap.get("INTERVIEW") ?? 0;
+  const offerCount = stageCountMap.get("OFFER") ?? 0;
+  const pipelineHiredCount = stageCountMap.get("HIRED") ?? 0;
+
+  const activeCandidates = totalApplications - hiredCount - (stageCountMap.get("REJECTED") ?? 0);
+
   const conversionRates = [
-    { stage: "Applied → Screening", rate: 65, count: "52/80" },
-    { stage: "Screening → Interview", rate: 48, count: "25/52" },
-    { stage: "Interview → Offer", rate: 32, count: "8/25" },
-    { stage: "Offer → Hired", rate: 88, count: "7/8" },
+    {
+      stage: "Applied → Screening",
+      rate: appliedCount > 0 ? Math.round((screeningCount / appliedCount) * 100) : 0,
+      count: `${screeningCount}/${appliedCount}`,
+    },
+    {
+      stage: "Screening → Interview",
+      rate: screeningCount > 0 ? Math.round((interviewCount / screeningCount) * 100) : 0,
+      count: `${interviewCount}/${screeningCount}`,
+    },
+    {
+      stage: "Interview → Offer",
+      rate: interviewCount > 0 ? Math.round((offerCount / interviewCount) * 100) : 0,
+      count: `${offerCount}/${interviewCount}`,
+    },
+    {
+      stage: "Offer → Hired",
+      rate: offerCount > 0 ? Math.round((pipelineHiredCount / offerCount) * 100) : 0,
+      count: `${pipelineHiredCount}/${offerCount}`,
+    },
   ];
 
-  const openJobs = mockJobs.filter((j) => j.status === "OPEN").length;
-
-  // Top performing jobs
-  const topJobs = mockJobs
-    .filter((j) => j.status === "OPEN")
-    .sort((a, b) => b.applicationCount - a.applicationCount)
-    .slice(0, 5);
-
-  // Source effectiveness (mock)
-  const sources = [
-    { name: "LinkedIn", candidates: 35, hired: 3, rate: 8.6 },
-    { name: "Direct Apply", candidates: 28, hired: 2, rate: 7.1 },
-    { name: "Referral", candidates: 12, hired: 2, rate: 16.7 },
-    { name: "Job Boards", candidates: 18, hired: 1, rate: 5.6 },
-  ];
+  const topJobsList = topJobs ?? [];
 
   return (
     <div className="space-y-6">
@@ -72,56 +101,29 @@ export default function AnalyticsPage() {
         <Card className="hover-lift">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg. Time to Hire
-            </CardTitle>
-            <Clock className="h-5 w-5 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{avgTimeToHire} days</div>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingDown className="h-4 w-4 text-green-500" />
-              <span className="text-xs text-green-500 font-medium">
-                {Math.abs(timeToHireChange)}% faster
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">
-                vs last month
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover-lift">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Success Rate
+              Hire Rate
             </CardTitle>
             <Target className="h-5 w-5 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {Math.round((hiredCount / totalCandidates) * 100)}%
-            </div>
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingUp className="h-4 w-4 text-green-500" />
-              <span className="text-xs text-green-500 font-medium">+5%</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                vs last month
-              </span>
-            </div>
+            <div className="text-3xl font-bold">{hireRate}%</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {hiredCount} hired from {totalApplications} applications
+            </p>
           </CardContent>
         </Card>
 
         <Card className="hover-lift">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg. AI Match Score
+              Total Candidates
             </CardTitle>
             <Users className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{avgAIScore}%</div>
+            <div className="text-3xl font-bold">{totalCandidates}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Across {totalCandidates} candidates
+              {totalApplications} applications submitted
             </p>
           </CardContent>
         </Card>
@@ -137,6 +139,21 @@ export default function AnalyticsPage() {
             <div className="text-3xl font-bold">{activeCandidates}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {openJobs} open positions
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover-lift">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Hired This Period
+            </CardTitle>
+            <TrendingUp className="h-5 w-5 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{hiredCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              From {overview?.totalJobs ?? 0} total jobs
             </p>
           </CardContent>
         </Card>
@@ -171,28 +188,30 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        {/* Source Effectiveness */}
+        {/* Pipeline Stage Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Source Effectiveness</CardTitle>
+            <CardTitle>Pipeline Distribution</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sources.map((source) => (
+              {pipelineData.map((stage) => (
                 <div
-                  key={source.name}
+                  key={stage.stage}
                   className="flex items-center justify-between p-3 rounded-lg border border-border"
                 >
                   <div className="flex-1">
-                    <p className="font-medium">{source.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {source.candidates} candidates • {source.hired} hired
+                    <p className="font-medium capitalize">
+                      {stage.stage.toLowerCase().replace("_", " ")}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold">{source.rate}%</p>
+                    <p className="text-lg font-bold">{stage.count}</p>
                     <p className="text-xs text-muted-foreground">
-                      Success rate
+                      {totalApplications > 0
+                        ? Math.round((stage.count / totalApplications) * 100)
+                        : 0}
+                      %
                     </p>
                   </div>
                 </div>
@@ -208,33 +227,41 @@ export default function AnalyticsPage() {
           <CardTitle>Top Performing Jobs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {topJobs.map((job, index) => (
-              <div
-                key={job.id}
-                className="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-accent transition-smooth"
-              >
-                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold">
-                  #{index + 1}
+          {topJobsList.length > 0 ? (
+            <div className="space-y-3">
+              {topJobsList.map((job, index) => (
+                <div
+                  key={job.id}
+                  className="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-accent transition-smooth"
+                >
+                  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-bold">
+                    #{index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{job.title}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {job.department ?? "—"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold">{job.applicationCount}</p>
+                    <p className="text-xs text-muted-foreground">Applications</p>
+                  </div>
+                  <Badge variant={job.status === "OPEN" ? "success" : "secondary"}>
+                    {job.status}
+                  </Badge>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold">{job.title}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {job.location}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold">{job.applicationCount}</p>
-                  <p className="text-xs text-muted-foreground">Applications</p>
-                </div>
-                <Badge variant="success">Active</Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No job data available yet.
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* Additional Metrics */}
+      {/* Summary Metrics */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -243,50 +270,52 @@ export default function AnalyticsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">32%</div>
+            <div className="text-4xl font-bold mb-2">
+              {interviewCount > 0
+                ? Math.round((offerCount / interviewCount) * 100)
+                : 0}
+              %
+            </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full gradient-primary w-[32%]" />
+              <div
+                className="h-full gradient-primary"
+                style={{
+                  width: `${interviewCount > 0 ? Math.round((offerCount / interviewCount) * 100) : 0}%`,
+                }}
+              />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              8 offers from 25 interviews
+              {offerCount} offers from {interviewCount} interviews
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Avg. Cost per Hire</CardTitle>
+            <CardTitle className="text-base">Total Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">$3,200</div>
-            <div className="flex items-center gap-1">
-              <TrendingDown className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-green-500 font-medium">-12%</span>
-              <span className="text-xs text-muted-foreground ml-1">
-                vs target
-              </span>
-            </div>
+            <div className="text-4xl font-bold mb-2">{overview?.totalJobs ?? 0}</div>
+            <p className="text-xs text-muted-foreground">
+              {openJobs} open • {(overview?.totalJobs ?? 0) - openJobs} closed/draft
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Candidate Satisfaction</CardTitle>
+            <CardTitle className="text-base">Rejection Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">4.6/5.0</div>
-            <div className="flex gap-1 mb-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <div
-                  key={star}
-                  className={`h-4 w-4 rounded-sm ${
-                    star <= 4.6 ? "bg-yellow-500" : "bg-muted"
-                  }`}
-                />
-              ))}
+            <div className="text-4xl font-bold mb-2">
+              {totalApplications > 0
+                ? Math.round(((stageCountMap.get("REJECTED") ?? 0) / totalApplications) * 100)
+                : 0}
+              %
             </div>
             <p className="text-xs text-muted-foreground">
-              Based on 42 survey responses
+              {stageCountMap.get("REJECTED") ?? 0} rejected out of{" "}
+              {totalApplications} applications
             </p>
           </CardContent>
         </Card>

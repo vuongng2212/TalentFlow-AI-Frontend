@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Job } from "@/types";
 
 interface JobDescriptionCardProps {
-  description: string;
+  description: string | null;
 }
 
 export function JobDescriptionCard({ description }: JobDescriptionCardProps) {
@@ -13,7 +13,7 @@ export function JobDescriptionCard({ description }: JobDescriptionCardProps) {
         <CardTitle>Job Description</CardTitle>
       </CardHeader>
       <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-        <p>{description}</p>
+          <p>{description || "No description available."}</p>
       </CardContent>
     </Card>
   );
@@ -24,6 +24,26 @@ interface JobRequirementsCardProps {
 }
 
 export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) {
+  if (!requirements) {
+    return null;
+  }
+
+  // Backend returns requirements as string[] (from JSONB column).
+  // Legacy format may be Record<string, unknown> with experience/education keys.
+  const items: string[] = Array.isArray(requirements)
+    ? requirements
+    : typeof requirements === "object"
+      ? [
+          requirements.experience ? `Experience: ${String(requirements.experience)}` : "",
+          requirements.education ? `Education: ${String(requirements.education)}` : "",
+          ...((requirements.skills as string[]) ?? []),
+        ].filter(Boolean)
+      : [];
+
+  if (items.length === 0) {
+    return null;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -31,20 +51,12 @@ export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) 
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
-          <li className="flex items-start gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-            <span className="text-sm">
-              <strong>Experience:</strong> {requirements.experience}
-            </span>
-          </li>
-          {requirements.education ? (
-            <li className="flex items-start gap-2">
-              <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
-              <span className="text-sm">
-                <strong>Education:</strong> {requirements.education}
-              </span>
+          {items.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />
+              <span className="text-sm">{item}</span>
             </li>
-          ) : null}
+          ))}
         </ul>
       </CardContent>
     </Card>

@@ -31,7 +31,7 @@ export function HeroSection() {
           {/* Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 animate-slide-up [text-wrap:balance]">
             Hire{" "}
-            <span className="bg-gradient-to-r from-primary via-indigo-500 to-purple-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-primary via-indigo-500 to-purple-500 bg-clip-text text-transparent">
               Smarter
             </span>
             , Not Harder
@@ -85,7 +85,7 @@ export function HeroSection() {
 function HeroDashboardPreview() {
   return (
     <div className="mt-16 lg:mt-24 relative animate-scale-in stagger-3">
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
       <div className="relative rounded-2xl border border-border/50 shadow-soft-xl overflow-hidden bg-card">
         {/* Mock Dashboard Header */}
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30" aria-hidden="true">

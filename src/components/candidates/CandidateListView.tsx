@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Upload, X, UserSearch } from "lucide-react";
-import type { Candidate, ApplicationStage } from "@/types";
+import type { CandidateViewModel, ApplicationStage } from "@/types";
 
 const stageColorMap: Record<ApplicationStage, string> = {
   APPLIED: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -16,7 +16,7 @@ const stageColorMap: Record<ApplicationStage, string> = {
 };
 
 interface CandidateListItemProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
   index: number;
 }
 
@@ -26,7 +26,7 @@ const CandidateListItem = React.memo(function CandidateListItem({
 }: CandidateListItemProps) {
   return (
     <Link
-      href={`/dashboard/candidates/${candidate.id}`}
+      href={`/dashboard/candidates/${candidate._applicationId}`}
       className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors group animate-fade-in"
       style={{ animationDelay: `${index * 30}ms` }}
     >
@@ -68,7 +68,7 @@ const CandidateListItem = React.memo(function CandidateListItem({
 });
 
 interface CandidateListViewProps {
-  candidates: Candidate[];
+  candidates: CandidateViewModel[];
   hasActiveFilters: boolean;
   onClearFilters: () => void;
 }

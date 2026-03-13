@@ -7,12 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AIScoreBadge } from "@/components/candidates/AIScoreBadge";
-import type { Candidate } from "@/types";
+import type { CandidateViewModel } from "@/types";
 import { GripVertical, Mail, Phone, Clock, ChevronRight } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 
 interface CandidateCardProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
   isDragging?: boolean;
   isOverlay?: boolean;
   className?: string;
@@ -75,7 +75,7 @@ export const CandidateCard = React.memo(function CandidateCard({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <Link
-                  href={`/dashboard/candidates/${candidate.id}`}
+                  href={`/dashboard/candidates/${candidate._applicationId}`}
                   onClick={(e) => e.stopPropagation()}
                   className={cn(
                     "font-semibold text-sm leading-tight block truncate",
@@ -160,7 +160,7 @@ export const CandidateCard = React.memo(function CandidateCard({
 
       {/* View Profile Indicator */}
       <Link
-        href={`/dashboard/candidates/${candidate.id}`}
+        href={`/dashboard/candidates/${candidate._applicationId}`}
         onClick={(e) => e.stopPropagation()}
         className={cn(
           "absolute right-2 top-1/2 -translate-y-1/2",
@@ -181,7 +181,7 @@ export const CandidateCard = React.memo(function CandidateCard({
 export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
   candidate
 }: {
-  candidate: Candidate
+  candidate: CandidateViewModel
 }) {
   return (
     <Card className="w-72 p-3 shadow-soft-xl rotate-3 opacity-95 border-primary/30">

@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { Mail, Phone, Calendar, MessageSquare, Video, Download } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
-import { Candidate } from "@/types";
+import { CandidateViewModel } from "@/types";
 
 interface CandidateHeaderProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
 }
 
 export function CandidateHeader({ candidate }: CandidateHeaderProps) {

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Star, TrendingUp, LucideIcon } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
-import { Candidate } from "@/types";
+import { CandidateViewModel } from "@/types";
 
 interface TimelineItem {
   date: Date;
@@ -12,7 +12,7 @@ interface TimelineItem {
 }
 
 interface ApplicationTimelineProps {
-  candidate: Candidate;
+  candidate: CandidateViewModel;
 }
 
 export function ApplicationTimeline({ candidate }: ApplicationTimelineProps) {

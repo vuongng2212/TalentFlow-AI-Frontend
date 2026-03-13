@@ -10,7 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
-import type { Candidate, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import type { CandidateViewModel, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -78,7 +78,7 @@ const stageConfig: Record<
 const SortableCandidateItem = React.memo(function SortableCandidateItem({
   candidate
 }: {
-  candidate: Candidate
+  candidate: CandidateViewModel
 }) {
   const {
     attributes,

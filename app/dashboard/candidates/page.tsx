@@ -13,8 +13,12 @@ import {
   type ScoreFilter,
   type ViewMode,
 } from "@/components/candidates";
-import { mockKanbanColumns } from "@/lib/mock-data";
-import type { KanbanColumn as KanbanColumnType } from "@/types";
+import { useApplications, updateApplicationStage } from "@/services/applications";
+import { groupApplicationsByStage } from "@/lib/mappers";
+import type { ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 
 // Dynamic import for KanbanBoard - code-splits @dnd-kit from initial bundle
 const KanbanBoard = dynamic(
@@ -31,25 +35,33 @@ const preloadKanbanBoard = () => {
 };
 
 export default function CandidatesPage() {
-  const [columns, setColumns] = useState<KanbanColumnType[]>(mockKanbanColumns);
+  const [page, setPage] = useState(1);
+  const { data: applications = [], pagination, isLoading, isValidating, error, mutate } = useApplications({ page, limit: 50 });
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
+  const [optimisticColumns, setOptimisticColumns] = useState<KanbanColumnType[] | null>(null);
+
+  // Build columns from API data
+  const apiColumns = useMemo(
+    () => groupApplicationsByStage(applications),
+    [applications],
+  );
+
+  const columns = optimisticColumns ?? apiColumns;
 
   // Filter columns based on search and score
   const filteredColumns = useMemo(() => {
-    return columns.map((col) => ({
-      ...col,
-      candidates: col.candidates.filter((candidate) => {
-        // Search filter
+    return columns.map((col) => {
+      const filtered = col.candidates.filter((candidate) => {
         const matchesSearch =
           searchQuery === "" ||
           candidate.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (candidate.appliedPosition ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
           candidate.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
-        // Score filter
         let matchesScore = true;
         if (scoreFilter !== "all" && candidate.aiScore) {
           if (scoreFilter === "high") matchesScore = candidate.aiScore >= 85;
@@ -59,22 +71,9 @@ export default function CandidatesPage() {
         }
 
         return matchesSearch && matchesScore;
-      }),
-      count: col.candidates.filter((candidate) => {
-        const matchesSearch =
-          searchQuery === "" ||
-          candidate.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (candidate.appliedPosition ?? "").toLowerCase().includes(searchQuery.toLowerCase());
-        let matchesScore = true;
-        if (scoreFilter !== "all" && candidate.aiScore) {
-          if (scoreFilter === "high") matchesScore = candidate.aiScore >= 85;
-          else if (scoreFilter === "medium")
-            matchesScore = candidate.aiScore >= 70 && candidate.aiScore < 85;
-          else if (scoreFilter === "low") matchesScore = candidate.aiScore < 70;
-        }
-        return matchesSearch && matchesScore;
-      }).length,
-    }));
+      });
+      return { ...col, candidates: filtered, count: filtered.length };
+    });
   }, [columns, searchQuery, scoreFilter]);
 
   // Calculate stats
@@ -85,7 +84,36 @@ export default function CandidatesPage() {
     .reduce((acc, col) => acc + col.count, 0);
   const hiredCount = columns.find((col) => col.id === "HIRED")?.count || 0;
 
+  // Handle Kanban drag — optimistic columns update
+  const handleColumnsChange = useCallback((newColumns: KanbanColumnType[]) => {
+    setOptimisticColumns(newColumns);
+  }, []);
 
+  // Handle stage drop — persist to API
+  const handleStageDrop = useCallback(
+    async (candidateId: string, newStage: ApplicationStage) => {
+      const movedCandidate = (optimisticColumns ?? apiColumns)
+        .flatMap((col) => col.candidates)
+        .find((c) => c.id === candidateId);
+      const applicationId = movedCandidate?._applicationId;
+
+      if (!applicationId) {
+        toast.error("Could not find application to update");
+        setOptimisticColumns(null);
+        return;
+      }
+
+      try {
+        await updateApplicationStage(applicationId, newStage);
+        setOptimisticColumns(null);
+        mutate();
+      } catch {
+        toast.error("Failed to update stage. Reverting...");
+        setOptimisticColumns(null);
+      }
+    },
+    [optimisticColumns, apiColumns, mutate],
+  );
 
   // Stable callbacks
   const handleSearchChange = useCallback((query: string) => {
@@ -110,13 +138,30 @@ export default function CandidatesPage() {
     setShowFilters(false);
   }, []);
 
-
   // Get all candidates for list view
   const allFilteredCandidates = useMemo(() => {
     return filteredColumns.flatMap((col) => col.candidates);
   }, [filteredColumns]);
 
   const hasActiveFilters = searchQuery !== "" || scoreFilter !== "all";
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
+        <Loader2 className="h-8 w-8 rotate-45 text-destructive" />
+        <h3 className="text-xl font-semibold">Failed to load candidates</h3>
+        <p className="text-muted-foreground">Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -159,7 +204,11 @@ export default function CandidatesPage() {
 
         {/* Kanban Board or List View */}
         {viewMode === "kanban" ? (
-          <KanbanBoard columns={filteredColumns} onColumnsChange={setColumns} />
+          <KanbanBoard
+            columns={filteredColumns}
+            onColumnsChange={handleColumnsChange}
+            onStageDrop={handleStageDrop}
+          />
         ) : (
           <CandidateListView
             candidates={allFilteredCandidates}
@@ -170,6 +219,21 @@ export default function CandidatesPage() {
 
         {/* Pipeline Summary */}
         <PipelineOverview columns={columns} totalCandidates={totalCandidates} />
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {applications.length} of {pagination.total} applications
+            </p>
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              onPageChange={setPage}
+              disabled={isValidating}
+            />
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

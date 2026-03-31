@@ -46,8 +46,11 @@ const faqs = [
 export function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: faqsRef, isVisible: faqsVisible, getStaggerStyle } =
-    useStaggeredAnimation(faqs.length, { staggerDelay: 80 });
+  const {
+    ref: faqsRef,
+    isVisible: faqsVisible,
+    getStaggerStyle,
+  } = useStaggeredAnimation(faqs.length, { staggerDelay: 80 });
 
   return (
     <section className="py-24 lg:py-32">
@@ -57,7 +60,7 @@ export function FAQSection() {
           ref={headerRef}
           className={cn(
             "text-center mb-16 scroll-animate",
-            headerVisible && "is-visible"
+            headerVisible && "is-visible",
           )}
         >
           <Badge variant="outline" className="mb-4">
@@ -78,7 +81,7 @@ export function FAQSection() {
               key={index}
               className={cn(
                 "border border-border/50 rounded-xl overflow-hidden bg-card scroll-stagger-item",
-                faqsVisible && "is-visible"
+                faqsVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >
@@ -90,14 +93,14 @@ export function FAQSection() {
                 <ChevronDown
                   className={cn(
                     "h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-200",
-                    openIndex === index && "rotate-180"
+                    openIndex === index && "rotate-180",
                   )}
                 />
               </button>
               <div
                 className={cn(
                   "overflow-hidden transition-all duration-200",
-                  openIndex === index ? "max-h-96" : "max-h-0"
+                  openIndex === index ? "max-h-96" : "max-h-0",
                 )}
               >
                 <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">

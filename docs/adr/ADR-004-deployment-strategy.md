@@ -9,18 +9,21 @@
 ## Context
 
 We need to deploy TalentFlow AI with:
+
 - **Frontend**: Next.js 16 (separate repo)
 - **Backend**: NestJS Monorepo (this repo)
 - **Database**: PostgreSQL
 - **Infrastructure**: Kafka, Redis, MinIO/S3
 
 **Project Constraints:**
+
 - 2-person team (limited DevOps time)
 - MVP in 1-2 months
 - Need fast iteration cycles
 - Cost-conscious (startup budget)
 
 **Options considered:**
+
 1. **Vercel (Frontend) + Railway/Render (Backend)** - Managed platforms
 2. **AWS (EC2 + RDS + S3)** - Full control, complex
 3. **DigitalOcean App Platform** - Simple but limited
@@ -32,6 +35,7 @@ We need to deploy TalentFlow AI with:
 ## Decision
 
 We will use:
+
 - **Frontend**: **Vercel** (Next.js 16)
 - **Backend**: **Railway** (NestJS apps)
 - **Database**: **Supabase** or **Neon** (Managed PostgreSQL)
@@ -46,6 +50,7 @@ We will use:
 ### Frontend: Why Vercel?
 
 ✅ **Pros:**
+
 1. **Zero-Config**: Push to GitHub, auto-deploy
 2. **Next.js Native**: Built by Next.js creators (Vercel)
 3. **Edge Functions**: Built-in support
@@ -54,12 +59,14 @@ We will use:
 6. **Performance**: Global CDN, optimized for Next.js
 
 ❌ **Cons:**
+
 1. **Vendor Lock-in**: Tied to Vercel
 2. **Cost**: Can get expensive at scale (but fine for MVP)
 
 ### Backend: Why Railway?
 
 ✅ **Pros:**
+
 1. **Simple**: Deploy from GitHub with minimal config
 2. **Monorepo Support**: Handles NestJS workspace well
 3. **Environment Variables**: Easy management
@@ -68,16 +75,19 @@ We will use:
 6. **Fast**: Quick deployment times
 
 **Alternative: Render**
+
 - Similar to Railway but slightly less polished UI
 - Railway chosen for better DX
 
 ❌ **Cons:**
+
 1. **Limited Customization**: Not as flexible as AWS
 2. **Scaling Limits**: May need to migrate later
 
 ### Database: Why Supabase/Neon?
 
 ✅ **Pros:**
+
 1. **Managed**: No database administration
 2. **PostgreSQL**: Compatible with Prisma
 3. **Free Tier**: Good for development
@@ -85,23 +95,27 @@ We will use:
 5. **Neon**: Serverless, scales to zero (cost-efficient)
 
 **Choice:**
+
 - **Development**: Supabase (more features)
 - **Production**: Neon (better pricing at scale)
 
 ### Kafka: Why Upstash Kafka?
 
 ✅ **Pros:**
+
 1. **Managed**: No Kafka administration
 2. **Serverless**: Pay per request, not per instance
 3. **REST API**: Easier to use than native Kafka protocol
 4. **Free Tier**: 10K messages/day free
 
 **Alternative: Run Kafka on Railway**
+
 - ❌ Rejected: Too complex to manage for 2-person team
 
 ### Redis: Why Upstash Redis?
 
 ✅ **Pros:**
+
 1. **Managed**: No Redis administration
 2. **Serverless**: Pay per request
 3. **Global**: Low latency worldwide
@@ -167,19 +181,18 @@ jobs:
 ```yaml
 # railway.json
 {
-  "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm run build"
-  },
-  "deploy": {
-    "startCommand": "node dist/apps/api-gateway/main.js",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  }
+  "build": { "builder": "NIXPACKS", "buildCommand": "npm run build" },
+  "deploy":
+    {
+      "startCommand": "node dist/apps/api-gateway/main.js",
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+    },
 }
 ```
 
 **Services:**
+
 1. `api-gateway` → Main API
 2. `ai-worker` → CV processor
 3. `notification` → WebSocket/Email
@@ -236,27 +249,27 @@ NODE_ENV=production
 
 ### MVP (Phase 1)
 
-| Service | Tier | Cost |
-|---------|------|------|
-| **Vercel** | Pro (if needed) | $20/mo (or Free) |
-| **Railway** | 3 services x $5 | $15/mo |
-| **Neon** | Free tier | $0 (< 3GB) |
-| **Upstash Kafka** | Free tier | $0 (< 10K msgs) |
-| **Upstash Redis** | Free tier | $0 (< 10K cmds) |
-| **AWS S3** | Pay-as-you-go | ~$5/mo (estimate) |
-| **Total** | | **~$40/mo** |
+| Service           | Tier            | Cost              |
+| ----------------- | --------------- | ----------------- |
+| **Vercel**        | Pro (if needed) | $20/mo (or Free)  |
+| **Railway**       | 3 services x $5 | $15/mo            |
+| **Neon**          | Free tier       | $0 (< 3GB)        |
+| **Upstash Kafka** | Free tier       | $0 (< 10K msgs)   |
+| **Upstash Redis** | Free tier       | $0 (< 10K cmds)   |
+| **AWS S3**        | Pay-as-you-go   | ~$5/mo (estimate) |
+| **Total**         |                 | **~$40/mo**       |
 
 ### Scale (Phase 2 - 1000 users)
 
-| Service | Tier | Cost |
-|---------|------|------|
-| **Vercel** | Pro | $20/mo |
-| **Railway** | 3 services x $20 | $60/mo |
-| **Neon** | Pro | $19/mo |
-| **Upstash Kafka** | Pay-as-you-go | $10/mo |
-| **Upstash Redis** | Pay-as-you-go | $10/mo |
-| **AWS S3** | | $20/mo |
-| **Total** | | **~$139/mo** |
+| Service           | Tier             | Cost         |
+| ----------------- | ---------------- | ------------ |
+| **Vercel**        | Pro              | $20/mo       |
+| **Railway**       | 3 services x $20 | $60/mo       |
+| **Neon**          | Pro              | $19/mo       |
+| **Upstash Kafka** | Pay-as-you-go    | $10/mo       |
+| **Upstash Redis** | Pay-as-you-go    | $10/mo       |
+| **AWS S3**        |                  | $20/mo       |
+| **Total**         |                  | **~$139/mo** |
 
 ---
 
@@ -265,6 +278,7 @@ NODE_ENV=production
 If we outgrow managed services:
 
 ### Phase 3: Self-Hosted
+
 ```
 Railway → AWS EC2 / DigitalOcean Droplets
 Upstash Kafka → Self-hosted Kafka (MSK or EC2)
@@ -272,6 +286,7 @@ Neon → AWS RDS PostgreSQL
 ```
 
 ### Phase 4: Kubernetes
+
 ```
 EC2 → AWS EKS or GKE
 Full Kubernetes deployment
@@ -282,6 +297,7 @@ Full Kubernetes deployment
 ## Consequences
 
 ### Positive:
+
 - ✅ **Fast MVP**: Deploy in hours, not days
 - ✅ **Low DevOps Overhead**: Managed services handle infrastructure
 - ✅ **Cost-Effective**: ~$40/mo for MVP
@@ -289,11 +305,13 @@ Full Kubernetes deployment
 - ✅ **Developer Experience**: Simple git push deployments
 
 ### Negative:
+
 - ❌ **Vendor Lock-in**: Tied to Vercel, Railway, Upstash
 - ❌ **Cost at Scale**: May get expensive beyond 10K users
 - ❌ **Limited Control**: Cannot customize infrastructure deeply
 
 ### Mitigation:
+
 - Use Docker for local dev (same environment)
 - Design for portability (can migrate to AWS later)
 - Monitor costs closely, optimize as we scale
@@ -355,6 +373,7 @@ jobs:
    - Query performance
 
 ### Additional Tools (Optional):
+
 - **Sentry** - Error tracking
 - **LogRocket** - Session replay
 - **Better Stack** (formerly Logtail) - Log aggregation
@@ -364,6 +383,7 @@ jobs:
 ## Rollback Strategy
 
 ### Frontend (Vercel):
+
 ```bash
 # Revert to previous deployment via Vercel dashboard
 # Or redeploy specific commit
@@ -371,12 +391,14 @@ vercel --prod --force
 ```
 
 ### Backend (Railway):
+
 ```bash
 # Railway keeps deployment history
 # Rollback via Railway dashboard (1-click)
 ```
 
 ### Database (Neon):
+
 ```bash
 # Point-in-time recovery available
 # Restore from automatic backups

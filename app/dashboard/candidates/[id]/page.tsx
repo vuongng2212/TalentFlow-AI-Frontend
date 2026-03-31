@@ -24,7 +24,12 @@ export default function CandidateDetailPage() {
   const router = useRouter();
   const applicationId = params.id as string;
 
-  const { data: application, isLoading, error, mutate } = useApplication(applicationId);
+  const {
+    data: application,
+    isLoading,
+    error,
+    mutate,
+  } = useApplication(applicationId);
 
   const candidate = useMemo(
     () => (application ? mapApplicationToViewModel(application) : null),

@@ -18,7 +18,8 @@ import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
 
   const {
     register,
@@ -64,7 +65,10 @@ export default function LoginPage() {
         }
         toast.error("Sign in failed", { description: err.message });
       } else {
-        const errorMessage = err instanceof Error ? err.message : "Please check your credentials and try again.";
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Please check your credentials and try again.";
         toast.error("Sign in failed", { description: errorMessage });
       }
     }
@@ -98,7 +102,9 @@ export default function LoginPage() {
                 autoComplete="email"
               />
               {fieldErrors.email && (
-                <p className="text-xs text-destructive">{fieldErrors.email.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.email.message}
+                </p>
               )}
             </div>
 
@@ -119,7 +125,9 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
               {fieldErrors.password && (
-                <p className="text-xs text-destructive">{fieldErrors.password.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.password.message}
+                </p>
               )}
             </div>
 
@@ -149,7 +157,10 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
+                  <Loader2
+                    className="h-4 w-4 animate-spin mr-2"
+                    aria-hidden="true"
+                  />
                   Signing in…
                 </>
               ) : (
@@ -173,7 +184,11 @@ export default function LoginPage() {
           {/* Social Login - Visual Only */}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" disabled>
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-5 h-5 mr-2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

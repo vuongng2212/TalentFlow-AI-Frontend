@@ -11,6 +11,7 @@
 We need to decide on repository structure for TalentFlow AI codebase.
 
 **Options considered:**
+
 1. **Monorepo (Backend + Frontend together)** - Single repo with all code
 2. **Separate Repos** - Backend repo + Frontend repo
 3. **Polyrepo** - Multiple repos (Backend, Frontend, Shared libs)
@@ -20,6 +21,7 @@ We need to decide on repository structure for TalentFlow AI codebase.
 ## Decision
 
 We will use **Separate Repositories**:
+
 - **`talentflow-backend`** - NestJS monorepo (this repo)
 - **`talentflow-frontend`** - Next.js 16 application
 
@@ -30,6 +32,7 @@ We will use **Separate Repositories**:
 ### Why Separate Repos?
 
 ✅ **Pros:**
+
 1. **Clear Boundaries**: Backend and Frontend are independent
 2. **Deployment Simplicity**:
    - Frontend → Vercel (auto-deploy from frontend repo)
@@ -40,6 +43,7 @@ We will use **Separate Repositories**:
 6. **Tooling**: Different tools for FE (Next.js) vs BE (NestJS)
 
 ❌ **Cons:**
+
 1. **Code Sharing Harder**: Cannot share types directly
 2. **Two PRs**: Changes affecting both need 2 PRs
 3. **Coordination**: Need to sync changes between repos
@@ -47,6 +51,7 @@ We will use **Separate Repositories**:
 ### Why NOT Monorepo (Backend + Frontend)?
 
 ❌ **Drawbacks:**
+
 1. **Deployment Complexity**:
    - Vercel and Railway would both need to build from same repo
    - Harder to configure build paths
@@ -55,6 +60,7 @@ We will use **Separate Repositories**:
 4. **Overkill for 2 people**: Monorepo tools (Nx, Turborepo) add complexity
 
 ✅ **When Monorepo Makes Sense:**
+
 - Big companies (Google, Facebook)
 - Need to share lots of code
 - Multiple teams working on different parts
@@ -65,11 +71,13 @@ We will use **Separate Repositories**:
 ## Handling Type Sharing
 
 ### Problem:
+
 Backend has DTOs in TypeScript. Frontend needs same types.
 
 ### Solutions:
 
 #### Option 1: OpenAPI/Swagger (Recommended)
+
 ```typescript
 // Backend generates OpenAPI spec
 // Frontend consumes it
@@ -86,6 +94,7 @@ npx openapi-typescript-codegen \
 **Result**: Auto-generated TypeScript types from backend API
 
 #### Option 2: NPM Package (For Phase 2)
+
 ```typescript
 // Create shared package
 // @talentflow/types
@@ -97,12 +106,13 @@ export interface CreateJobDto {
 }
 
 // Frontend: Import types
-import { CreateJobDto } from '@talentflow/types';
+import { CreateJobDto } from "@talentflow/types";
 ```
 
 **Complexity**: Need to publish to NPM or use private registry
 
 #### Option 3: Copy-Paste DTOs (MVP)
+
 ```typescript
 // Manually copy DTOs from backend to frontend
 // Good enough for MVP with few types
@@ -151,6 +161,7 @@ talentflow-frontend/
 ## Workflow: Making Changes
 
 ### Scenario 1: Backend-Only Change
+
 ```bash
 # Work in backend repo
 cd talentflow-backend
@@ -164,6 +175,7 @@ git push
 **Frontend**: No changes needed ✅
 
 ### Scenario 2: Frontend-Only Change
+
 ```bash
 # Work in frontend repo
 cd talentflow-frontend
@@ -177,6 +189,7 @@ git push
 **Backend**: No changes needed ✅
 
 ### Scenario 3: Full-Stack Change (API + UI)
+
 ```bash
 # 1. Backend first
 cd talentflow-backend
@@ -203,15 +216,17 @@ git push
 ## Version Synchronization
 
 ### Backend API Versioning
+
 ```
 /api/v1/jobs      # Version 1
 /api/v2/jobs      # Version 2 (breaking changes)
 ```
 
 ### Frontend Compatibility
+
 ```typescript
 // Frontend config
-const API_VERSION = 'v1';
+const API_VERSION = "v1";
 const API_BASE_URL = `https://api.talentflow.ai/api/${API_VERSION}`;
 ```
 
@@ -222,17 +237,20 @@ const API_BASE_URL = `https://api.talentflow.ai/api/${API_VERSION}`;
 ## Consequences
 
 ### Positive:
+
 - ✅ **Simple Deployment**: Each repo deploys independently
 - ✅ **Fast CI/CD**: Smaller repos = faster builds
 - ✅ **Clear Ownership**: Easy to understand what's where
 - ✅ **Vercel + Railway Native**: Optimal for our deployment stack
 
 ### Negative:
+
 - ❌ **Type Sharing**: Requires OpenAPI generation or manual sync
 - ❌ **Coordination Overhead**: Need to coordinate cross-repo changes
 - ❌ **Two Repos to Manage**: More repos to clone, update, etc.
 
 ### Mitigation:
+
 - Use OpenAPI to auto-generate types (eliminates manual sync)
 - Use GitHub Projects to track cross-repo work
 - Document cross-repo workflows clearly
@@ -245,12 +263,14 @@ const API_BASE_URL = `https://api.talentflow.ai/api/${API_VERSION}`;
 ### When to Move to Monorepo?
 
 Consider monorepo if:
+
 1. Team grows to 5+ developers
 2. Sharing code becomes a major pain point
 3. Need to ensure atomic changes across FE+BE
 4. Have resources to manage monorepo tooling (Nx/Turborepo)
 
 ### Migration Path:
+
 ```bash
 # Combine repos using git subtree
 git subtree add --prefix=backend backend-repo main

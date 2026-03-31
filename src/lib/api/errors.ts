@@ -95,7 +95,7 @@ export async function parseApiError(response: Response): Promise<ApiError> {
     const message =
       typeof body.message === "string"
         ? body.message
-        : (response.statusText || "An unexpected error occurred");
+        : response.statusText || "An unexpected error occurred";
 
     return new ApiError(
       body.status || response.status,
@@ -124,11 +124,7 @@ export function createNetworkError(cause?: unknown): ApiError {
 }
 
 export function createTimeoutError(): ApiError {
-  return new ApiError(
-    0,
-    "TIMEOUT",
-    "The request timed out. Please try again.",
-  );
+  return new ApiError(0, "TIMEOUT", "The request timed out. Please try again.");
 }
 
 /** User-friendly error message for display */
@@ -138,8 +134,7 @@ export function getErrorMessage(error: unknown): string {
       return "Connection lost. Please check your internet.";
     if (error.isTimeout) return "Request timed out. Please try again.";
     if (error.isUnauthorized) return "Session expired. Please log in again.";
-    if (error.isForbidden)
-      return "You don't have permission for this action.";
+    if (error.isForbidden) return "You don't have permission for this action.";
     if (error.isServerError)
       return "Something went wrong on our end. Please try again later.";
     return error.message;

@@ -28,6 +28,7 @@
 ### Why Monitoring Matters
 
 For a **Polyglot 3-Service Architecture**, comprehensive monitoring is critical:
+
 - **Early Detection:** Catch issues before users report them
 - **Performance Optimization:** Identify bottlenecks across different tech stacks
 - **SLA Compliance:** Ensure 99%+ uptime for production
@@ -83,19 +84,19 @@ Regardless of your tech stack (NestJS, Spring Boot, ASP.NET Core), follow these 
 
 ### Key Metrics to Track
 
-| Service | Metric | Target | Tool |
-|---------|--------|--------|------|
-| **API Gateway** | Response Time (p95) | < 200ms | Prometheus |
-| **API Gateway** | Throughput (RPS) | 100+ | Prometheus |
-| **API Gateway** | Error Rate | < 1% | Prometheus |
-| **CV Parser** | Processing Time | < 10s | Application Logs |
-| **CV Parser** | Queue Lag | < 5 msgs | RabbitMQ Management |
-| **Notification** | WebSocket Connections | Monitor | Prometheus |
-| **Database** | Query Time (p95) | < 50ms | Prisma/EF Metrics |
-| **Database** | Connection Pool | < 80% | Postgres Exporter |
-| **Redis** | Memory Usage | < 1GB | Redis Exporter |
-| **System** | CPU Usage | < 70% | Node Exporter |
-| **System** | Memory Usage | < 85% | Node Exporter |
+| Service          | Metric                | Target   | Tool                |
+| ---------------- | --------------------- | -------- | ------------------- |
+| **API Gateway**  | Response Time (p95)   | < 200ms  | Prometheus          |
+| **API Gateway**  | Throughput (RPS)      | 100+     | Prometheus          |
+| **API Gateway**  | Error Rate            | < 1%     | Prometheus          |
+| **CV Parser**    | Processing Time       | < 10s    | Application Logs    |
+| **CV Parser**    | Queue Lag             | < 5 msgs | RabbitMQ Management |
+| **Notification** | WebSocket Connections | Monitor  | Prometheus          |
+| **Database**     | Query Time (p95)      | < 50ms   | Prisma/EF Metrics   |
+| **Database**     | Connection Pool       | < 80%    | Postgres Exporter   |
+| **Redis**        | Memory Usage          | < 1GB    | Redis Exporter      |
+| **System**       | CPU Usage             | < 70%    | Node Exporter       |
+| **System**       | Memory Usage          | < 85%    | Node Exporter       |
 
 ---
 
@@ -111,7 +112,7 @@ Applications → Filebeat → Logstash → Elasticsearch ← Kibana
 
 ```yaml
 # docker-compose.monitoring.yml
-version: '3.8'
+version: "3.8"
 
 services:
   elasticsearch:
@@ -221,6 +222,7 @@ Time Field: @timestamp
 ```
 
 **Index Examples:**
+
 - `talentflow-api-gateway-2026.02.03`
 - `talentflow-cv-parser-2026.02.03`
 - `talentflow-notification-2026.02.03`
@@ -228,16 +230,19 @@ Time Field: @timestamp
 ### Kibana Dashboard Queries
 
 **1. Error Rate by Service (Last 24h):**
+
 ```
 level: "error" AND timestamp:[now-24h TO now]
 ```
 
 **2. Slow Requests (> 1s):**
+
 ```
 duration: >1000 AND service_name: "api-gateway"
 ```
 
 **3. Failed CV Parsing:**
+
 ```
 message: "CV parsing failed" AND service_name: "cv-parser"
 ```
@@ -249,39 +254,39 @@ message: "CV parsing failed" AND service_name: "cv-parser"
 ### Docker Compose (Add to monitoring stack)
 
 ```yaml
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - monitoring
+prometheus:
+  image: prom/prometheus:latest
+  container_name: prometheus
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus-data:/prometheus
+  command:
+    - "--config.file=/etc/prometheus/prometheus.yml"
+    - "--storage.tsdb.path=/prometheus"
+    - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+    - "--web.console.templates=/usr/share/prometheus/consoles"
+  networks:
+    - monitoring
 
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    ports:
-      - "9100:9100"
-    networks:
-      - monitoring
+node-exporter:
+  image: prom/node-exporter:latest
+  container_name: node-exporter
+  ports:
+    - "9100:9100"
+  networks:
+    - monitoring
 
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: redis-exporter
-    ports:
-      - "9121:9121"
-    environment:
-      - REDIS_ADDR=redis:6379
-    networks:
-      - monitoring
+redis-exporter:
+  image: oliver006/redis_exporter:latest
+  container_name: redis-exporter
+  ports:
+    - "9121:9121"
+  environment:
+    - REDIS_ADDR=redis:6379
+  networks:
+    - monitoring
 ```
 
 ### Prometheus Configuration File
@@ -305,49 +310,49 @@ rule_files:
 
 scrape_configs:
   # API Gateway (NestJS)
-  - job_name: 'api-gateway'
+  - job_name: "api-gateway"
     static_configs:
-      - targets: ['api-gateway:3000']
-    metrics_path: '/metrics'
+      - targets: ["api-gateway:3000"]
+    metrics_path: "/metrics"
 
   # CV Parser (Spring Boot)
-  - job_name: 'cv-parser-springboot'
+  - job_name: "cv-parser-springboot"
     static_configs:
-      - targets: ['cv-parser:8080']
-    metrics_path: '/actuator/prometheus'
+      - targets: ["cv-parser:8080"]
+    metrics_path: "/actuator/prometheus"
 
   # CV Parser (ASP.NET Core)
-  - job_name: 'cv-parser-dotnet'
+  - job_name: "cv-parser-dotnet"
     static_configs:
-      - targets: ['cv-parser:5000']
-    metrics_path: '/metrics'
+      - targets: ["cv-parser:5000"]
+    metrics_path: "/metrics"
 
   # Notification Service (NestJS)
-  - job_name: 'notification-nestjs'
+  - job_name: "notification-nestjs"
     static_configs:
-      - targets: ['notification:3001']
-    metrics_path: '/metrics'
+      - targets: ["notification:3001"]
+    metrics_path: "/metrics"
 
   # Notification Service (ASP.NET Core)
-  - job_name: 'notification-dotnet'
+  - job_name: "notification-dotnet"
     static_configs:
-      - targets: ['notification:5001']
-    metrics_path: '/metrics'
+      - targets: ["notification:5001"]
+    metrics_path: "/metrics"
 
   # Node Exporter (System metrics)
-  - job_name: 'node'
+  - job_name: "node"
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ["node-exporter:9100"]
 
   # Redis Exporter
-  - job_name: 'redis'
+  - job_name: "redis"
     static_configs:
-      - targets: ['redis-exporter:9121']
+      - targets: ["redis-exporter:9121"]
 
   # PostgreSQL Exporter
-  - job_name: 'postgres'
+  - job_name: "postgres"
     static_configs:
-      - targets: ['postgres-exporter:9187']
+      - targets: ["postgres-exporter:9187"]
 ```
 
 ### Framework-Specific Metrics Endpoints
@@ -358,12 +363,12 @@ scrape_configs:
 // Install: npm install @willsoto/nestjs-prometheus prom-client
 
 // app.module.ts
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { PrometheusModule } from "@willsoto/nestjs-prometheus";
 
 @Module({
   imports: [
     PrometheusModule.register({
-      path: '/metrics',
+      path: "/metrics",
       defaultMetrics: {
         enabled: true,
       },
@@ -373,21 +378,26 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 export class AppModule {}
 
 // metrics.service.ts
-import { Injectable } from '@nestjs/common';
-import { Counter, Histogram } from 'prom-client';
-import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Injectable } from "@nestjs/common";
+import { Counter, Histogram } from "prom-client";
+import { InjectMetric } from "@willsoto/nestjs-prometheus";
 
 @Injectable()
 export class MetricsService {
   constructor(
-    @InjectMetric('http_requests_total')
+    @InjectMetric("http_requests_total")
     private readonly httpRequestsTotal: Counter<string>,
 
-    @InjectMetric('http_request_duration_seconds')
+    @InjectMetric("http_request_duration_seconds")
     private readonly httpRequestDuration: Histogram<string>,
   ) {}
 
-  recordRequest(method: string, route: string, statusCode: number, duration: number) {
+  recordRequest(
+    method: string,
+    route: string,
+    statusCode: number,
+    duration: number,
+  ) {
     this.httpRequestsTotal.inc({ method, route, status: statusCode });
     this.httpRequestDuration.observe({ method, route }, duration / 1000);
   }
@@ -493,21 +503,21 @@ public class CvParserMetrics
 ### Docker Compose (Add to monitoring stack)
 
 ```yaml
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    depends_on:
-      - prometheus
-    networks:
-      - monitoring
+grafana:
+  image: grafana/grafana:latest
+  container_name: grafana
+  ports:
+    - "3000:3000"
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+    - GF_INSTALL_PLUGINS=grafana-piechart-panel
+  volumes:
+    - grafana-data:/var/lib/grafana
+    - ./grafana/provisioning:/etc/grafana/provisioning
+  depends_on:
+    - prometheus
+  networks:
+    - monitoring
 ```
 
 ### Pre-built Dashboard Templates
@@ -619,6 +629,7 @@ Time Range: Last 1h, Last 24h, Last 7d
 ### Structured Logging Format (JSON)
 
 **Standard Log Structure:**
+
 ```json
 {
   "timestamp": "2026-02-03T10:30:00Z",
@@ -646,28 +657,28 @@ Time Range: Last 1h, Last 24h, Last 7d
 // Install: npm install winston nest-winston
 
 // logger.service.ts
-import { createLogger, format, transports } from 'winston';
+import { createLogger, format, transports } from "winston";
 
 export const logger = createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   format: format.combine(
     format.timestamp(),
     format.errors({ stack: true }),
-    format.json()
+    format.json(),
   ),
-  defaultMeta: { service: 'api-gateway' },
+  defaultMeta: { service: "api-gateway" },
   transports: [
     new transports.Console(),
     new transports.Http({
-      host: 'logstash',
+      host: "logstash",
       port: 5000,
-      path: '/',
+      path: "/",
     }),
   ],
 });
 
 // Usage
-logger.error('Database connection failed', {
+logger.error("Database connection failed", {
   context: {
     userId: req.user.id,
     requestId: req.id,
@@ -742,22 +753,22 @@ Log.Error(exception, "CV parsing failed for {UserId} and {CvId}", userId, cvId);
 
 ### Log Levels
 
-| Level | When to Use | Example |
-|-------|-------------|---------|
-| **ERROR** | Requires immediate action | Database down, API call failed |
-| **WARN** | Recoverable issue | Retry succeeded, deprecated API used |
-| **INFO** | Normal operations | Request completed, job created |
-| **DEBUG** | Development info | Query execution time, cache hit/miss |
-| **TRACE** | Very detailed | Method entry/exit, variable values |
+| Level     | When to Use               | Example                              |
+| --------- | ------------------------- | ------------------------------------ |
+| **ERROR** | Requires immediate action | Database down, API call failed       |
+| **WARN**  | Recoverable issue         | Retry succeeded, deprecated API used |
+| **INFO**  | Normal operations         | Request completed, job created       |
+| **DEBUG** | Development info          | Query execution time, cache hit/miss |
+| **TRACE** | Very detailed             | Method entry/exit, variable values   |
 
 ### Log Retention Policy
 
-| Level | Retention | Storage |
-|-------|-----------|---------|
-| ERROR | 90 days | Elasticsearch hot tier |
-| WARN | 30 days | Elasticsearch warm tier |
-| INFO | 7 days | Elasticsearch cold tier |
-| DEBUG | 1 day (dev only) | Local only |
+| Level | Retention        | Storage                 |
+| ----- | ---------------- | ----------------------- |
+| ERROR | 90 days          | Elasticsearch hot tier  |
+| WARN  | 30 days          | Elasticsearch warm tier |
+| INFO  | 7 days           | Elasticsearch cold tier |
+| DEBUG | 1 day (dev only) | Local only              |
 
 ---
 
@@ -766,6 +777,7 @@ Log.Error(exception, "CV parsing failed for {UserId} and {CvId}", userId, cvId);
 ### OpenTelemetry Setup
 
 **Why OpenTelemetry:**
+
 - Framework-agnostic (works with NestJS, Spring Boot, ASP.NET)
 - Industry standard
 - Supports traces, metrics, and logs
@@ -779,22 +791,22 @@ Application → OpenTelemetry SDK → OTLP Exporter → Jaeger
 ### Docker Compose (Add Jaeger)
 
 ```yaml
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: jaeger
-    ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"  # Jaeger UI
-      - "14268:14268"
-      - "14250:14250"
-      - "9411:9411"
-    environment:
-      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
-    networks:
-      - monitoring
+jaeger:
+  image: jaegertracing/all-in-one:latest
+  container_name: jaeger
+  ports:
+    - "5775:5775/udp"
+    - "6831:6831/udp"
+    - "6832:6832/udp"
+    - "5778:5778"
+    - "16686:16686" # Jaeger UI
+    - "14268:14268"
+    - "14250:14250"
+    - "9411:9411"
+  environment:
+    - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+  networks:
+    - monitoring
 ```
 
 ### Framework-Specific Tracing
@@ -805,16 +817,16 @@ Application → OpenTelemetry SDK → OTLP Exporter → Jaeger
 // Install: npm install @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node
 
 // tracing.ts
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
 
 const sdk = new NodeSDK({
   traceExporter: new JaegerExporter({
-    endpoint: 'http://jaeger:14268/api/traces',
+    endpoint: "http://jaeger:14268/api/traces",
   }),
   instrumentations: [getNodeAutoInstrumentations()],
-  serviceName: 'api-gateway',
+  serviceName: "api-gateway",
 });
 
 sdk.start();
@@ -835,7 +847,7 @@ sdk.start();
 management:
   tracing:
     sampling:
-      probability: 1.0  # 100% sampling for dev
+      probability: 1.0 # 100% sampling for dev
   zipkin:
     tracing:
       endpoint: http://jaeger:9411/api/v2/spans
@@ -866,6 +878,7 @@ builder.Services.AddOpenTelemetry()
 ### Trace Attributes
 
 **Standard Span Attributes:**
+
 ```
 - http.method: GET, POST, PUT, DELETE
 - http.url: /api/v1/jobs
@@ -875,10 +888,11 @@ builder.Services.AddOpenTelemetry()
 ```
 
 **Custom Attributes:**
+
 ```typescript
-span.setAttribute('user.id', userId);
-span.setAttribute('cv.id', cvId);
-span.setAttribute('processing.duration', duration);
+span.setAttribute("user.id", userId);
+span.setAttribute("cv.id", cvId);
+span.setAttribute("processing.duration", duration);
 ```
 
 ---
@@ -889,13 +903,13 @@ span.setAttribute('processing.duration', duration);
 
 All services MUST expose health check endpoints:
 
-| Service | Endpoint | Port |
-|---------|----------|------|
-| API Gateway (NestJS) | GET /health | 3000 |
+| Service                 | Endpoint             | Port |
+| ----------------------- | -------------------- | ---- |
+| API Gateway (NestJS)    | GET /health          | 3000 |
 | CV Parser (Spring Boot) | GET /actuator/health | 8080 |
-| CV Parser (ASP.NET) | GET /health | 5000 |
-| Notification (NestJS) | GET /health | 3001 |
-| Notification (ASP.NET) | GET /health | 5001 |
+| CV Parser (ASP.NET)     | GET /health          | 5000 |
+| Notification (NestJS)   | GET /health          | 3001 |
+| Notification (ASP.NET)  | GET /health          | 5001 |
 
 ### Health Check Response Format
 
@@ -929,10 +943,15 @@ All services MUST expose health check endpoints:
 // Install: npm install @nestjs/terminus
 
 // health.controller.ts
-import { Controller, Get } from '@nestjs/common';
-import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator, DiskHealthIndicator } from '@nestjs/terminus';
+import { Controller, Get } from "@nestjs/common";
+import {
+  HealthCheck,
+  HealthCheckService,
+  TypeOrmHealthIndicator,
+  DiskHealthIndicator,
+} from "@nestjs/terminus";
 
-@Controller('health')
+@Controller("health")
 export class HealthController {
   constructor(
     private health: HealthCheckService,
@@ -944,8 +963,9 @@ export class HealthController {
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.db.pingCheck('database'),
-      () => this.disk.checkStorage('storage', { path: '/', thresholdPercent: 0.9 }),
+      () => this.db.pingCheck("database"),
+      () =>
+        this.disk.checkStorage("storage", { path: "/", thresholdPercent: 0.9 }),
     ]);
   }
 }
@@ -1135,45 +1155,45 @@ groups:
 # alertmanager/alertmanager.yml
 global:
   resolve_timeout: 5m
-  slack_api_url: 'https://hooks.slack.com/services/YOUR/WEBHOOK/URL'
+  slack_api_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 
 route:
-  group_by: ['alertname', 'cluster', 'service']
+  group_by: ["alertname", "cluster", "service"]
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 12h
-  receiver: 'team-alerts'
+  receiver: "team-alerts"
   routes:
     - match:
         severity: critical
-      receiver: 'pagerduty'
+      receiver: "pagerduty"
     - match:
         severity: warning
-      receiver: 'slack'
+      receiver: "slack"
 
 receivers:
-  - name: 'team-alerts'
+  - name: "team-alerts"
     slack_configs:
-      - channel: '#alerts'
-        title: '{{ .GroupLabels.alertname }}'
-        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+      - channel: "#alerts"
+        title: "{{ .GroupLabels.alertname }}"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
 
-  - name: 'pagerduty'
+  - name: "pagerduty"
     pagerduty_configs:
-      - service_key: 'YOUR_PAGERDUTY_KEY'
+      - service_key: "YOUR_PAGERDUTY_KEY"
 
-  - name: 'slack'
+  - name: "slack"
     slack_configs:
-      - channel: '#monitoring'
+      - channel: "#monitoring"
 ```
 
 ### Notification Channels
 
-| Severity | Channel | Response Time |
-|----------|---------|---------------|
-| **Critical** | PagerDuty + Slack | Immediate (24/7) |
-| **Warning** | Slack | 1 hour (business hours) |
-| **Info** | Email | Best effort |
+| Severity     | Channel           | Response Time           |
+| ------------ | ----------------- | ----------------------- |
+| **Critical** | PagerDuty + Slack | Immediate (24/7)        |
+| **Warning**  | Slack             | 1 hour (business hours) |
+| **Info**     | Email             | Best effort             |
 
 ---
 
@@ -1188,11 +1208,13 @@ receivers:
 ### 1. Detection
 
 **Automated:**
+
 - Prometheus alerts trigger
 - Error rate spikes in Grafana
 - Health check failures
 
 **Manual:**
+
 - User reports
 - Customer support tickets
 - Social media mentions
@@ -1201,14 +1223,15 @@ receivers:
 
 **Severity Classification:**
 
-| Severity | Impact | Examples | Response Time |
-|----------|--------|----------|---------------|
-| **P0 - Critical** | System down | All services unreachable | 15 minutes |
-| **P1 - High** | Major feature broken | CV upload fails | 1 hour |
-| **P2 - Medium** | Degraded performance | Slow response times | 4 hours |
-| **P3 - Low** | Minor issue | Cosmetic bug | Next sprint |
+| Severity          | Impact               | Examples                 | Response Time |
+| ----------------- | -------------------- | ------------------------ | ------------- |
+| **P0 - Critical** | System down          | All services unreachable | 15 minutes    |
+| **P1 - High**     | Major feature broken | CV upload fails          | 1 hour        |
+| **P2 - Medium**   | Degraded performance | Slow response times      | 4 hours       |
+| **P3 - Low**      | Minor issue          | Cosmetic bug             | Next sprint   |
 
 **Incident Commander:**
+
 - Declare incident severity
 - Coordinate response team
 - Update status page
@@ -1216,6 +1239,7 @@ receivers:
 ### 3. Mitigation (MTTR - Mean Time To Repair)
 
 **Immediate Actions:**
+
 ```bash
 # 1. Check service status
 curl https://api.talentflow.ai/health
@@ -1231,6 +1255,7 @@ kubectl rollout undo deployment/api-gateway
 ```
 
 **Communication:**
+
 - Post to #incidents Slack channel
 - Update status page (status.talentflow.ai)
 - Notify affected customers
@@ -1238,12 +1263,14 @@ kubectl rollout undo deployment/api-gateway
 ### 4. Resolution
 
 **Root Cause Analysis:**
+
 - Review logs in Kibana
 - Analyze traces in Jaeger
 - Check metrics in Grafana
 - Inspect database queries
 
 **Fix Implementation:**
+
 - Deploy hotfix
 - Verify fix in staging
 - Deploy to production
@@ -1262,6 +1289,7 @@ kubectl rollout undo deployment/api-gateway
 **Impact:** CV upload unavailable for 500 users
 
 ## Timeline
+
 - 10:00 AM: Alert triggered (high error rate)
 - 10:02 AM: Incident declared (P1)
 - 10:05 AM: Root cause identified (S3 timeout)
@@ -1269,17 +1297,21 @@ kubectl rollout undo deployment/api-gateway
 - 10:15 AM: Incident resolved
 
 ## Root Cause
+
 Cloudflare R2 experienced network latency spike, causing upload timeouts.
 
 ## Resolution
+
 Increased upload timeout from 5s → 30s, added retry logic (3 attempts).
 
 ## Action Items
+
 - [ ] Add R2 latency monitoring (Owner: DevOps, Due: Week 1)
 - [ ] Implement circuit breaker for S3 (Owner: Backend, Due: Week 2)
 - [ ] Add timeout alerts (Owner: SRE, Due: Week 1)
 
 ## Lessons Learned
+
 - Need better external service monitoring
 - Timeout values were too aggressive
 - Missing fallback mechanism
@@ -1291,15 +1323,15 @@ Increased upload timeout from 5s → 30s, added retry logic (3 attempts).
 
 ### Cloud Cost Tracking
 
-| Service | Monthly Cost | Usage Metric |
-|---------|--------------|--------------|
-| Railway (Backend) | $40 | CPU hours |
-| Neon (Database) | $19 | Storage + Compute |
-| Cloudflare R2 | $0.015/GB | Storage |
-| Upstash Redis | $10 | Data transfer |
-| Vercel (Frontend) | $20 | Bandwidth |
-| Sentry | $26 | Events |
-| **Total** | **~$115/month** | |
+| Service           | Monthly Cost    | Usage Metric      |
+| ----------------- | --------------- | ----------------- |
+| Railway (Backend) | $40             | CPU hours         |
+| Neon (Database)   | $19             | Storage + Compute |
+| Cloudflare R2     | $0.015/GB       | Storage           |
+| Upstash Redis     | $10             | Data transfer     |
+| Vercel (Frontend) | $20             | Bandwidth         |
+| Sentry            | $26             | Events            |
+| **Total**         | **~$115/month** |                   |
 
 ### Cost Optimization Strategies
 

@@ -11,6 +11,7 @@
 We need object storage for CV files (PDF/DOCX) uploaded by candidates.
 
 ### Requirements:
+
 - **Storage volume:** ~1000 CVs/day × 2MB average = 2GB/day = 60GB/month
 - **Access pattern:** Write once, read few times (download for parsing)
 - **Retention:** 2+ years (GDPR compliance)
@@ -18,6 +19,7 @@ We need object storage for CV files (PDF/DOCX) uploaded by candidates.
 - **Cost:** Predictable, budget-friendly for startup MVP
 
 ### Options Considered:
+
 1. **AWS S3** - Industry standard
 2. **Cloudflare R2** - S3-compatible, zero egress fees
 3. **MinIO** - Self-hosted S3-compatible
@@ -31,6 +33,7 @@ We need object storage for CV files (PDF/DOCX) uploaded by candidates.
 We will use **Cloudflare R2** for production and **MinIO** for local development.
 
 **Why R2:**
+
 - S3-compatible API (easy migration)
 - **Zero egress fees** (huge cost savings)
 - Global CDN (low latency)
@@ -43,19 +46,20 @@ We will use **Cloudflare R2** for production and **MinIO** for local development
 
 ### Cost Comparison (60GB storage, 10TB egress/month)
 
-| Provider | Storage Cost | Egress Cost | Total/Month | Annual |
-|----------|-------------|-------------|-------------|--------|
-| **AWS S3** | $1.38 | **$921.60** | **$922.98** | **$11,075** |
-| **Cloudflare R2** | $0.90 | **$0.00** ✨ | **$0.90** | **$10.80** |
-| **Azure Blob** | $1.20 | $614.40 | $615.60 | $7,387 |
-| **DO Spaces** | $5.00 | $10.00 | $15.00 | $180 |
-| **MinIO** | $20/mo VPS | $0 | $20.00 | $240 |
+| Provider          | Storage Cost | Egress Cost  | Total/Month | Annual      |
+| ----------------- | ------------ | ------------ | ----------- | ----------- |
+| **AWS S3**        | $1.38        | **$921.60**  | **$922.98** | **$11,075** |
+| **Cloudflare R2** | $0.90        | **$0.00** ✨ | **$0.90**   | **$10.80**  |
+| **Azure Blob**    | $1.20        | $614.40      | $615.60     | $7,387      |
+| **DO Spaces**     | $5.00        | $10.00       | $15.00      | $180        |
+| **MinIO**         | $20/mo VPS   | $0           | $20.00      | $240        |
 
 **Winner:** 🏆 **Cloudflare R2** - **1,025x cheaper than S3!**
 
 ### Why This Matters:
 
 **With AWS S3:**
+
 ```
 Year 1: $11,075
 Year 2: $22,150
@@ -64,6 +68,7 @@ Total 3 years: $33,225
 ```
 
 **With Cloudflare R2:**
+
 ```
 Year 1: $10.80
 Year 2: $21.60
@@ -76,6 +81,7 @@ Total 3 years: $64.80
 ### Egress Math:
 
 **CV downloads:**
+
 ```
 1000 CVs/day × 2MB = 2GB/day
 CV Parser downloads each file once
@@ -96,18 +102,18 @@ But with R2: $0 egress! 🎉
 
 ### Feature Parity
 
-| Feature | AWS S3 | Cloudflare R2 | Notes |
-|---------|--------|---------------|-------|
-| **S3 API Compatible** | ✅ Native | ✅ Compatible | Same SDK works! |
-| **Signed URLs** | ✅ | ✅ | Temporary access |
-| **Bucket Policies** | ✅ | ✅ | IAM-style permissions |
-| **Lifecycle Rules** | ✅ | ✅ | Auto-delete old files |
-| **CORS** | ✅ | ✅ | Frontend uploads |
-| **Multipart Upload** | ✅ | ✅ | Large files |
-| **Versioning** | ✅ | ✅ | Keep file history |
-| **Encryption at Rest** | ✅ | ✅ | AES-256 |
-| **CDN Integration** | CloudFront | **Built-in** | R2 auto-CDN |
-| **Global Edge** | Regions | **Global** | Lower latency |
+| Feature                | AWS S3     | Cloudflare R2 | Notes                 |
+| ---------------------- | ---------- | ------------- | --------------------- |
+| **S3 API Compatible**  | ✅ Native  | ✅ Compatible | Same SDK works!       |
+| **Signed URLs**        | ✅         | ✅            | Temporary access      |
+| **Bucket Policies**    | ✅         | ✅            | IAM-style permissions |
+| **Lifecycle Rules**    | ✅         | ✅            | Auto-delete old files |
+| **CORS**               | ✅         | ✅            | Frontend uploads      |
+| **Multipart Upload**   | ✅         | ✅            | Large files           |
+| **Versioning**         | ✅         | ✅            | Keep file history     |
+| **Encryption at Rest** | ✅         | ✅            | AES-256               |
+| **CDN Integration**    | CloudFront | **Built-in**  | R2 auto-CDN           |
+| **Global Edge**        | Regions    | **Global**    | Lower latency         |
 
 **Verdict:** R2 has feature parity + extras
 
@@ -162,10 +168,14 @@ But with R2: $0 egress! 🎉
 
 ```typescript
 // src/storage/r2-storage.service.ts
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class R2StorageService {
@@ -173,14 +183,14 @@ export class R2StorageService {
   private bucketName: string;
 
   constructor(private config: ConfigService) {
-    this.bucketName = this.config.get('R2_BUCKET_NAME');
+    this.bucketName = this.config.get("R2_BUCKET_NAME");
 
     this.client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${this.config.get('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
+      region: "auto",
+      endpoint: `https://${this.config.get("R2_ACCOUNT_ID")}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: this.config.get('R2_ACCESS_KEY_ID'),
-        secretAccessKey: this.config.get('R2_SECRET_ACCESS_KEY'),
+        accessKeyId: this.config.get("R2_ACCESS_KEY_ID"),
+        secretAccessKey: this.config.get("R2_SECRET_ACCESS_KEY"),
       },
     });
   }
@@ -247,7 +257,7 @@ export class R2StorageService {
    * Get public URL (for public buckets)
    */
   private getPublicUrl(key: string): string {
-    const bucketId = this.config.get('R2_PUBLIC_BUCKET_ID');
+    const bucketId = this.config.get("R2_PUBLIC_BUCKET_ID");
     return `https://pub-${bucketId}.r2.dev/${key}`;
   }
 
@@ -269,7 +279,7 @@ export class R2StorageService {
 
 ```typescript
 // src/upload/upload.controller.ts
-@Controller('candidates')
+@Controller("candidates")
 export class UploadController {
   constructor(
     private storage: R2StorageService,
@@ -277,36 +287,34 @@ export class UploadController {
     private prisma: PrismaService,
   ) {}
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('file', {
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-    fileFilter: (req, file, cb) => {
-      const allowed = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ];
+  @Post("upload")
+  @UseInterceptors(
+    FileInterceptor("file", {
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+      fileFilter: (req, file, cb) => {
+        const allowed = [
+          "application/pdf",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
 
-      if (allowed.includes(file.mimetype)) {
-        cb(null, true);
-      } else {
-        cb(new BadRequestException('Invalid file type'), false);
-      }
-    },
-  }))
+        if (allowed.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException("Invalid file type"), false);
+        }
+      },
+    }),
+  )
   async uploadCV(
     @UploadedFile() file: Express.Multer.File,
     @Body() dto: UploadCvDto,
   ) {
     // Generate unique key
-    const ext = file.originalname.split('.').pop();
+    const ext = file.originalname.split(".").pop();
     const key = `cvs/${uuidv4()}.${ext}`;
 
     // Upload to R2
-    const fileUrl = await this.storage.upload(
-      file.buffer,
-      key,
-      file.mimetype,
-    );
+    const fileUrl = await this.storage.upload(file.buffer, key, file.mimetype);
 
     // Save to database
     const candidate = await this.prisma.candidate.create({
@@ -317,15 +325,15 @@ export class UploadController {
         applications: {
           create: {
             jobId: dto.jobId,
-            stage: 'APPLIED',
-            status: 'PENDING',
+            stage: "APPLIED",
+            status: "PENDING",
           },
         },
       },
     });
 
     // Emit to queue for processing
-    await this.queue.add('cv.uploaded', {
+    await this.queue.add("cv.uploaded", {
       candidateId: candidate.id,
       fileUrl,
       jobId: dto.jobId,
@@ -333,8 +341,8 @@ export class UploadController {
 
     return {
       candidateId: candidate.id,
-      status: 'processing',
-      message: 'CV uploaded successfully. Processing...',
+      status: "processing",
+      message: "CV uploaded successfully. Processing...",
     };
   }
 }
@@ -357,6 +365,7 @@ R2_CUSTOM_DOMAIN=cdn.talentflow.ai
 ### Bucket Configuration
 
 **Create R2 Bucket:**
+
 ```bash
 # Via Cloudflare Dashboard:
 1. Go to R2 → Create Bucket
@@ -372,6 +381,7 @@ R2_CUSTOM_DOMAIN=cdn.talentflow.ai
 ```
 
 **Bucket Policy (Private):**
+
 ```json
 {
   "Version": "2012-10-17",
@@ -387,6 +397,7 @@ R2_CUSTOM_DOMAIN=cdn.talentflow.ai
 ```
 
 **CORS Configuration:**
+
 ```json
 {
   "CORSRules": [
@@ -401,6 +412,7 @@ R2_CUSTOM_DOMAIN=cdn.talentflow.ai
 ```
 
 **Lifecycle Rule (Optional):**
+
 ```json
 {
   "Rules": [
@@ -423,14 +435,16 @@ R2_CUSTOM_DOMAIN=cdn.talentflow.ai
 ## Local Development: MinIO
 
 **Why MinIO for local dev:**
+
 - S3-compatible (same code works!)
 - Runs in Docker
 - Web UI for debugging
 - Free & open-source
 
 **docker-compose.yml:**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   minio:
@@ -440,8 +454,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"  # API
-      - "9001:9001"  # Web UI
+      - "9000:9000" # API
+      - "9001:9001" # Web UI
     volumes:
       - minio_data:/data
 
@@ -450,6 +464,7 @@ volumes:
 ```
 
 **Local Environment Variables:**
+
 ```env
 # Local: MinIO
 R2_ACCOUNT_ID=us-east-1  # MinIO doesn't need account ID
@@ -463,6 +478,7 @@ R2_ENDPOINT=http://localhost:9000  # Override endpoint for local
 ```
 
 **Code works for both:**
+
 ```typescript
 // Automatically uses correct endpoint
 const endpoint = process.env.R2_ENDPOINT ||
@@ -500,13 +516,13 @@ const signedUrl = await storage.getSignedUrl('cvs/abc.pdf', 3600);
 ```typescript
 // Already implemented in FileInterceptor
 fileFilter: (req, file, cb) => {
-  const allowed = ['application/pdf', 'application/vnd...'];
+  const allowed = ["application/pdf", "application/vnd..."];
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new BadRequestException('Invalid file type'), false);
+    cb(new BadRequestException("Invalid file type"), false);
   }
-}
+};
 ```
 
 ### 3. Virus Scanning (Phase 2)
@@ -518,7 +534,7 @@ fileFilter: (req, file, cb) => {
 // Phase 2: Virus scanning before upload
 const scanResult = await virusScanner.scan(file.buffer);
 if (scanResult.infected) {
-  throw new BadRequestException('Virus detected');
+  throw new BadRequestException("Virus detected");
 }
 ```
 
@@ -533,25 +549,25 @@ if (scanResult.infected) {
 
 ### Year 1 (MVP → Growth)
 
-| Month | CVs/day | Storage | Egress | R2 Cost | S3 Cost | Savings |
-|-------|---------|---------|--------|---------|---------|---------|
-| 1-3 | 100 | 6GB | 10GB | $0.09 | $93 | $92.91 |
-| 4-6 | 500 | 30GB | 50GB | $0.45 | $465 | $464.55 |
-| 7-9 | 1000 | 60GB | 100GB | $0.90 | $930 | $929.10 |
-| 10-12 | 2000 | 120GB | 200GB | $1.80 | $1,860 | $1,858.20 |
+| Month | CVs/day | Storage | Egress | R2 Cost | S3 Cost | Savings   |
+| ----- | ------- | ------- | ------ | ------- | ------- | --------- |
+| 1-3   | 100     | 6GB     | 10GB   | $0.09   | $93     | $92.91    |
+| 4-6   | 500     | 30GB    | 50GB   | $0.45   | $465    | $464.55   |
+| 7-9   | 1000    | 60GB    | 100GB  | $0.90   | $930    | $929.10   |
+| 10-12 | 2000    | 120GB   | 200GB  | $1.80   | $1,860  | $1,858.20 |
 
 **Year 1 Total:** $3.24 (R2) vs $3,348 (S3) = **$3,344.76 saved!**
 
 ### Year 3 (Scale)
 
-| Metric | Value |
-|--------|-------|
-| CVs/day | 10,000 |
-| Storage | 2TB |
-| Egress | 10TB/month |
-| **R2 Cost** | **$30/month** = **$360/year** |
+| Metric      | Value                                |
+| ----------- | ------------------------------------ |
+| CVs/day     | 10,000                               |
+| Storage     | 2TB                                  |
+| Egress      | 10TB/month                           |
+| **R2 Cost** | **$30/month** = **$360/year**        |
 | **S3 Cost** | **$9,240/month** = **$110,880/year** |
-| **Savings** | **$110,520/year** |
+| **Savings** | **$110,520/year**                    |
 
 **That's hiring a full-time engineer!** 👨‍💻
 
@@ -579,6 +595,7 @@ R2_SECRET_ACCESS_KEY=prod-secret
 ### From S3 → R2 (if needed)
 
 **Cloudflare provides migration tools:**
+
 ```bash
 # Using rclone
 rclone sync s3:old-bucket r2:new-bucket
@@ -641,21 +658,25 @@ export class R2StorageService {
 ### Positive:
 
 ✅ **Massive Cost Savings:**
+
 - $33,160 saved over 3 years vs S3
 - Free egress = predictable costs
 - Can reinvest in features
 
 ✅ **S3 API Compatible:**
+
 - Same code, same SDK
 - Easy migration from/to S3
 - Familiar developer experience
 
 ✅ **Global CDN Built-in:**
+
 - No need for CloudFront
 - Lower latency worldwide
 - Automatic edge caching
 
 ✅ **Simple Pricing:**
+
 - $0.015/GB storage
 - $0 egress
 - No surprise bills
@@ -663,16 +684,19 @@ export class R2StorageService {
 ### Negative:
 
 ⚠️ **Newer Service:**
+
 - R2 launched 2022 (vs S3 2006)
 - Less battle-tested
 - Smaller community
 
 ⚠️ **Fewer Integrations:**
+
 - S3 has more 3rd-party tools
 - Some tools may not support R2
 - Workaround: S3 API compatibility
 
 ⚠️ **Cloudflare Dependency:**
+
 - Vendor lock-in (but S3-compatible)
 - If Cloudflare down, storage down
 - Mitigation: Use S3 as backup
@@ -680,6 +704,7 @@ export class R2StorageService {
 ### Mitigation:
 
 **Abstraction Layer:**
+
 ```typescript
 interface StorageService {
   upload(file: Buffer, key: string): Promise<string>;
@@ -691,6 +716,7 @@ interface StorageService {
 ```
 
 **Backup Strategy:**
+
 ```bash
 # Daily backup to S3 (just in case)
 rclone sync r2:talentflow-cvs s3:talentflow-backup
@@ -703,6 +729,7 @@ rclone sync r2:talentflow-cvs s3:talentflow-backup
 ### R2 will be considered successful if:
 
 **MVP (Week 8):**
+
 - [ ] Upload latency < 2s (p95)
 - [ ] Download latency < 1s (p95)
 - [ ] 99.9% upload success rate
@@ -710,6 +737,7 @@ rclone sync r2:talentflow-cvs s3:talentflow-backup
 - [ ] Cost < $5/month
 
 **Post-MVP (Month 3-6):**
+
 - [ ] Handle 1000+ uploads/day
 - [ ] 99.95% uptime
 - [ ] Cost < $50/month

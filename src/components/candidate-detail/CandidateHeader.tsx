@@ -2,7 +2,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { Mail, Phone, Calendar, MessageSquare, Video, Download } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Calendar,
+  MessageSquare,
+  Video,
+  Download,
+} from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 import { CandidateViewModel } from "@/types";
 
@@ -25,7 +32,9 @@ export function CandidateHeader({ candidate }: CandidateHeaderProps) {
           <div className="flex-1">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h1 className="text-3xl font-bold mb-1">{candidate.fullName}</h1>
+                <h1 className="text-3xl font-bold mb-1">
+                  {candidate.fullName}
+                </h1>
                 <p className="text-lg text-muted-foreground">
                   {candidate.appliedPosition ?? ""}
                 </p>
@@ -63,7 +72,10 @@ export function CandidateHeader({ candidate }: CandidateHeaderProps) {
               {candidate.appliedDate ? (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>Applied {formatRelativeTime(new Date(candidate.appliedDate))}</span>
+                  <span>
+                    Applied{" "}
+                    {formatRelativeTime(new Date(candidate.appliedDate))}
+                  </span>
                 </div>
               ) : null}
             </div>

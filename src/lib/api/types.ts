@@ -97,7 +97,15 @@ export interface SignupRequest {
  * Backend auth user shape (returned inside login/signup/me responses).
  * Matches backend `{ id, email, fullName, role, createdAt }`.
  */
-import { UserRole, EmploymentType, JobStatus, ApplicationStage, ApplicationStatus, InterviewType, InterviewStatus } from "@/types";
+import {
+  UserRole,
+  EmploymentType,
+  JobStatus,
+  ApplicationStage,
+  ApplicationStatus,
+  InterviewType,
+  InterviewStatus,
+} from "@/types";
 
 export interface AuthUser {
   id: string;

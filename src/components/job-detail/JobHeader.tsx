@@ -24,7 +24,9 @@ interface JobHeaderProps {
 export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Link copied!", { description: "Job link copied to clipboard." });
+    toast.success("Link copied!", {
+      description: "Job link copied to clipboard.",
+    });
   };
 
   const handleEdit = () => {
@@ -45,8 +47,8 @@ export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
               job.status === "OPEN"
                 ? "success"
                 : job.status === "DRAFT"
-                ? "secondary"
-                : "outline"
+                  ? "secondary"
+                  : "outline"
             }
           >
             {job.status}
@@ -63,10 +65,10 @@ export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
               {job.salaryMin && job.salaryMax
                 ? `$${job.salaryMin.toLocaleString()} – $${job.salaryMax.toLocaleString()}`
                 : job.salaryMin
-                ? `From $${job.salaryMin.toLocaleString()}`
-                : job.salaryMax
-                ? `Up to $${job.salaryMax.toLocaleString()}`
-                : "Not specified"}
+                  ? `From $${job.salaryMin.toLocaleString()}`
+                  : job.salaryMax
+                    ? `Up to $${job.salaryMax.toLocaleString()}`
+                    : "Not specified"}
             </span>
           </div>
           <div className="flex items-center gap-2">

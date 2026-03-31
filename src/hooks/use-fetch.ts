@@ -13,7 +13,11 @@
 import useSWR, { type SWRConfiguration } from "swr";
 import useSWRMutation from "swr/mutation";
 import { api } from "@/lib/api/client";
-import type { ApiResponse, PaginatedResponse, ListParams } from "@/lib/api/types";
+import type {
+  ApiResponse,
+  PaginatedResponse,
+  ListParams,
+} from "@/lib/api/types";
 import { getErrorMessage, type ApiError } from "@/lib/api/errors";
 
 /** Default SWR config optimized for performance */
@@ -46,11 +50,10 @@ export function useFetch<T>(
   path: string | null,
   config?: SWRConfiguration<ApiResponse<T>, ApiError>,
 ) {
-  const { data, error, isLoading, isValidating, mutate } = useSWR<ApiResponse<T>, ApiError>(
-    path,
-    fetcher<ApiResponse<T>>,
-    { ...defaultConfig, ...config },
-  );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    ApiResponse<T>,
+    ApiError
+  >(path, fetcher<ApiResponse<T>>, { ...defaultConfig, ...config });
 
   return {
     data: data?.data,
@@ -83,13 +86,16 @@ export function useFetchList<T>(
       }
     }
   }
-  const cacheKey = path ? (searchParams?.toString() ? `${path}?${searchParams.toString()}` : path) : null;
+  const cacheKey = path
+    ? searchParams?.toString()
+      ? `${path}?${searchParams.toString()}`
+      : path
+    : null;
 
-  const { data, error, isLoading, isValidating, mutate } = useSWR<PaginatedResponse<T>, ApiError>(
-    cacheKey,
-    fetcher<PaginatedResponse<T>>,
-    { ...defaultConfig, ...config },
-  );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    PaginatedResponse<T>,
+    ApiError
+  >(cacheKey, fetcher<PaginatedResponse<T>>, { ...defaultConfig, ...config });
 
   return {
     data: data?.data?.data || [],
@@ -120,21 +126,18 @@ export function useMutation<TResponse, TBody = unknown>(
     ApiError,
     string,
     TBody
-  >(
-    path,
-    async (url: string, { arg }: { arg: TBody }) => {
-      switch (method) {
-        case "POST":
-          return api.post<ApiResponse<TResponse>>(url, arg);
-        case "PUT":
-          return api.put<ApiResponse<TResponse>>(url, arg);
-        case "PATCH":
-          return api.patch<ApiResponse<TResponse>>(url, arg);
-        case "DELETE":
-          return api.delete<ApiResponse<TResponse>>(url);
-      }
-    },
-  );
+  >(path, async (url: string, { arg }: { arg: TBody }) => {
+    switch (method) {
+      case "POST":
+        return api.post<ApiResponse<TResponse>>(url, arg);
+      case "PUT":
+        return api.put<ApiResponse<TResponse>>(url, arg);
+      case "PATCH":
+        return api.patch<ApiResponse<TResponse>>(url, arg);
+      case "DELETE":
+        return api.delete<ApiResponse<TResponse>>(url);
+    }
+  });
 
   return {
     trigger,

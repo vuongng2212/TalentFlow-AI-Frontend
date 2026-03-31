@@ -38,14 +38,20 @@ export function useApplication(id: string | null) {
  * Hook for submitting a new application
  */
 export function useCreateApplication() {
-  return useMutation<Application, CreateApplicationRequest>(endpoints.applications.create, "POST");
+  return useMutation<Application, CreateApplicationRequest>(
+    endpoints.applications.create,
+    "POST",
+  );
 }
 
 /**
  * Hook for updating an application (e.g., stage or status)
  */
 export function useUpdateApplication(id: string) {
-  return useMutation<Application, UpdateApplicationRequest>(endpoints.applications.detail(id), "PUT");
+  return useMutation<Application, UpdateApplicationRequest>(
+    endpoints.applications.detail(id),
+    "PUT",
+  );
 }
 
 /**
@@ -86,7 +92,10 @@ export function useUploadCV() {
     { file: File; jobId: string; coverLetter?: string }
   >(
     endpoints.applications.upload,
-    async (url: string, { arg }: { arg: { file: File; jobId: string; coverLetter?: string } }) => {
+    async (
+      url: string,
+      { arg }: { arg: { file: File; jobId: string; coverLetter?: string } },
+    ) => {
       const formData = new FormData();
       formData.append("file", arg.file);
       formData.append("jobId", arg.jobId);

@@ -10,7 +10,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
-import type { CandidateViewModel, ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import type {
+  CandidateViewModel,
+  ApplicationStage,
+  KanbanColumn as KanbanColumnType,
+} from "@/types";
 import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -34,7 +38,12 @@ interface KanbanColumnProps {
 
 const stageConfig: Record<
   ApplicationStage,
-  { icon: React.ElementType; bgClass: string; accentColor: string; description: string }
+  {
+    icon: React.ElementType;
+    bgClass: string;
+    accentColor: string;
+    description: string;
+  }
 > = {
   APPLIED: {
     icon: Inbox,
@@ -76,9 +85,9 @@ const stageConfig: Record<
 
 // Sortable Candidate Item - memoized for performance
 const SortableCandidateItem = React.memo(function SortableCandidateItem({
-  candidate
+  candidate,
 }: {
-  candidate: CandidateViewModel
+  candidate: CandidateViewModel;
 }) {
   const {
     attributes,
@@ -100,10 +109,7 @@ const SortableCandidateItem = React.memo(function SortableCandidateItem({
       style={style}
       {...attributes}
       {...listeners}
-      className={cn(
-        "mb-2 last:mb-0",
-        isDragging && "opacity-50"
-      )}
+      className={cn("mb-2 last:mb-0", isDragging && "opacity-50")}
     >
       <CandidateCard candidate={candidate} isDragging={isDragging} />
     </div>
@@ -112,7 +118,7 @@ const SortableCandidateItem = React.memo(function SortableCandidateItem({
 
 export const KanbanColumn = React.memo(function KanbanColumn({
   column,
-  className
+  className,
 }: KanbanColumnProps) {
   const config = stageConfig[column.id];
   const Icon = config.icon;
@@ -129,7 +135,7 @@ export const KanbanColumn = React.memo(function KanbanColumn({
           "border border-border/50 shadow-soft-sm",
           "transition-all duration-200",
           isOver && "ring-2 ring-primary/30 border-primary/40",
-          className
+          className,
         )}
       >
         {/* Sticky Header */}
@@ -138,13 +144,15 @@ export const KanbanColumn = React.memo(function KanbanColumn({
             "sticky top-0 z-10 px-4 py-3",
             "border-b border-border/40",
             "backdrop-blur-sm",
-            config.bgClass
+            config.bgClass,
           )}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {/* Accent dot */}
-              <div className={cn("h-2.5 w-2.5 rounded-full", config.accentColor)} />
+              <div
+                className={cn("h-2.5 w-2.5 rounded-full", config.accentColor)}
+              />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1.5 cursor-help">
@@ -168,50 +176,53 @@ export const KanbanColumn = React.memo(function KanbanColumn({
           </div>
         </div>
 
-      {/* Scrollable Body */}
-      <div
-        ref={setNodeRef}
-        className={cn(
-          "flex-1 overflow-y-auto p-3",
-          "min-h-[200px]",
-          config.bgClass
-        )}
-      >
-        <SortableContext
-          items={column.candidates.map((c) => c.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          {column.candidates.length === 0 ? (
-            <div
-              className={cn(
-                "flex h-32 flex-col items-center justify-center rounded-lg",
-                "border-2 border-dashed border-border/60",
-                "text-center text-sm text-muted-foreground/70",
-                isOver && "border-primary/40 bg-primary/5"
-              )}
-            >
-              <Icon className="h-6 w-6 mb-2 opacity-40" />
-              <p className="text-xs">Drop candidates here</p>
-            </div>
-          ) : (
-            column.candidates.map((candidate) => (
-              <SortableCandidateItem key={candidate.id} candidate={candidate} />
-            ))
+        {/* Scrollable Body */}
+        <div
+          ref={setNodeRef}
+          className={cn(
+            "flex-1 overflow-y-auto p-3",
+            "min-h-[200px]",
+            config.bgClass,
           )}
-        </SortableContext>
-      </div>
+        >
+          <SortableContext
+            items={column.candidates.map((c) => c.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {column.candidates.length === 0 ? (
+              <div
+                className={cn(
+                  "flex h-32 flex-col items-center justify-center rounded-lg",
+                  "border-2 border-dashed border-border/60",
+                  "text-center text-sm text-muted-foreground/70",
+                  isOver && "border-primary/40 bg-primary/5",
+                )}
+              >
+                <Icon className="h-6 w-6 mb-2 opacity-40" />
+                <p className="text-xs">Drop candidates here</p>
+              </div>
+            ) : (
+              column.candidates.map((candidate) => (
+                <SortableCandidateItem
+                  key={candidate.id}
+                  candidate={candidate}
+                />
+              ))
+            )}
+          </SortableContext>
+        </div>
 
-      {/* Footer Stats (optional subtle info) */}
-      <div
-        className={cn(
-          "px-4 py-2 border-t border-border/30",
-          "text-[10px] text-muted-foreground/60",
-          config.bgClass
-        )}
-      >
-        {column.count} candidate{column.count !== 1 ? "s" : ""}
+        {/* Footer Stats (optional subtle info) */}
+        <div
+          className={cn(
+            "px-4 py-2 border-t border-border/30",
+            "text-[10px] text-muted-foreground/60",
+            config.bgClass,
+          )}
+        >
+          {column.count} candidate{column.count !== 1 ? "s" : ""}
+        </div>
       </div>
-    </div>
     </TooltipProvider>
   );
 });

@@ -11,6 +11,7 @@
 We need an ORM (Object-Relational Mapping) tool to interact with PostgreSQL database.
 
 **Options considered:**
+
 1. **Prisma** - Modern TypeScript-first ORM
 2. **TypeORM** - Popular NestJS ORM
 3. **Sequelize** - Traditional Node.js ORM
@@ -29,6 +30,7 @@ We will use **Prisma** as our ORM.
 ### Why Prisma?
 
 ✅ **Pros:**
+
 1. **Type Safety**: Auto-generated TypeScript types from schema
 2. **Developer Experience**: Excellent autocomplete and IntelliSense
 3. **Schema-First**: Define schema in `schema.prisma`, not decorators
@@ -39,6 +41,7 @@ We will use **Prisma** as our ORM.
 8. **Documentation**: Excellent docs and examples
 
 ❌ **Cons:**
+
 1. **Less NestJS Integration**: Requires manual setup (not first-class like TypeORM)
 2. **Learning Curve**: Different paradigm from traditional ORMs
 3. **Raw SQL Limitations**: Complex queries may need raw SQL
@@ -163,6 +166,7 @@ export class JobService {
 ### Benefits in Practice:
 
 1. **Autocomplete Everywhere**:
+
    ```typescript
    // ✅ TypeScript knows all fields
    const job = await prisma.job.findUnique({
@@ -175,14 +179,16 @@ export class JobService {
    ```
 
 2. **Compile-Time Errors**:
+
    ```typescript
    // ❌ TypeScript error: "titlee" doesn't exist
    const job = await prisma.job.create({
-     data: { titlee: 'Developer' }
+     data: { titlee: "Developer" },
    });
    ```
 
 3. **Type-Safe Relations**:
+
    ```typescript
    // ✅ Knows that job.createdBy exists
    const job = await prisma.job.findUnique({
@@ -226,23 +232,23 @@ npx prisma migrate deploy
 
 ```typescript
 // prisma/seed.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
   // Create admin user
   await prisma.user.upsert({
-    where: { email: 'admin@talentflow.ai' },
+    where: { email: "admin@talentflow.ai" },
     update: {},
     create: {
-      email: 'admin@talentflow.ai',
-      password: 'hashed_password',
-      role: 'ADMIN',
+      email: "admin@talentflow.ai",
+      password: "hashed_password",
+      role: "ADMIN",
     },
   });
 
-  console.log('✅ Seed completed');
+  console.log("✅ Seed completed");
 }
 
 main()
@@ -260,17 +266,20 @@ main()
 ## Consequences
 
 ### Positive:
+
 - ✅ **Excellent DX**: Best-in-class developer experience
 - ✅ **Type Safety**: Catch errors at compile time
 - ✅ **Productivity**: Less boilerplate, faster development
 - ✅ **Debugging**: Prisma Studio makes DB inspection easy
 
 ### Negative:
+
 - ❌ **NestJS Integration**: Manual setup required (no `@nestjs/prisma` official package)
 - ❌ **Complex Queries**: May need raw SQL for very complex queries
 - ❌ **Learning Curve**: Different from traditional ORMs
 
 ### Mitigation:
+
 - Create `PrismaService` wrapper for NestJS integration
 - Use `prisma.$queryRaw` for complex queries when needed
 - Document common Prisma patterns for team
@@ -283,14 +292,14 @@ main()
 
 ```typescript
 // libs/database/src/prisma.service.ts
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy {
-
+  implements OnModuleInit, OnModuleDestroy
+{
   async onModuleInit() {
     await this.$connect();
   }
@@ -305,8 +314,8 @@ export class PrismaService
 
 ```typescript
 // libs/database/src/prisma.module.ts
-import { Module, Global } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
+import { Module, Global } from "@nestjs/common";
+import { PrismaService } from "./prisma.service";
 
 @Global()
 @Module({
@@ -359,7 +368,7 @@ const module: TestingModule = await Test.createTestingModule({
 const jobs = await prisma.job.findMany();
 for (const job of jobs) {
   const user = await prisma.user.findUnique({
-    where: { id: job.createdById }
+    where: { id: job.createdById },
   });
 }
 
@@ -377,7 +386,7 @@ const jobs = await prisma.job.findMany({
 const jobs = await prisma.job.findMany({
   take: 20,
   skip: (page - 1) * 20,
-  orderBy: { createdAt: 'desc' },
+  orderBy: { createdAt: "desc" },
 });
 ```
 

@@ -13,9 +13,15 @@ import {
   type ScoreFilter,
   type ViewMode,
 } from "@/components/candidates";
-import { useApplications, updateApplicationStage } from "@/services/applications";
+import {
+  useApplications,
+  updateApplicationStage,
+} from "@/services/applications";
 import { groupApplicationsByStage } from "@/lib/mappers";
-import type { ApplicationStage, KanbanColumn as KanbanColumnType } from "@/types";
+import type {
+  ApplicationStage,
+  KanbanColumn as KanbanColumnType,
+} from "@/types";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
@@ -26,7 +32,7 @@ const KanbanBoard = dynamic(
   {
     ssr: false,
     loading: () => <KanbanSkeleton />,
-  }
+  },
 );
 
 // Preload function for hover optimization
@@ -36,13 +42,22 @@ const preloadKanbanBoard = () => {
 
 export default function CandidatesPage() {
   const [page, setPage] = useState(1);
-  const { data: applications = [], pagination, isLoading, isValidating, error, mutate } = useApplications({ page, limit: 50 });
+  const {
+    data: applications = [],
+    pagination,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  } = useApplications({ page, limit: 50 });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [scoreFilter, setScoreFilter] = useState<ScoreFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("kanban");
-  const [optimisticColumns, setOptimisticColumns] = useState<KanbanColumnType[] | null>(null);
+  const [optimisticColumns, setOptimisticColumns] = useState<
+    KanbanColumnType[] | null
+  >(null);
 
   // Build columns from API data
   const apiColumns = useMemo(
@@ -58,8 +73,12 @@ export default function CandidatesPage() {
       const filtered = col.candidates.filter((candidate) => {
         const matchesSearch =
           searchQuery === "" ||
-          candidate.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (candidate.appliedPosition ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+          candidate.fullName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (candidate.appliedPosition ?? "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
           candidate.email?.toLowerCase().includes(searchQuery.toLowerCase());
 
         let matchesScore = true;
@@ -76,9 +95,12 @@ export default function CandidatesPage() {
     });
   }, [columns, searchQuery, scoreFilter]);
 
-  // Calculate stats
+  // Calculate stats - compute directly without memoization for primitive values
   const totalCandidates = columns.reduce((acc, col) => acc + col.count, 0);
-  const filteredTotal = filteredColumns.reduce((acc, col) => acc + col.count, 0);
+  const filteredTotal = filteredColumns.reduce(
+    (acc, col) => acc + col.count,
+    0,
+  );
   const inProgressCount = columns
     .filter((col) => !["HIRED", "REJECTED"].includes(col.id))
     .reduce((acc, col) => acc + col.count, 0);
@@ -221,7 +243,7 @@ export default function CandidatesPage() {
         <PipelineOverview columns={columns} totalCandidates={totalCandidates} />
 
         {/* Pagination */}
-        {pagination && pagination.totalPages > 1 && (
+        {pagination && pagination.totalPages > 1 ? (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {applications.length} of {pagination.total} applications
@@ -233,7 +255,7 @@ export default function CandidatesPage() {
               disabled={isValidating}
             />
           </div>
-        )}
+        ) : null}
       </div>
     </TooltipProvider>
   );

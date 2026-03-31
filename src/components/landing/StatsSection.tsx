@@ -13,7 +13,7 @@ const stats = [
 export function StatsSection() {
   const { ref, isVisible, getStaggerStyle } = useStaggeredAnimation(
     stats.length,
-    { staggerDelay: 100 }
+    { staggerDelay: 100 },
   );
 
   return (
@@ -25,7 +25,7 @@ export function StatsSection() {
               key={stat.label}
               className={cn(
                 "text-center scroll-stagger-item",
-                isVisible && "is-visible"
+                isVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >

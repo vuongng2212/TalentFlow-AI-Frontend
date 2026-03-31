@@ -41,7 +41,10 @@ export function CandidateSearchBar({
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search Input */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               type="search"
               placeholder="Search candidates by name, position, or email…"
@@ -74,7 +77,10 @@ export function CandidateSearchBar({
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Filters
               {hasActiveFilters ? (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 h-5 px-1.5 text-[10px]"
+                >
                   Active
                 </Badge>
               ) : null}
@@ -82,7 +88,9 @@ export function CandidateSearchBar({
 
             {/* Score Quick Filters */}
             <div className="flex items-center gap-1 border-l pl-2 ml-1">
-              <span className="text-xs text-muted-foreground mr-1">AI Score:</span>
+              <span className="text-xs text-muted-foreground mr-1">
+                AI Score:
+              </span>
               {(["all", "high", "medium", "low"] as const).map((filter) => (
                 <Button
                   key={filter}
@@ -94,10 +102,10 @@ export function CandidateSearchBar({
                   {filter === "all"
                     ? "All"
                     : filter === "high"
-                    ? "85%+"
-                    : filter === "medium"
-                    ? "70-84%"
-                    : "<70%"}
+                      ? "85%+"
+                      : filter === "medium"
+                        ? "70-84%"
+                        : "<70%"}
                 </Button>
               ))}
             </div>
@@ -121,12 +129,15 @@ export function CandidateSearchBar({
         {hasActiveFilters ? (
           <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              Showing <strong className="text-foreground">{filteredTotal}</strong> of{" "}
-              <strong className="text-foreground">{totalCandidates}</strong> candidates
+              Showing{" "}
+              <strong className="text-foreground">{filteredTotal}</strong> of{" "}
+              <strong className="text-foreground">{totalCandidates}</strong>{" "}
+              candidates
             </span>
             {searchQuery ? (
               <span>
-                Search: &quot;<strong className="text-foreground">{searchQuery}</strong>&quot;
+                Search: &quot;
+                <strong className="text-foreground">{searchQuery}</strong>&quot;
               </span>
             ) : null}
           </div>

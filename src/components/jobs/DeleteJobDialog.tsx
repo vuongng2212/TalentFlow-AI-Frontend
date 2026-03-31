@@ -58,8 +58,11 @@ export function DeleteJobDialog({
           </div>
           <DialogDescription className="pt-2">
             Are you sure you want to delete{" "}
-            <span className="font-semibold text-foreground">&quot;{jobTitle}&quot;</span>?
-            This action cannot be undone. All applications for this job will also be removed.
+            <span className="font-semibold text-foreground">
+              &quot;{jobTitle}&quot;
+            </span>
+            ? This action cannot be undone. All applications for this job will
+            also be removed.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">

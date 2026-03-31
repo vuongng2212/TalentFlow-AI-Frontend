@@ -11,6 +11,7 @@
 After initial planning with NestJS Monorepo approach, we discovered critical issues that don't align with our team structure and technical requirements:
 
 ### Team Reality:
+
 - **3 developers** with diverse tech stack expertise:
   - NestJS/TypeScript
   - Spring Boot/Java
@@ -19,6 +20,7 @@ After initial planning with NestJS Monorepo approach, we discovered critical iss
 - **Timeline: 8 weeks MVP**
 
 ### Technical Concerns:
+
 1. **PDF/DOCX parsing with Tesseract OCR** - CPU-intensive, blocks Node.js event loop
 2. **Team skill diversity underutilized** - NestJS-only doesn't leverage Java/C# expertise
 3. **Scalability requirements** - Need to handle >1000 CVs/day without blocking API
@@ -70,6 +72,7 @@ talentflow-backend/  (Single Git Repository)
 ### Service Breakdown:
 
 #### **Service 1: API Gateway (NestJS)** 🟢
+
 - **Location:** `/api-gateway`
 - **Responsibilities:**
   - REST API for frontend
@@ -80,6 +83,7 @@ talentflow-backend/  (Single Git Repository)
   - Prisma ORM (database access)
 
 #### **Service 2: CV Parser (Spring Boot)** 🟡
+
 - **Location:** `/cv-parser`
 - **Responsibilities:**
   - RabbitMQ Consumer (listen `cv.uploaded` queue)
@@ -92,6 +96,7 @@ talentflow-backend/  (Single Git Repository)
   - Emit `cv.parsed` event
 
 #### **Service 3: Notification (ASP.NET Core)** 🔵
+
 - **Location:** `/notification-service`
 - **Responsibilities:**
   - RabbitMQ Consumer (listen `cv.parsed`, `cv.failed` queues)
@@ -143,6 +148,7 @@ talentflow-backend/  (Single Git Repository)
 ### Why NOT NestJS Monolith (Single Service)?
 
 **Problems:**
+
 - ❌ Tesseract.js would block Node.js event loop (5-30s per CV)
 - ❌ Cannot leverage Spring Boot/Java expertise for CPU-intensive tasks
 - ❌ Hard to scale independently (API and CV processing together)
@@ -150,12 +156,14 @@ talentflow-backend/  (Single Git Repository)
 ### Why NOT Full Microservices (5+ services)?
 
 **Too much for MVP:**
+
 - Team size: 3 developers
 - Timeline: 8 weeks
 - Features: Auth, Jobs, CV Upload
 - Scale: < 10k CVs/day
 
 **3 services is the sweet spot:**
+
 - Simple enough to maintain
 - Complex enough to solve performance problems
 - Scalable for future growth
@@ -167,17 +175,20 @@ talentflow-backend/  (Single Git Repository)
 ### Communication Strategy
 
 **1. Synchronous (REST API):**
+
 ```
 Frontend ↔ API Gateway: REST API (HTTPS)
 ```
 
 **2. Asynchronous (RabbitMQ - AMQP Queue):**
+
 ```
 API Gateway → CV Parser: RabbitMQ queue "cv.uploaded"
 CV Parser → Notification: RabbitMQ queue "cv.parsed" / "cv.failed"
 ```
 
 **3. Real-time (WebSocket):**
+
 ```
 Notification Service → Frontend: WebSocket events
 ```
@@ -215,21 +226,25 @@ Notification Service → Frontend: WebSocket events
 ### Shared Infrastructure
 
 **Database:**
+
 - **PostgreSQL** (Prisma ORM) - shared by all services with logical separation:
   - API Gateway owns: `users`, `jobs`, `applications`
   - CV Parser owns: `candidates` (resume_text, ai_score)
   - Notification Service: stateless (reads from Redis cache)
 
 **Queue:**
+
 - **RabbitMQ** (AMQP-based) - async communication between services
 - See [ADR-009](./ADR-009-rabbitmq-polyglot.md) for queue design (polyglot)
 - See [ADR-007](./ADR-007-bullmq-over-kafka.md) for Node.js-only alternative
 
 **Storage:**
+
 - **Cloudflare R2** (S3-compatible) - CV file storage
 - See [ADR-008](./ADR-008-cloudflare-r2.md) for storage strategy
 
 **Cache:**
+
 - **Redis** - shared cache + BullMQ queue storage
 
 ---
@@ -239,26 +254,31 @@ Notification Service → Frontend: WebSocket events
 This architecture follows SOLID principles:
 
 ### ✅ Single Responsibility Principle (SRP)
+
 - API Gateway: Handle HTTP requests
 - CV Parser: Parse files
 - Notification: Send notifications
 - Each service has ONE reason to change
 
 ### ✅ Open/Closed Principle (OCP)
+
 - Can add new queue consumers without modifying existing services
 - Can extend notification channels (SMS, Slack) without changing core logic
 
 ### ✅ Liskov Substitution Principle (LSP)
+
 - Storage abstraction: Can swap R2 ↔ MinIO
 - Queue abstraction: Can swap BullMQ ↔ Kafka
 - Parser abstraction: Can swap PDFBox ↔ Tika
 
 ### ✅ Interface Segregation Principle (ISP)
+
 - Services only expose minimal interfaces
 - Queue payloads contain only necessary data
 - No God objects
 
 ### ✅ Dependency Inversion Principle (DIP)
+
 - Services depend on abstractions (Queue, Storage)
 - Not coupled to concrete implementations
 - Can swap infrastructure without code changes
@@ -270,26 +290,31 @@ This architecture follows SOLID principles:
 ### Positive:
 
 ✅ **Team Productivity:**
+
 - Each developer works in comfort zone
 - Parallel development (no blocking)
 - Faster MVP delivery
 
 ✅ **Performance:**
+
 - PDF parsing doesn't block API Gateway
 - Can scale services independently
 - Horizontal scaling for CV Parser
 
 ✅ **Maintainability:**
+
 - Clear service boundaries
 - Easy to understand codebase
 - Can rewrite services individually
 
 ✅ **Testability:**
+
 - Test services in isolation
 - Mock external dependencies easily
 - Fast test execution
 
 ✅ **Deployment:**
+
 - Deploy services independently
 - Rollback individual services
 - Zero-downtime deployments
@@ -297,15 +322,18 @@ This architecture follows SOLID principles:
 ### Negative:
 
 ⚠️ **Operational Complexity:**
+
 - Need to monitor 3 services
 - Distributed logging/tracing
 - Service discovery (mitigated by direct URLs for MVP)
 
 ⚠️ **Network Overhead:**
+
 - Queue latency: ~10-50ms
 - Database connections: 3 services vs 1
 
 ⚠️ **Data Consistency:**
+
 - Eventual consistency between services
 - Need idempotent operations
 - Handle duplicate messages
@@ -313,16 +341,19 @@ This architecture follows SOLID principles:
 ### Mitigation Strategies:
 
 **Complexity:**
+
 - Use Docker Compose for local dev
 - Single Railway/Render account for all services
 - Structured logging with correlation IDs
 
 **Network:**
+
 - RabbitMQ is AMQP-based (reliable messaging)
 - Connection pooling for database
 - Acceptable latency for MVP scale
 
 **Consistency:**
+
 - RabbitMQ retry logic with DLQ
 - Idempotent message handlers
 - Database transactions where needed
@@ -373,11 +404,13 @@ talentflow-backend/
 ### Future Evolution:
 
 **When to add more services:**
+
 - **Analytics Service:** When need advanced reporting (Phase 2+)
 - **AI Matching Service:** When add semantic search with Vector DB (Phase 2)
 - **Interview Service:** When add scheduling features (Phase 2+)
 
 **When traffic scales (> 10k CVs/day):**
+
 - Consider Kafka for event streaming
 - Add service mesh (Istio/Linkerd)
 - Implement distributed tracing (OpenTelemetry)
@@ -389,11 +422,13 @@ talentflow-backend/
 ### Option A: Standard NestJS App (Single Service)
 
 **Pros:**
+
 - Simplest to deploy
 - No network overhead
 - Single codebase
 
 **Cons:**
+
 - ❌ PDF parsing blocks event loop
 - ❌ Cannot leverage Java/C# expertise
 - ❌ Hard to scale independently
@@ -406,11 +441,13 @@ talentflow-backend/
 ### Option B: NestJS Monorepo (Original ADR-001)
 
 **Pros:**
+
 - Code sharing easy (Nx/Turborepo)
 - TypeScript end-to-end
 - Unified build system
 
 **Cons:**
+
 - ❌ Doesn't leverage polyglot team skills
 - ❌ Single language (TypeScript only)
 - ❌ PDF parsing still in Node.js (event loop blocking)
@@ -423,6 +460,7 @@ talentflow-backend/
 ### Option C: Polyglot 3-Service Architecture (Selected) ✅
 
 **Pros:**
+
 - ✅ Leverages all tech stacks
 - ✅ Solves CPU-blocking issue with Spring Boot
 - ✅ Independent scaling
@@ -430,6 +468,7 @@ talentflow-backend/
 - ✅ Clear service boundaries
 
 **Cons:**
+
 - Polyglot operational complexity
 - Network latency via queue
 - Distributed debugging
@@ -441,10 +480,12 @@ talentflow-backend/
 ### Option D: Full Polyglot Microservices (5+ services)
 
 **Pros:**
+
 - Maximum flexibility
 - Best tool for each job
 
 **Cons:**
+
 - ❌ Too complex for MVP
 - ❌ Deployment overhead
 - ❌ Context switching
@@ -457,6 +498,7 @@ talentflow-backend/
 ## Success Metrics
 
 ### Technical:
+
 - [ ] API response time < 200ms (p95)
 - [ ] CV processing time < 10s (average)
 - [ ] Queue lag < 5 messages (p95)
@@ -464,12 +506,14 @@ talentflow-backend/
 - [ ] Zero data loss
 
 ### Team:
+
 - [ ] Productive development in familiar tech stacks
 - [ ] Clear service ownership
 - [ ] Deploy independently 3+ times per week
 - [ ] Sprint velocity maintained
 
 ### Business:
+
 - [ ] MVP launched in 8 weeks
 - [ ] Frontend integration seamless
 - [ ] < 5 critical bugs in production

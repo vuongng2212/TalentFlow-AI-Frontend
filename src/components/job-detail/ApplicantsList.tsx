@@ -53,7 +53,9 @@ export function ApplicantsList({ applicants }: ApplicantsListProps) {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{candidate.fullName}</p>
                   <p className="text-sm text-muted-foreground">
-                    {candidate.appliedDate ? `Applied ${formatDate(candidate.appliedDate)}` : ""}
+                    {candidate.appliedDate
+                      ? `Applied ${formatDate(candidate.appliedDate)}`
+                      : ""}
                   </p>
                 </div>
                 {candidate.aiScore ? (

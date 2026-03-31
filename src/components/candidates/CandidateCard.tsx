@@ -34,7 +34,7 @@ export const CandidateCard = React.memo(function CandidateCard({
         "hover:border-primary/30 hover:shadow-soft-md",
         isDragging && "rotate-2 scale-105 shadow-soft-lg border-primary/40",
         isOverlay && "rotate-3 opacity-90 shadow-soft-xl",
-        className
+        className,
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -45,7 +45,7 @@ export const CandidateCard = React.memo(function CandidateCard({
           "absolute left-0 top-0 bottom-0 w-1 rounded-l-lg",
           "bg-linear-to-b from-primary/60 to-primary/30",
           "opacity-0 transition-opacity duration-200",
-          (isHovered || isDragging) && "opacity-100"
+          (isHovered || isDragging) && "opacity-100",
         )}
       />
 
@@ -57,7 +57,7 @@ export const CandidateCard = React.memo(function CandidateCard({
             className={cn(
               "h-4 w-4 mt-1 text-muted-foreground/40 shrink-0",
               "transition-opacity duration-200 cursor-grab active:cursor-grabbing",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
           />
 
@@ -79,7 +79,7 @@ export const CandidateCard = React.memo(function CandidateCard({
                   onClick={(e) => e.stopPropagation()}
                   className={cn(
                     "font-semibold text-sm leading-tight block truncate",
-                    "hover:text-primary transition-colors duration-150"
+                    "hover:text-primary transition-colors duration-150",
                   )}
                 >
                   {candidate.fullName}
@@ -98,7 +98,11 @@ export const CandidateCard = React.memo(function CandidateCard({
             {/* Applied time - subtle */}
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
               <Clock className="h-2.5 w-2.5" />
-              <span>{candidate.appliedDate ? formatRelativeTime(new Date(candidate.appliedDate)) : ""}</span>
+              <span>
+                {candidate.appliedDate
+                  ? formatRelativeTime(new Date(candidate.appliedDate))
+                  : ""}
+              </span>
             </div>
           </div>
         </div>
@@ -130,7 +134,7 @@ export const CandidateCard = React.memo(function CandidateCard({
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isHovered ? "max-h-16 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0"
+            isHovered ? "max-h-16 opacity-100 mt-3" : "max-h-0 opacity-0 mt-0",
           )}
         >
           <div className="flex items-center gap-3 pl-7 text-[10px] text-muted-foreground">
@@ -141,7 +145,9 @@ export const CandidateCard = React.memo(function CandidateCard({
                 className="flex items-center gap-1 hover:text-primary transition-colors"
               >
                 <Mail className="h-2.5 w-2.5" />
-                <span className="truncate max-w-[100px]">{candidate.email}</span>
+                <span className="truncate max-w-[100px]">
+                  {candidate.email}
+                </span>
               </a>
             )}
             {candidate.phone && (
@@ -168,7 +174,7 @@ export const CandidateCard = React.memo(function CandidateCard({
           "bg-primary/10 text-primary",
           "opacity-0 transition-all duration-200",
           isHovered && "opacity-100 translate-x-0",
-          !isHovered && "translate-x-2"
+          !isHovered && "translate-x-2",
         )}
       >
         <ChevronRight className="h-3.5 w-3.5" />
@@ -179,9 +185,9 @@ export const CandidateCard = React.memo(function CandidateCard({
 
 // Simplified overlay version for drag preview - memoized to prevent re-renders
 export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
-  candidate
+  candidate,
 }: {
-  candidate: CandidateViewModel
+  candidate: CandidateViewModel;
 }) {
   return (
     <Card className="w-72 p-3 shadow-soft-xl rotate-3 opacity-95 border-primary/30">
@@ -193,13 +199,19 @@ export const CandidateCardOverlay = React.memo(function CandidateCardOverlay({
           size="md"
         />
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm truncate">{candidate.fullName}</h4>
+          <h4 className="font-semibold text-sm truncate">
+            {candidate.fullName}
+          </h4>
           <p className="text-xs text-muted-foreground truncate">
             {candidate.appliedPosition ?? ""}
           </p>
         </div>
         {candidate.aiScore ? (
-          <AIScoreBadge score={candidate.aiScore} size="sm" showBreakdown={false} />
+          <AIScoreBadge
+            score={candidate.aiScore}
+            size="sm"
+            showBreakdown={false}
+          />
         ) : null}
       </div>
     </Card>

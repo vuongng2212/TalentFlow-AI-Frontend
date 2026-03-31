@@ -25,7 +25,9 @@ export function CandidateStatsCards({
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold tabular-nums">{totalCandidates}</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {totalCandidates}
+              </p>
               <p className="text-xs text-muted-foreground">Total Candidates</p>
             </div>
           </div>
@@ -39,7 +41,9 @@ export function CandidateStatsCards({
               <Clock className="h-5 w-5 text-amber-500" />
             </div>
             <div>
-              <p className="text-2xl font-bold tabular-nums">{inProgressCount}</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {inProgressCount}
+              </p>
               <p className="text-xs text-muted-foreground">In Progress</p>
             </div>
           </div>

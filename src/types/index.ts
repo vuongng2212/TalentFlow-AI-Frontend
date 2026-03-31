@@ -56,11 +56,13 @@ export interface Job {
   createdAt: string | Date;
   updatedAt: string | Date;
   /** Included by backend via Prisma `include` on list queries */
-  createdBy?: {
-    id: string;
-    email: string;
-    fullName: string;
-  } | User;
+  createdBy?:
+    | {
+        id: string;
+        email: string;
+        fullName: string;
+      }
+    | User;
   /** Included by backend via Prisma `_count` on list queries */
   _count?: {
     applications: number;

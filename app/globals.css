@@ -81,32 +81,24 @@
   /* ------------------------------------------ */
   /* SOFT SHADOWS - Layered, refined depth      */
   /* ------------------------------------------ */
-  --shadow-soft-xs:
-    0 1px 2px hsl(222 47% 11% / 0.04);
+  --shadow-soft-xs: 0 1px 2px hsl(222 47% 11% / 0.04);
   --shadow-soft-sm:
-    0 1px 3px hsl(222 47% 11% / 0.05),
-    0 6px 16px hsl(226 35% 22% / 0.04);
+    0 1px 3px hsl(222 47% 11% / 0.05), 0 6px 16px hsl(226 35% 22% / 0.04);
   --shadow-soft-md:
-    0 2px 4px hsl(222 47% 11% / 0.04),
-    0 8px 24px hsl(226 35% 22% / 0.06),
+    0 2px 4px hsl(222 47% 11% / 0.04), 0 8px 24px hsl(226 35% 22% / 0.06),
     0 16px 48px hsl(226 35% 22% / 0.04);
   --shadow-soft-lg:
-    0 4px 8px hsl(222 47% 11% / 0.04),
-    0 12px 32px hsl(226 35% 22% / 0.08),
+    0 4px 8px hsl(222 47% 11% / 0.04), 0 12px 32px hsl(226 35% 22% / 0.08),
     0 24px 64px hsl(226 35% 22% / 0.06);
   --shadow-soft-xl:
-    0 8px 16px hsl(222 47% 11% / 0.06),
-    0 20px 48px hsl(226 35% 22% / 0.1),
+    0 8px 16px hsl(222 47% 11% / 0.06), 0 20px 48px hsl(226 35% 22% / 0.1),
     0 40px 96px hsl(226 35% 22% / 0.08);
 
   /* Colored shadows for interactive elements */
   --shadow-primary:
-    0 4px 14px hsl(226 71% 55% / 0.25),
-    0 8px 24px hsl(226 71% 55% / 0.15);
-  --shadow-success:
-    0 4px 14px hsl(162 72% 38% / 0.25);
-  --shadow-destructive:
-    0 4px 14px hsl(347 77% 52% / 0.25);
+    0 4px 14px hsl(226 71% 55% / 0.25), 0 8px 24px hsl(226 71% 55% / 0.15);
+  --shadow-success: 0 4px 14px hsl(162 72% 38% / 0.25);
+  --shadow-destructive: 0 4px 14px hsl(347 77% 52% / 0.25);
 
   /* ------------------------------------------ */
   /* GLASS MORPHISM                             */
@@ -128,10 +120,26 @@
   /* ------------------------------------------ */
   /* AI SCORE GRADIENTS                         */
   /* ------------------------------------------ */
-  --ai-score-excellent: linear-gradient(135deg, hsl(162 72% 38%) 0%, hsl(152 68% 42%) 100%);
-  --ai-score-good: linear-gradient(135deg, hsl(206 100% 50%) 0%, hsl(196 90% 48%) 100%);
-  --ai-score-average: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(28 88% 48%) 100%);
-  --ai-score-low: linear-gradient(135deg, hsl(347 77% 52%) 0%, hsl(357 73% 56%) 100%);
+  --ai-score-excellent: linear-gradient(
+    135deg,
+    hsl(162 72% 38%) 0%,
+    hsl(152 68% 42%) 100%
+  );
+  --ai-score-good: linear-gradient(
+    135deg,
+    hsl(206 100% 50%) 0%,
+    hsl(196 90% 48%) 100%
+  );
+  --ai-score-average: linear-gradient(
+    135deg,
+    hsl(38 92% 50%) 0%,
+    hsl(28 88% 48%) 100%
+  );
+  --ai-score-low: linear-gradient(
+    135deg,
+    hsl(347 77% 52%) 0%,
+    hsl(357 73% 56%) 100%
+  );
 
   /* Kanban column backgrounds */
   --kanban-applied: 220 23% 96%;
@@ -193,24 +201,18 @@
   --info-foreground: 206 100% 10%;
   --info-muted: 206 100% 60% / 0.15;
 
-  --shadow-soft-xs:
-    0 1px 2px hsl(222 47% 3% / 0.3);
+  --shadow-soft-xs: 0 1px 2px hsl(222 47% 3% / 0.3);
   --shadow-soft-sm:
-    0 1px 3px hsl(222 47% 3% / 0.4),
-    0 8px 20px hsl(222 47% 2% / 0.3);
+    0 1px 3px hsl(222 47% 3% / 0.4), 0 8px 20px hsl(222 47% 2% / 0.3);
   --shadow-soft-md:
-    0 2px 6px hsl(222 47% 3% / 0.4),
-    0 12px 32px hsl(222 47% 2% / 0.4);
+    0 2px 6px hsl(222 47% 3% / 0.4), 0 12px 32px hsl(222 47% 2% / 0.4);
   --shadow-soft-lg:
-    0 4px 12px hsl(222 47% 3% / 0.45),
-    0 20px 48px hsl(222 47% 2% / 0.5);
+    0 4px 12px hsl(222 47% 3% / 0.45), 0 20px 48px hsl(222 47% 2% / 0.5);
   --shadow-soft-xl:
-    0 8px 24px hsl(222 47% 3% / 0.5),
-    0 32px 64px hsl(222 47% 2% / 0.6);
+    0 8px 24px hsl(222 47% 3% / 0.5), 0 32px 64px hsl(222 47% 2% / 0.6);
 
   --shadow-primary:
-    0 4px 14px hsl(226 79% 65% / 0.3),
-    0 8px 24px hsl(226 79% 65% / 0.2);
+    0 4px 14px hsl(226 79% 65% / 0.3), 0 8px 24px hsl(226 79% 65% / 0.2);
 
   --glass-bg: hsl(222 40% 10% / 0.9);
   --glass-border: hsl(223 18% 24% / 0.7);
@@ -322,7 +324,9 @@ h3 {
   line-height: 1.4;
 }
 
-h4, h5, h6 {
+h4,
+h5,
+h6 {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -354,7 +358,11 @@ h4, h5, h6 {
 
 /* Gradient utilities */
 .gradient-primary {
-  background: linear-gradient(135deg, hsl(226 71% 55%) 0%, hsl(238 68% 58%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(226 71% 55%) 0%,
+    hsl(238 68% 58%) 100%
+  );
 }
 
 .gradient-mesh {
@@ -383,19 +391,22 @@ h4, h5, h6 {
 
 /* Transition utilities */
 .transition-smooth {
-  transition-property: opacity, transform, background-color, border-color, color, box-shadow;
+  transition-property:
+    opacity, transform, background-color, border-color, color, box-shadow;
   transition-duration: var(--duration-normal);
   transition-timing-function: var(--ease-in-out);
 }
 
 .transition-fast {
-  transition-property: opacity, transform, background-color, border-color, color, box-shadow;
+  transition-property:
+    opacity, transform, background-color, border-color, color, box-shadow;
   transition-duration: var(--duration-fast);
   transition-timing-function: var(--ease-in-out);
 }
 
 .transition-slow {
-  transition-property: opacity, transform, background-color, border-color, color, box-shadow;
+  transition-property:
+    opacity, transform, background-color, border-color, color, box-shadow;
   transition-duration: var(--duration-slow);
   transition-timing-function: var(--ease-out-expo);
 }
@@ -569,11 +580,21 @@ h4, h5, h6 {
 }
 
 /* Staggered animation delays */
-.stagger-1 { animation-delay: 50ms; }
-.stagger-2 { animation-delay: 100ms; }
-.stagger-3 { animation-delay: 150ms; }
-.stagger-4 { animation-delay: 200ms; }
-.stagger-5 { animation-delay: 250ms; }
+.stagger-1 {
+  animation-delay: 50ms;
+}
+.stagger-2 {
+  animation-delay: 100ms;
+}
+.stagger-3 {
+  animation-delay: 150ms;
+}
+.stagger-4 {
+  animation-delay: 200ms;
+}
+.stagger-5 {
+  animation-delay: 250ms;
+}
 
 /* ============================================ */
 /* SCROLL-TRIGGERED ANIMATIONS                  */

@@ -27,6 +27,7 @@
 ### Why Performance Matters
 
 For TalentFlow AI's **Polyglot 3-Service Architecture**:
+
 - **User Experience:** Fast response times keep recruiters productive
 - **Cost Efficiency:** Optimized resource usage reduces cloud costs
 - **Scalability:** Well-tuned services handle growth gracefully
@@ -46,30 +47,30 @@ For TalentFlow AI's **Polyglot 3-Service Architecture**:
 
 ### Service-Level Targets
 
-| Service | Metric | Target | Measurement Tool |
-|---------|--------|--------|------------------|
-| **API Gateway** | Response Time (p50) | < 100ms | Prometheus |
-| **API Gateway** | Response Time (p95) | < 200ms | Prometheus |
-| **API Gateway** | Response Time (p99) | < 500ms | Prometheus |
-| **API Gateway** | Throughput | 100+ RPS | k6 Load Testing |
-| **API Gateway** | Error Rate | < 0.5% | Prometheus |
-| **CV Parser** | Processing Time (avg) | < 10s | Application Logs |
-| **CV Parser** | Processing Time (p95) | < 15s | Application Logs |
-| **Notification** | WebSocket Latency | < 50ms | Custom Metrics |
-| **Database** | Query Time (p95) | < 50ms | Prisma/EF Metrics |
-| **Database** | Connection Pool | < 80% | Postgres Exporter |
-| **RabbitMQ** | Queue Lag | < 5 msgs | RabbitMQ Management |
-| **Redis** | Memory Usage | < 1GB | Redis Exporter |
+| Service          | Metric                | Target   | Measurement Tool    |
+| ---------------- | --------------------- | -------- | ------------------- |
+| **API Gateway**  | Response Time (p50)   | < 100ms  | Prometheus          |
+| **API Gateway**  | Response Time (p95)   | < 200ms  | Prometheus          |
+| **API Gateway**  | Response Time (p99)   | < 500ms  | Prometheus          |
+| **API Gateway**  | Throughput            | 100+ RPS | k6 Load Testing     |
+| **API Gateway**  | Error Rate            | < 0.5%   | Prometheus          |
+| **CV Parser**    | Processing Time (avg) | < 10s    | Application Logs    |
+| **CV Parser**    | Processing Time (p95) | < 15s    | Application Logs    |
+| **Notification** | WebSocket Latency     | < 50ms   | Custom Metrics      |
+| **Database**     | Query Time (p95)      | < 50ms   | Prisma/EF Metrics   |
+| **Database**     | Connection Pool       | < 80%    | Postgres Exporter   |
+| **RabbitMQ**     | Queue Lag             | < 5 msgs | RabbitMQ Management |
+| **Redis**        | Memory Usage          | < 1GB    | Redis Exporter      |
 
 ### Business Metrics
 
-| Metric | Target | Current | Notes |
-|--------|--------|---------|-------|
-| **CV Upload Throughput** | 1,000 CVs/day | TBD | MVP target |
-| **Concurrent Users** | 50 users | TBD | Peak load |
-| **Data Size (Year 1)** | < 10GB | 0 | Database size |
-| **Uptime** | > 99.5% | TBD | 3.65 days downtime/year |
-| **Time to First Byte (TTFB)** | < 600ms | TBD | Global CDN |
+| Metric                        | Target        | Current | Notes                   |
+| ----------------------------- | ------------- | ------- | ----------------------- |
+| **CV Upload Throughput**      | 1,000 CVs/day | TBD     | MVP target              |
+| **Concurrent Users**          | 50 users      | TBD     | Peak load               |
+| **Data Size (Year 1)**        | < 10GB        | 0       | Database size           |
+| **Uptime**                    | > 99.5%       | TBD     | 3.65 days downtime/year |
+| **Time to First Byte (TTFB)** | < 600ms       | TBD     | Global CDN              |
 
 ---
 
@@ -77,13 +78,13 @@ For TalentFlow AI's **Polyglot 3-Service Architecture**:
 
 ### Tools by Framework
 
-| Framework | Recommended Tool | Why |
-|-----------|------------------|-----|
-| **Any Backend** | **k6** (Primary) | Scriptable in JS, Grafana integration |
-| **Any Backend** | **Artillery** | Scenario-based testing |
-| **Spring Boot** | JMeter | Java ecosystem, good for JVM apps |
-| **ASP.NET Core** | NBomber | Native .NET tool |
-| **Frontend** | Lighthouse CI | Core Web Vitals |
+| Framework        | Recommended Tool | Why                                   |
+| ---------------- | ---------------- | ------------------------------------- |
+| **Any Backend**  | **k6** (Primary) | Scriptable in JS, Grafana integration |
+| **Any Backend**  | **Artillery**    | Scenario-based testing                |
+| **Spring Boot**  | JMeter           | Java ecosystem, good for JVM apps     |
+| **ASP.NET Core** | NBomber          | Native .NET tool                      |
+| **Frontend**     | Lighthouse CI    | Core Web Vitals                       |
 
 ### Test Scenarios
 
@@ -93,29 +94,30 @@ For TalentFlow AI's **Polyglot 3-Service Architecture**:
 
 ```javascript
 // k6/baseline.js
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from "k6/http";
+import { check, sleep } from "k6";
 
 export let options = {
-  vus: 10,                  // 10 virtual users
-  duration: '5m',           // 5 minutes
+  vus: 10, // 10 virtual users
+  duration: "5m", // 5 minutes
   thresholds: {
-    http_req_duration: ['p(95)<200'],  // 95% < 200ms
-    http_req_failed: ['rate<0.01'],     // Error rate < 1%
+    http_req_duration: ["p(95)<200"], // 95% < 200ms
+    http_req_failed: ["rate<0.01"], // Error rate < 1%
   },
 };
 
 export default function () {
-  let res = http.get('https://api.talentflow.ai/health');
+  let res = http.get("https://api.talentflow.ai/health");
   check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 200ms': (r) => r.timings.duration < 200,
+    "status is 200": (r) => r.status === 200,
+    "response time < 200ms": (r) => r.timings.duration < 200,
   });
   sleep(1);
 }
 ```
 
 **Run:**
+
 ```bash
 k6 run k6/baseline.js
 ```
@@ -128,13 +130,13 @@ k6 run k6/baseline.js
 // k6/load-test.js
 export let options = {
   stages: [
-    { duration: '2m', target: 20 },   // Ramp up to 20 users
-    { duration: '5m', target: 50 },   // Stay at 50 users (MVP target)
-    { duration: '2m', target: 0 },    // Ramp down
+    { duration: "2m", target: 20 }, // Ramp up to 20 users
+    { duration: "5m", target: 50 }, // Stay at 50 users (MVP target)
+    { duration: "2m", target: 0 }, // Ramp down
   ],
   thresholds: {
-    http_req_duration: ['p(95)<300'],
-    http_req_failed: ['rate<0.02'],    // 2% error rate acceptable
+    http_req_duration: ["p(95)<300"],
+    http_req_failed: ["rate<0.02"], // 2% error rate acceptable
   },
 };
 
@@ -147,26 +149,26 @@ export default function () {
 }
 
 function login() {
-  let res = http.post('https://api.talentflow.ai/api/v1/auth/login', {
-    email: 'test@example.com',
-    password: 'password123',
+  let res = http.post("https://api.talentflow.ai/api/v1/auth/login", {
+    email: "test@example.com",
+    password: "password123",
   });
-  return res.json('token');
+  return res.json("token");
 }
 
 function getJobs(token) {
-  http.get('https://api.talentflow.ai/api/v1/jobs', {
+  http.get("https://api.talentflow.ai/api/v1/jobs", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 function uploadCV(token) {
-  let binFile = open('./sample-cv.pdf', 'b');
+  let binFile = open("./sample-cv.pdf", "b");
   let data = {
-    file: http.file(binFile, 'cv.pdf'),
-    jobId: 'job_123',
+    file: http.file(binFile, "cv.pdf"),
+    jobId: "job_123",
   };
-  http.post('https://api.talentflow.ai/api/v1/candidates/upload', data, {
+  http.post("https://api.talentflow.ai/api/v1/candidates/upload", data, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
@@ -180,14 +182,14 @@ function uploadCV(token) {
 // k6/stress-test.js
 export let options = {
   stages: [
-    { duration: '2m', target: 50 },
-    { duration: '5m', target: 100 },   // Push to 100 users
-    { duration: '5m', target: 150 },   // Push to 150 users
-    { duration: '2m', target: 0 },
+    { duration: "2m", target: 50 },
+    { duration: "5m", target: 100 }, // Push to 100 users
+    { duration: "5m", target: 150 }, // Push to 150 users
+    { duration: "2m", target: 0 },
   ],
   thresholds: {
-    http_req_duration: ['p(95)<1000'],  // Relaxed threshold
-    http_req_failed: ['rate<0.1'],      // 10% error acceptable
+    http_req_duration: ["p(95)<1000"], // Relaxed threshold
+    http_req_failed: ["rate<0.1"], // 10% error acceptable
   },
 };
 ```
@@ -200,11 +202,11 @@ export let options = {
 // k6/spike-test.js
 export let options = {
   stages: [
-    { duration: '1m', target: 10 },
-    { duration: '30s', target: 200 },   // Sudden spike!
-    { duration: '1m', target: 10 },
-    { duration: '30s', target: 200 },   // Another spike
-    { duration: '1m', target: 0 },
+    { duration: "1m", target: 10 },
+    { duration: "30s", target: 200 }, // Sudden spike!
+    { duration: "1m", target: 10 },
+    { duration: "30s", target: 200 }, // Another spike
+    { duration: "1m", target: 0 },
   ],
 };
 ```
@@ -217,9 +219,9 @@ export let options = {
 // k6/soak-test.js
 export let options = {
   stages: [
-    { duration: '5m', target: 30 },
-    { duration: '1h', target: 30 },    // Stay for 1 hour
-    { duration: '5m', target: 0 },
+    { duration: "5m", target: 30 },
+    { duration: "1h", target: 30 }, // Stay for 1 hour
+    { duration: "5m", target: 0 },
   ],
 };
 ```
@@ -261,11 +263,13 @@ vus_max........................: 50      min=50  max=50
 ```
 
 **Good Indicators:**
+
 - ✅ `http_req_failed` < 1%
 - ✅ `http_req_duration` p(95) < target
 - ✅ `http_req_duration` increasing = stable system
 
 **Bad Indicators:**
+
 - ❌ `http_req_failed` > 5%
 - ❌ `http_req_duration` p(95) > 2x target
 - ❌ `http_req_duration` exponentially increasing = bottleneck
@@ -279,11 +283,13 @@ vus_max........................: 50      min=50  max=50
 #### 1. Indexing Strategy
 
 **When to Index:**
+
 - Foreign keys (jobId, userId)
 - Frequently filtered columns (status, createdAt)
 - Sort columns (createdAt DESC)
 
 **When NOT to Index:**
+
 - Low cardinality columns (boolean, small enums)
 - Frequently updated columns
 - Small tables (< 1000 rows)
@@ -308,6 +314,7 @@ CREATE INDEX idx_candidates_name ON candidates USING gin(to_tsvector('english', 
 ```
 
 **Check Index Usage:**
+
 ```sql
 -- Find unused indexes
 SELECT schemaname, tablename, indexname, idx_scan
@@ -361,7 +368,7 @@ const jobs = await prisma.job.findMany({
   take: 20,
   skip: 1,
   cursor: { id: lastJobId },
-  orderBy: { createdAt: 'desc' },
+  orderBy: { createdAt: "desc" },
 });
 ```
 
@@ -495,6 +502,7 @@ LIMIT 20;
 ```
 
 **Look for:**
+
 - ✅ `Index Scan` (fast)
 - ❌ `Seq Scan` on large tables (slow - needs index)
 - ❌ High `cost` values (> 1000)
@@ -534,15 +542,15 @@ LIMIT 20;
 
 ### What to Cache
 
-| Data Type | TTL | Cache Layer | Invalidation Strategy |
-|-----------|-----|-------------|----------------------|
-| Static Assets (JS, CSS) | 1 year | CDN | Version/Hash in URL |
-| Images | 1 month | CDN | Immutable URLs |
-| Public API Responses | 5-15 min | Redis | Time-based |
-| User Sessions | 24 hours | Redis | On logout |
-| Job Listings | 5 min | Redis | On job update |
-| User Profile | 10 min | Redis | On profile update |
-| Database Query Results | 1-5 min | Application | On data mutation |
+| Data Type               | TTL      | Cache Layer | Invalidation Strategy |
+| ----------------------- | -------- | ----------- | --------------------- |
+| Static Assets (JS, CSS) | 1 year   | CDN         | Version/Hash in URL   |
+| Images                  | 1 month  | CDN         | Immutable URLs        |
+| Public API Responses    | 5-15 min | Redis       | Time-based            |
+| User Sessions           | 24 hours | Redis       | On logout             |
+| Job Listings            | 5 min    | Redis       | On job update         |
+| User Profile            | 10 min   | Redis       | On profile update     |
+| Database Query Results  | 1-5 min  | Application | On data mutation      |
 
 ### Framework-Specific Caching
 
@@ -553,14 +561,14 @@ LIMIT 20;
 // Install: npm install cache-manager-redis-store
 
 // app.module.ts
-import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore from 'cache-manager-redis-store';
+import { CacheModule } from "@nestjs/cache-manager";
+import * as redisStore from "cache-manager-redis-store";
 
 @Module({
   imports: [
     CacheModule.register({
       store: redisStore,
-      host: 'localhost',
+      host: "localhost",
       port: 6379,
       ttl: 300, // 5 minutes default
     }),
@@ -569,9 +577,9 @@ import * as redisStore from 'cache-manager-redis-store';
 export class AppModule {}
 
 // cache.service.ts
-import { Injectable, Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Injectable, Inject } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class CacheService {
@@ -597,12 +605,12 @@ export class CacheService {
 
   async invalidate(pattern: string): Promise<void> {
     const keys = await this.cacheManager.store.keys(pattern);
-    await Promise.all(keys.map(key => this.cacheManager.del(key)));
+    await Promise.all(keys.map((key) => this.cacheManager.del(key)));
   }
 }
 
 // Usage in controller
-@Controller('jobs')
+@Controller("jobs")
 export class JobsController {
   constructor(
     private readonly jobsService: JobsService,
@@ -612,7 +620,7 @@ export class JobsController {
   @Get()
   async findAll() {
     return this.cacheService.getOrSet(
-      'jobs:published',
+      "jobs:published",
       () => this.jobsService.findPublished(),
       300, // 5 minutes
     );
@@ -622,7 +630,7 @@ export class JobsController {
   async create(@Body() dto: CreateJobDto) {
     const job = await this.jobsService.create(dto);
     // Invalidate cache
-    await this.cacheService.invalidate('jobs:*');
+    await this.cacheService.invalidate("jobs:*");
     return job;
   }
 }
@@ -779,28 +787,32 @@ public class JobService {
 ### Cache Invalidation Strategies
 
 **1. Time-Based (TTL):**
+
 ```
 Cache for 5 minutes, auto-expire
 ```
 
 **2. Write-Through:**
+
 ```
 Update cache when updating database
 ```
 
 **3. Write-Behind:**
+
 ```
 Update cache immediately, update database async
 ```
 
 **4. Event-Based:**
+
 ```typescript
 // When job is updated, invalidate cache
-eventEmitter.emit('job.updated', jobId);
+eventEmitter.emit("job.updated", jobId);
 
-eventEmitter.on('job.updated', async (jobId) => {
+eventEmitter.on("job.updated", async (jobId) => {
   await cacheService.invalidate(`job:${jobId}`);
-  await cacheService.invalidate('jobs:published');
+  await cacheService.invalidate("jobs:published");
 });
 ```
 
@@ -816,13 +828,13 @@ eventEmitter.on('job.updated', async (jobId) => {
 // Install: npm install @nestjs/throttler
 
 // app.module.ts
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
-      ttl: 60,      // 60 seconds
-      limit: 100,   // 100 requests per ttl
+      ttl: 60, // 60 seconds
+      limit: 100, // 100 requests per ttl
     }),
   ],
 })
@@ -832,10 +844,10 @@ export class AppModule {}
 app.useGlobalGuards(new ThrottlerGuard());
 
 // Custom rate limit per endpoint
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
-  @Throttle(5, 60)  // 5 requests per 60 seconds
-  @Post('login')
+  @Throttle(5, 60) // 5 requests per 60 seconds
+  @Post("login")
   async login(@Body() dto: LoginDto) {
     // ...
   }
@@ -881,17 +893,19 @@ app.UseIpRateLimiting();
 // Install: npm install compression
 
 // main.ts
-import * as compression from 'compression';
+import * as compression from "compression";
 
-app.use(compression({
-  threshold: 1024,      // Only compress > 1KB
-  level: 6,             // Compression level (1-9, 6 is balanced)
-  filter: (req, res) => {
-    // Don't compress images, videos
-    if (req.headers['x-no-compression']) return false;
-    return compression.filter(req, res);
-  },
-}));
+app.use(
+  compression({
+    threshold: 1024, // Only compress > 1KB
+    level: 6, // Compression level (1-9, 6 is balanced)
+    filter: (req, res) => {
+      // Don't compress images, videos
+      if (req.headers["x-no-compression"]) return false;
+      return compression.filter(req, res);
+    },
+  }),
+);
 ```
 
 **ASP.NET Core:**
@@ -921,16 +935,19 @@ app.UseResponseCompression();
 
 ```typescript
 // main.ts
-import * as https from 'https';
-import * as fs from 'fs';
+import * as https from "https";
+import * as fs from "fs";
 
 const httpsOptions = {
-  key: fs.readFileSync('./secrets/private-key.pem'),
-  cert: fs.readFileSync('./secrets/certificate.pem'),
-  allowHTTP1: true,  // Fallback to HTTP/1.1
+  key: fs.readFileSync("./secrets/private-key.pem"),
+  cert: fs.readFileSync("./secrets/certificate.pem"),
+  allowHTTP1: true, // Fallback to HTTP/1.1
 };
 
-const server = https.createServer(httpsOptions, app.getHttpAdapter().getInstance());
+const server = https.createServer(
+  httpsOptions,
+  app.getHttpAdapter().getInstance(),
+);
 await server.listen(3000);
 ```
 
@@ -955,8 +972,8 @@ await server.listen(3000);
 ```typescript
 // NestJS
 app.use((req, res, next) => {
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Keep-Alive', 'timeout=5, max=100');
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Keep-Alive", "timeout=5, max=100");
   next();
 });
 ```
@@ -1075,13 +1092,13 @@ public class PdfParserService {
 
 ### Core Web Vitals Targets
 
-| Metric | Target | Tool |
-|--------|--------|------|
-| **LCP** (Largest Contentful Paint) | < 2.5s | Lighthouse |
-| **FID** (First Input Delay) | < 100ms | Real User Monitoring |
-| **CLS** (Cumulative Layout Shift) | < 0.1 | Lighthouse |
-| **TTFB** (Time to First Byte) | < 600ms | WebPageTest |
-| **FCP** (First Contentful Paint) | < 1.8s | Lighthouse |
+| Metric                             | Target  | Tool                 |
+| ---------------------------------- | ------- | -------------------- |
+| **LCP** (Largest Contentful Paint) | < 2.5s  | Lighthouse           |
+| **FID** (First Input Delay)        | < 100ms | Real User Monitoring |
+| **CLS** (Cumulative Layout Shift)  | < 0.1   | Lighthouse           |
+| **TTFB** (Time to First Byte)      | < 600ms | WebPageTest          |
+| **FCP** (First Contentful Paint)   | < 1.8s  | Lighthouse           |
 
 ### Next.js 16 Optimizations
 
@@ -1142,9 +1159,9 @@ module.exports = {
       // Analyze bundle size
       config.plugins.push(
         new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
+          analyzerMode: "static",
           openAnalyzer: false,
-        })
+        }),
       );
     }
     return config;
@@ -1152,21 +1169,22 @@ module.exports = {
 
   // Tree-shaking
   experimental: {
-    optimizePackageImports: ['lodash', 'date-fns'],
+    optimizePackageImports: ["lodash", "date-fns"],
   },
 };
 
 // Tree-shake lodash
 // ❌ Bad: Imports entire library (24KB)
-import _ from 'lodash';
+import _ from "lodash";
 _.debounce(fn, 300);
 
 // ✅ Good: Import only what you need
-import debounce from 'lodash/debounce';
+import debounce from "lodash/debounce";
 debounce(fn, 300);
 ```
 
 **Target Bundle Sizes:**
+
 - Initial JS bundle: < 200KB gzipped
 - Total page weight: < 1MB
 - Number of requests: < 50
@@ -1180,12 +1198,12 @@ debounce(fn, 300);
 ```javascript
 // Set cache headers
 app.use((req, res, next) => {
-  if (req.url.startsWith('/static')) {
+  if (req.url.startsWith("/static")) {
     // Cache static assets for 1 year
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  } else if (req.url.startsWith('/api')) {
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (req.url.startsWith("/api")) {
     // API responses: cache for 5 minutes
-    res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+    res.setHeader("Cache-Control", "public, max-age=300, must-revalidate");
   }
   next();
 });
@@ -1204,7 +1222,7 @@ async function getJobs(params: PaginationParams) {
   const jobs = await prisma.job.findMany({
     take: params.limit + 1, // Fetch 1 extra to check if more exist
     cursor: params.cursor ? { id: params.cursor } : undefined,
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
 
   const hasMore = jobs.length > params.limit;
@@ -1249,37 +1267,37 @@ async job(@Parent() application: Application) {
 
 ### Application Profiling Tools
 
-| Framework | Tool | Usage |
-|-----------|------|-------|
-| **NestJS** | clinic.js | `clinic doctor -- node dist/main.js` |
-| **NestJS** | 0x | `0x -- node dist/main.js` |
-| **Spring Boot** | JProfiler | Attach to running process |
-| **Spring Boot** | VisualVM | `jvisualvm` |
-| **ASP.NET Core** | dotnet-trace | `dotnet-trace collect -p <PID>` |
-| **ASP.NET Core** | BenchmarkDotNet | Unit test benchmarking |
-| **Database** | EXPLAIN ANALYZE | `EXPLAIN ANALYZE SELECT ...` |
+| Framework        | Tool            | Usage                                |
+| ---------------- | --------------- | ------------------------------------ |
+| **NestJS**       | clinic.js       | `clinic doctor -- node dist/main.js` |
+| **NestJS**       | 0x              | `0x -- node dist/main.js`            |
+| **Spring Boot**  | JProfiler       | Attach to running process            |
+| **Spring Boot**  | VisualVM        | `jvisualvm`                          |
+| **ASP.NET Core** | dotnet-trace    | `dotnet-trace collect -p <PID>`      |
+| **ASP.NET Core** | BenchmarkDotNet | Unit test benchmarking               |
+| **Database**     | EXPLAIN ANALYZE | `EXPLAIN ANALYZE SELECT ...`         |
 
 ### Continuous Performance Monitoring
 
 **NestJS (Custom Metrics):**
 
 ```typescript
-import { Histogram } from 'prom-client';
+import { Histogram } from "prom-client";
 
 const httpDuration = new Histogram({
-  name: 'http_request_duration_seconds',
-  help: 'Duration of HTTP requests in seconds',
-  labelNames: ['method', 'route', 'status'],
+  name: "http_request_duration_seconds",
+  help: "Duration of HTTP requests in seconds",
+  labelNames: ["method", "route", "status"],
   buckets: [0.1, 0.5, 1, 2, 5],
 });
 
 app.use((req, res, next) => {
   const start = Date.now();
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = (Date.now() - start) / 1000;
     httpDuration.observe(
       { method: req.method, route: req.route?.path, status: res.statusCode },
-      duration
+      duration,
     );
   });
   next();

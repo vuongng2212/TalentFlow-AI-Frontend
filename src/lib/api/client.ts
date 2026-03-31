@@ -12,7 +12,12 @@
  */
 
 import { apiConfig } from "./config";
-import { ApiError, createNetworkError, createTimeoutError, parseApiError } from "./errors";
+import {
+  ApiError,
+  createNetworkError,
+  createTimeoutError,
+  parseApiError,
+} from "./errors";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -24,8 +29,12 @@ interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
 }
 
 /** Build URL with query params */
-function buildUrl(path: string, params?: Record<string, string | number | boolean | undefined>): string {
-  const base = typeof window === "undefined" ? apiConfig.internalUrl : apiConfig.baseUrl;
+function buildUrl(
+  path: string,
+  params?: Record<string, string | number | boolean | undefined>,
+): string {
+  const base =
+    typeof window === "undefined" ? apiConfig.internalUrl : apiConfig.baseUrl;
   const fullPath = path.startsWith("/") ? `${base}${path}` : path;
 
   // For relative paths (e.g. "/api/v1/auth/login"), use window.location.origin as the base
@@ -155,7 +164,9 @@ async function fetchWithConfig<T>(
         lastError = error;
         // Only retry on server errors (5xx)
         if (error.isServerError && attempt < retry) {
-          await new Promise((r) => setTimeout(r, apiConfig.retryDelay * (attempt + 1)));
+          await new Promise((r) =>
+            setTimeout(r, apiConfig.retryDelay * (attempt + 1)),
+          );
           continue;
         }
         throw error;
@@ -166,7 +177,9 @@ async function fetchWithConfig<T>(
       }
 
       if (attempt < retry) {
-        await new Promise((r) => setTimeout(r, apiConfig.retryDelay * (attempt + 1)));
+        await new Promise((r) =>
+          setTimeout(r, apiConfig.retryDelay * (attempt + 1)),
+        );
         continue;
       }
 
@@ -201,7 +214,7 @@ export const api = {
     fetchWithConfig<T>("POST", path, formData, options),
 } as const;
 
-/** 
+/**
  * tokenManager is now empty because browser handles HttpOnly cookies.
  * Kept as empty object to avoid breaking imports that might still look for it.
  */

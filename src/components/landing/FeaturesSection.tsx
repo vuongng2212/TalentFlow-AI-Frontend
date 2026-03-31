@@ -7,14 +7,7 @@ import {
   useScrollAnimation,
   useStaggeredAnimation,
 } from "@/hooks/use-scroll-animation";
-import {
-  Brain,
-  Zap,
-  Users,
-  BarChart3,
-  Shield,
-  Target,
-} from "lucide-react";
+import { Brain, Zap, Users, BarChart3, Shield, Target } from "lucide-react";
 
 const features = [
   {
@@ -69,8 +62,11 @@ const features = [
 
 export function FeaturesSection() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
-    useStaggeredAnimation(features.length, { staggerDelay: 80 });
+  const {
+    ref: gridRef,
+    isVisible: gridVisible,
+    getStaggerStyle,
+  } = useStaggeredAnimation(features.length, { staggerDelay: 80 });
 
   return (
     <section className="py-24 lg:py-32">
@@ -80,7 +76,7 @@ export function FeaturesSection() {
           ref={headerRef}
           className={cn(
             "text-center max-w-2xl mx-auto mb-16 scroll-animate",
-            headerVisible && "is-visible"
+            headerVisible && "is-visible",
           )}
         >
           <Badge variant="outline" className="mb-4">
@@ -102,7 +98,7 @@ export function FeaturesSection() {
               key={feature.title}
               className={cn(
                 "group hover-lift border-border/50 scroll-stagger-item",
-                gridVisible && "is-visible"
+                gridVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >

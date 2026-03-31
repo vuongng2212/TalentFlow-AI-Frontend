@@ -48,12 +48,14 @@ sequenceDiagram
 ### JWT Strategy
 
 **Access Token:**
+
 - **Lifetime**: 15 minutes
 - **Storage**: httpOnly cookie (not localStorage - XSS protection)
 - **Claims**: `userId`, `email`, `role`, `exp`
 - **Algorithm**: HS256 (HMAC SHA-256)
 
 **Refresh Token:**
+
 - **Lifetime**: 7 days
 - **Storage**: httpOnly cookie, secure flag
 - **Rotation**: New refresh token issued on each use
@@ -62,20 +64,23 @@ sequenceDiagram
 ### Password Policy
 
 **Requirements:**
+
 - Minimum 8 characters
 - At least 1 uppercase letter
 - At least 1 lowercase letter
 - At least 1 number
-- At least 1 special character (!@#$%^&*)
+- At least 1 special character (!@#$%^&\*)
 
 **Hashing:**
+
 - Algorithm: **bcrypt**
 - Cost factor: 10 (2^10 iterations)
 - Never store plaintext passwords
 
 **Example:**
+
 ```typescript
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from "bcrypt";
 
 const saltRounds = 10;
 const hashedPassword = await bcrypt.hash(plainPassword, saltRounds);
@@ -87,36 +92,37 @@ const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
 ### Role-Based Access Control (RBAC)
 
 **Roles:**
+
 - **ADMIN**: Full system access
 - **RECRUITER**: Manage jobs, candidates, applications
 - **INTERVIEWER**: View assigned candidates, submit feedback
 
 **Permission Matrix:**
 
-| Resource | ADMIN | RECRUITER | INTERVIEWER |
-|----------|-------|-----------|-------------|
-| **Users** |  |  |  |
-| - Create | ✅ | ❌ | ❌ |
-| - Read All | ✅ | ❌ | ❌ |
-| - Update All | ✅ | ❌ | ❌ |
-| - Delete | ✅ | ❌ | ❌ |
-| **Jobs** |  |  |  |
-| - Create | ✅ | ✅ | ❌ |
-| - Read All | ✅ | ✅ | ✅ |
-| - Update Own | ✅ | ✅ | ❌ |
-| - Delete Own | ✅ | ✅ | ❌ |
-| **Candidates** |  |  |  |
-| - Create | ✅ | ✅ | ❌ |
-| - Read All | ✅ | ✅ | ✅ (assigned only) |
-| - Update | ✅ | ✅ | ❌ |
-| - Delete | ✅ | ✅ | ❌ |
-| **Applications** |  |  |  |
-| - Create | ✅ | ✅ | ❌ |
-| - Read All | ✅ | ✅ | ✅ (assigned only) |
-| - Update Stage | ✅ | ✅ | ❌ |
-| **Interviews** |  |  |  |
-| - Schedule | ✅ | ✅ | ❌ |
-| - Submit Feedback | ✅ | ✅ | ✅ |
+| Resource          | ADMIN | RECRUITER | INTERVIEWER        |
+| ----------------- | ----- | --------- | ------------------ |
+| **Users**         |       |           |                    |
+| - Create          | ✅    | ❌        | ❌                 |
+| - Read All        | ✅    | ❌        | ❌                 |
+| - Update All      | ✅    | ❌        | ❌                 |
+| - Delete          | ✅    | ❌        | ❌                 |
+| **Jobs**          |       |           |                    |
+| - Create          | ✅    | ✅        | ❌                 |
+| - Read All        | ✅    | ✅        | ✅                 |
+| - Update Own      | ✅    | ✅        | ❌                 |
+| - Delete Own      | ✅    | ✅        | ❌                 |
+| **Candidates**    |       |           |                    |
+| - Create          | ✅    | ✅        | ❌                 |
+| - Read All        | ✅    | ✅        | ✅ (assigned only) |
+| - Update          | ✅    | ✅        | ❌                 |
+| - Delete          | ✅    | ✅        | ❌                 |
+| **Applications**  |       |           |                    |
+| - Create          | ✅    | ✅        | ❌                 |
+| - Read All        | ✅    | ✅        | ✅ (assigned only) |
+| - Update Stage    | ✅    | ✅        | ❌                 |
+| **Interviews**    |       |           |                    |
+| - Schedule        | ✅    | ✅        | ❌                 |
+| - Submit Feedback | ✅    | ✅        | ✅                 |
 
 ---
 
@@ -125,6 +131,7 @@ const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
 ### CORS Policy
 
 **Development:**
+
 ```typescript
 {
   origin: 'http://localhost:3001',
@@ -133,6 +140,7 @@ const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
 ```
 
 **Production:**
+
 ```typescript
 {
   origin: ['https://app.talentflow.ai', 'https://www.talentflow.ai'],
@@ -143,10 +151,12 @@ const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
 ### CSRF Protection
 
 **Strategy:** Double Submit Cookie
+
 - Access token in httpOnly cookie
 - CSRF token in request header: `X-CSRF-Token`
 
 **Implementation:**
+
 ```typescript
 @UseGuards(CsrfGuard)
 @Post('jobs')
@@ -165,23 +175,26 @@ createJob(@Body() dto: CreateJobDto) {
 | **Admin** | 1000 requests / minute |
 
 **Implementation:**
+
 ```typescript
 @UseGuards(JwtAuthGuard, RateLimitGuard)
-@Controller('jobs')
+@Controller("jobs")
 export class JobController {
   // Rate limited endpoints
 }
 ```
 
 **DDoS Protection:**
+
 - Railway/Vercel built-in DDoS protection
 - Cloudflare (optional) for additional layer
 
 ### Request Validation
 
 **All inputs validated:**
+
 ```typescript
-import { IsString, IsEmail, MinLength } from 'class-validator';
+import { IsString, IsEmail, MinLength } from "class-validator";
 
 export class SignupDto {
   @IsEmail()
@@ -194,6 +207,7 @@ export class SignupDto {
 ```
 
 **Prevent:**
+
 - SQL Injection (Prisma parameterized queries)
 - NoSQL Injection (Prisma type-safe)
 - XSS (Input sanitization, Content-Security-Policy)
@@ -206,15 +220,18 @@ export class SignupDto {
 ### CV Upload Endpoint
 
 **Restrictions:**
+
 - **Allowed MIME types**: `application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document` (DOCX)
 - **Max file size**: 10 MB
 - **Filename sanitization**: Remove special characters, generate UUID
 
 **Virus Scanning:**
+
 - **Phase 1 (MVP)**: Basic file type validation
 - **Phase 2**: Integrate ClamAV or cloud service (AWS GuardDuty, VirusTotal)
 
 **Implementation:**
+
 ```typescript
 @Post('upload')
 @UseInterceptors(FileInterceptor('file', {
@@ -239,15 +256,17 @@ async uploadCV(@UploadedFile() file: Express.Multer.File) {
 ### Storage Security
 
 **Cloudflare R2 Configuration:**
+
 - **Private buckets**: No public access by default
 - **Signed URLs**: Temporary access (1 hour expiry) via presigned URLs
 - **Encryption at rest**: AES-256
 - **Encryption in transit**: HTTPS only
 
 **Example:**
+
 ```typescript
 const signedUrl = await r2Client.getSignedUrl({
-  Bucket: 'talentflow-cvs',
+  Bucket: "talentflow-cvs",
   Key: fileKey,
   Expires: 3600, // 1 hour
 });
@@ -260,10 +279,12 @@ const signedUrl = await r2Client.getSignedUrl({
 ### PII Data Handling
 
 **PII Fields:**
+
 - Candidate: `email`, `fullName`, `phone`, `linkedinUrl`, `resumeText`
 - User: `email`, `fullName`
 
 **Requirements:**
+
 1. **Consent**: Candidates consent to data processing when applying
 2. **Access**: Candidates can request their data (API endpoint)
 3. **Deletion**: Candidates can request deletion (soft delete, 30-day retention)
@@ -272,6 +293,7 @@ const signedUrl = await r2Client.getSignedUrl({
 ### Right to be Forgotten
 
 **Implementation:**
+
 ```typescript
 @Delete('candidates/:id/gdpr')
 async deleteCandidate(@Param('id') id: string) {
@@ -288,21 +310,23 @@ async deleteCandidate(@Param('id') id: string) {
 
 ### Data Retention Policy
 
-| Data Type | Retention Period |
-|-----------|------------------|
-| **Active Applications** | Until closed + 2 years |
-| **Closed Applications** | 2 years after close |
-| **Audit Logs** | 7 years (compliance) |
+| Data Type                   | Retention Period          |
+| --------------------------- | ------------------------- |
+| **Active Applications**     | Until closed + 2 years    |
+| **Closed Applications**     | 2 years after close       |
+| **Audit Logs**              | 7 years (compliance)      |
 | **Soft-Deleted Candidates** | 30 days, then hard delete |
 
 ### Encryption
 
 **At Rest:**
+
 - Database: PostgreSQL with encryption at rest (Railway/Neon default)
 - File Storage: Cloudflare R2 server-side encryption (default enabled)
 - Sensitive env vars: Railway/Vercel encrypted secrets
 
 **In Transit:**
+
 - HTTPS only (TLS 1.3)
 - WebSocket: WSS (secure)
 - Database: SSL/TLS connection
@@ -321,24 +345,29 @@ async deleteCandidate(@Param('id') id: string) {
 ### Response Plan
 
 **Step 1: Detection**
+
 - Monitor logs for suspicious activity
 - Alerts from Sentry, Railway
 
 **Step 2: Containment**
+
 - Revoke compromised credentials immediately
 - Block malicious IPs (Cloudflare)
 - Disable affected accounts
 
 **Step 3: Investigation**
+
 - Analyze logs (request IDs, timestamps)
 - Identify scope of breach
 
 **Step 4: Remediation**
+
 - Patch vulnerability
 - Reset all affected user passwords
 - Notify affected users (GDPR requirement: within 72 hours)
 
 **Step 5: Post-Mortem**
+
 - Document incident
 - Update security practices
 - Conduct team training
@@ -353,6 +382,7 @@ async deleteCandidate(@Param('id') id: string) {
 ## 📋 Security Checklist (Pre-Deployment)
 
 ### Authentication & Authorization
+
 - [ ] JWT_SECRET is strong and unique (not default)
 - [ ] Password hashing uses bcrypt with cost factor 10+
 - [ ] RBAC guards applied to all protected routes
@@ -360,6 +390,7 @@ async deleteCandidate(@Param('id') id: string) {
 - [ ] Session invalidation on logout
 
 ### API Security
+
 - [ ] CORS configured correctly (no wildcards in production)
 - [ ] CSRF protection enabled for state-changing requests
 - [ ] Rate limiting configured and tested
@@ -367,6 +398,7 @@ async deleteCandidate(@Param('id') id: string) {
 - [ ] Error messages don't leak sensitive info
 
 ### Data Protection
+
 - [ ] PII fields identified and encrypted
 - [ ] GDPR consent collected from candidates
 - [ ] Right to be forgotten implemented
@@ -374,6 +406,7 @@ async deleteCandidate(@Param('id') id: string) {
 - [ ] Audit logs capture all data access
 
 ### File Upload
+
 - [ ] File type validation (whitelist only)
 - [ ] File size limits enforced (10 MB max)
 - [ ] Filenames sanitized
@@ -381,6 +414,7 @@ async deleteCandidate(@Param('id') id: string) {
 - [ ] R2 buckets are private (no public access)
 
 ### Infrastructure
+
 - [ ] HTTPS enforced (redirect HTTP to HTTPS)
 - [ ] Database connections use SSL/TLS
 - [ ] Environment variables secured (Railway/Vercel secrets)
@@ -388,6 +422,7 @@ async deleteCandidate(@Param('id') id: string) {
 - [ ] Secrets not committed to Git (.env in .gitignore)
 
 ### Monitoring
+
 - [ ] Error tracking configured (Sentry)
 - [ ] Audit logs enabled for sensitive operations
 - [ ] Alerting rules configured (e.g., multiple failed logins)
@@ -402,6 +437,7 @@ async deleteCandidate(@Param('id') id: string) {
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 
 **Instead:**
+
 1. Email security@talentflow.ai
 2. Include:
    - Description of vulnerability
@@ -419,17 +455,20 @@ Not currently active. May launch bug bounty program in Phase 2.
 ## 📚 Security Resources
 
 ### Training
+
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
 - [GDPR Compliance Guide](https://gdpr.eu/)
 
 ### Tools
+
 - **npm audit**: Check for vulnerable dependencies
 - **Snyk**: Continuous security monitoring
 - **Dependabot**: Automated dependency updates
 - **OWASP ZAP**: Security testing
 
 ### Regular Tasks
+
 - [ ] **Weekly**: Review access logs for anomalies
 - [ ] **Monthly**: Update dependencies (npm audit fix)
 - [ ] **Quarterly**: Penetration testing (manual or tool)
@@ -440,11 +479,13 @@ Not currently active. May launch bug bounty program in Phase 2.
 ## 🎓 Team Security Training
 
 ### Required Reading
+
 1. OWASP Top 10 (2 hours)
 2. NestJS Security Best Practices (1 hour)
 3. This document (30 minutes)
 
 ### Secure Coding Practices
+
 - Never commit secrets to Git
 - Always validate user input
 - Use parameterized queries (Prisma handles this)

@@ -74,6 +74,7 @@ sequenceDiagram
 ```
 
 **Flow Steps:**
+
 1. **Upload (Sync):** Frontend uploads CV → API Gateway validates → Store in R2 → Queue event
 2. **Processing (Async):** CV Parser consumes event → Parse PDF → Call AI → Update DB
 3. **Notification (Async):** Notification service consumes event → WebSocket to Frontend → Email to recruiter
@@ -83,12 +84,14 @@ sequenceDiagram
 ## Quick Start
 
 ### Base URL
+
 ```
 Development: http://localhost:3000/api/v1
 Production:  https://api.talentflow.ai/api/v1
 ```
 
 ### Authentication
+
 All endpoints (except `/auth/login` and `/auth/signup`) require valid JWT tokens stored in **HttpOnly Cookies**.
 The browser automatically sends these cookies with cross-origin credentials enabled (`credentials: 'include'`).
 
@@ -100,6 +103,7 @@ Cookie: access_token=...; refresh_token=...
 ### Response Format
 
 **Success:**
+
 ```json
 {
   "status": 200,
@@ -110,6 +114,7 @@ Cookie: access_token=...; refresh_token=...
 ```
 
 **Error:**
+
 ```json
 {
   "status": 400,
@@ -125,9 +130,11 @@ Cookie: access_token=...; refresh_token=...
 ## Authentication
 
 ### POST /auth/signup
+
 Register a new user
 
 **Request:**
+
 ```http
 POST /api/v1/auth/signup
 Content-Type: application/json
@@ -141,6 +148,7 @@ Content-Type: application/json
 ```
 
 **Response** (201):
+
 ```json
 {
   "status": 201,
@@ -159,9 +167,11 @@ Content-Type: application/json
 ---
 
 ### POST /auth/login
+
 Login existing user. Returns `access_token` and `refresh_token` in HttpOnly cookies.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/login
 Content-Type: application/json
@@ -173,6 +183,7 @@ Content-Type: application/json
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -191,15 +202,18 @@ Content-Type: application/json
 ---
 
 ### POST /auth/refresh
+
 Refresh access token using `refresh_token` cookie.
 
 **Request:**
+
 ```http
 POST /api/v1/auth/refresh
 Cookie: refresh_token=...
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -211,15 +225,18 @@ Cookie: refresh_token=...
 ---
 
 ### GET /auth/me
+
 Get current user profile
 
 **Request:**
+
 ```http
 GET /api/v1/auth/me
 Cookie: access_token=...
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -238,9 +255,11 @@ Cookie: access_token=...
 ## Jobs
 
 ### GET /jobs
+
 Get all jobs (with filters)
 
 **Request:**
+
 ```http
 GET /api/v1/jobs?status=OPEN&page=1&limit=20
 Authorization: Bearer <access_token>
@@ -262,6 +281,7 @@ Authorization: Bearer <access_token>
 | `sortOrder` | string | Sort order: `asc`, `desc` (default: `desc`) |
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -294,15 +314,18 @@ Authorization: Bearer <access_token>
 ---
 
 ### GET /jobs/:id
+
 Get job by ID
 
 **Request:**
+
 ```http
 GET /api/v1/jobs/550e8400-e29b-41d4-a716-446655440001
 Authorization: Bearer <access_token>
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -339,9 +362,11 @@ Authorization: Bearer <access_token>
 ---
 
 ### POST /jobs
+
 Create a new job
 
 **Request:**
+
 ```http
 POST /api/v1/jobs
 Authorization: Bearer <access_token>
@@ -360,6 +385,7 @@ Content-Type: application/json
 ```
 
 **Response** (201):
+
 ```json
 {
   "status": 201,
@@ -376,9 +402,11 @@ Content-Type: application/json
 ---
 
 ### PATCH /jobs/:id
+
 Update job
 
 **Request:**
+
 ```http
 PATCH /api/v1/jobs/550e8400-e29b-41d4-a716-446655440001
 Authorization: Bearer <access_token>
@@ -390,6 +418,7 @@ Content-Type: application/json
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -405,15 +434,18 @@ Content-Type: application/json
 ---
 
 ### DELETE /jobs/:id
+
 Delete job
 
 **Request:**
+
 ```http
 DELETE /api/v1/jobs/550e8400-e29b-41d4-a716-446655440001
 Authorization: Bearer <access_token>
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -426,9 +458,11 @@ Authorization: Bearer <access_token>
 ## Candidates
 
 ### POST /candidates/upload
+
 Upload CV and create candidate
 
 **Request:**
+
 ```http
 POST /api/v1/candidates/upload
 Authorization: Bearer <access_token>
@@ -451,6 +485,7 @@ John Doe
 ```
 
 **Response** (201):
+
 ```json
 {
   "status": 201,
@@ -473,15 +508,18 @@ John Doe
 ---
 
 ### GET /candidates
+
 List all candidates
 
 **Request:**
+
 ```http
 GET /api/v1/candidates?page=1&limit=20&search=john
 Authorization: Bearer <access_token>
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -511,9 +549,11 @@ Authorization: Bearer <access_token>
 ## Applications
 
 ### POST /applications
+
 Submit application
 
 **Request:**
+
 ```http
 POST /api/v1/applications
 Authorization: Bearer <access_token>
@@ -526,6 +566,7 @@ Content-Type: application/json
 ```
 
 **Response** (201):
+
 ```json
 {
   "status": 201,
@@ -544,9 +585,11 @@ Content-Type: application/json
 ---
 
 ### PATCH /applications/:id/stage
+
 Update application stage
 
 **Request:**
+
 ```http
 PATCH /api/v1/applications/app-id-1/stage
 Authorization: Bearer <access_token>
@@ -558,6 +601,7 @@ Content-Type: application/json
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": 200,
@@ -576,22 +620,23 @@ Content-Type: application/json
 
 ### HTTP Status Codes
 
-| Code | Meaning |
-|------|---------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request (validation error) |
-| 401 | Unauthorized (invalid/missing token) |
-| 403 | Forbidden (insufficient permissions) |
-| 404 | Not Found |
-| 409 | Conflict (duplicate resource) |
-| 422 | Unprocessable Entity |
-| 429 | Too Many Requests (rate limit) |
-| 500 | Internal Server Error |
+| Code | Meaning                              |
+| ---- | ------------------------------------ |
+| 200  | Success                              |
+| 201  | Created                              |
+| 400  | Bad Request (validation error)       |
+| 401  | Unauthorized (invalid/missing token) |
+| 403  | Forbidden (insufficient permissions) |
+| 404  | Not Found                            |
+| 409  | Conflict (duplicate resource)        |
+| 422  | Unprocessable Entity                 |
+| 429  | Too Many Requests (rate limit)       |
+| 500  | Internal Server Error                |
 
 ### Error Response Examples
 
 **Validation Error (400):**
+
 ```json
 {
   "status": 400,
@@ -606,6 +651,7 @@ Content-Type: application/json
 ```
 
 **Unauthorized (401):**
+
 ```json
 {
   "status": 401,
@@ -616,6 +662,7 @@ Content-Type: application/json
 ```
 
 **Not Found (404):**
+
 ```json
 {
   "status": 404,
@@ -630,11 +677,13 @@ Content-Type: application/json
 ## Rate Limiting
 
 **Limits:**
+
 - **Anonymous**: 10 requests / minute
 - **Authenticated**: 100 requests / minute
 - **Admin**: 1000 requests / minute
 
 **Headers:**
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -642,6 +691,7 @@ X-RateLimit-Reset: 1672574400
 ```
 
 **Rate Limit Exceeded (429):**
+
 ```json
 {
   "status": 429,
@@ -657,15 +707,19 @@ X-RateLimit-Reset: 1672574400
 ## Swagger/OpenAPI
 
 **Interactive API Documentation:**
+
 ```
 http://localhost:3000/api/docs
 ```
+
 (Enabled only when `SWAGGER_ENABLED=true`, which defaults to non-production environments.)
 
 **OpenAPI JSON:**
+
 ```
 http://localhost:3000/api-json
 ```
+
 (Same availability rules as above.)
 
 ---
@@ -673,16 +727,17 @@ http://localhost:3000/api-json
 ## WebSocket API (Phase 2)
 
 **Connection:**
+
 ```javascript
-const socket = io('http://localhost:3000', {
+const socket = io("http://localhost:3000", {
   auth: {
-    token: 'your-jwt-token'
-  }
+    token: "your-jwt-token",
+  },
 });
 
 // Listen for CV processing updates
-socket.on('cv:processed', (data) => {
-  console.log('CV processed:', data);
+socket.on("cv:processed", (data) => {
+  console.log("CV processed:", data);
 });
 ```
 

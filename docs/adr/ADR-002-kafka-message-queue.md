@@ -19,6 +19,7 @@ API Gateway -> Queue -> AI Worker -> Queue -> Notification Service
 ```
 
 **Options considered:**
+
 1. **Apache Kafka** - Event streaming platform
 2. **RabbitMQ** - Traditional message broker
 3. **BullMQ** - Redis-based queue (simpler)
@@ -37,6 +38,7 @@ We will use **Apache Kafka** for message queue.
 ### Why Kafka?
 
 ✅ **Pros:**
+
 1. **Event Streaming**: Stores events permanently, supports replay
 2. **Scalability**: Handles high throughput (important for future AI matching)
 3. **Multi-Consumer**: Multiple services can consume same events
@@ -45,6 +47,7 @@ We will use **Apache Kafka** for message queue.
 6. **Industry Standard**: Used by LinkedIn, Uber, Netflix for similar use cases
 
 ❌ **Cons:**
+
 1. **Complexity**: More complex to setup than RabbitMQ or BullMQ
 2. **Resource Heavy**: Requires Zookeeper (or KRaft mode in Kafka 3.x)
 3. **Overkill for MVP**: Might be overengineered for simple async jobs
@@ -72,15 +75,19 @@ We will use **Apache Kafka** for message queue.
 ## Trade-offs
 
 ### For MVP (Phase 1):
+
 Kafka might be **overkill** for simple CV upload/processing. However:
 
 ✅ **Accept complexity now because:**
+
 - Phase 2 will add AI matching, semantic search, analytics
 - Event replay will be useful for debugging and reprocessing
 - Team decided to invest time in proper architecture upfront
 
 ### Alternative considered:
+
 Start with **BullMQ for MVP**, migrate to Kafka in Phase 2:
+
 - ❌ Rejected because migration effort is high
 - ✅ Better to build on Kafka from start
 
@@ -92,22 +99,24 @@ Start with **BullMQ for MVP**, migrate to Kafka in Phase 2:
 
 ```typescript
 // Phase 1 (MVP)
-cv.uploaded        // Triggered when CV is uploaded
-cv.parsed          // CV text extracted
-cv.processed       // CV processing complete
+cv.uploaded; // Triggered when CV is uploaded
+cv.parsed; // CV text extracted
+cv.processed; // CV processing complete
 
 // Phase 2 (AI Matching)
-cv.embeddings.generated
-job.matching.requested
-candidate.scored
+cv.embeddings.generated;
+job.matching.requested;
+candidate.scored;
 ```
 
 ### Technology:
+
 - **Kafka Version**: 3.6+ (KRaft mode, no Zookeeper needed)
 - **Client Library**: `kafkajs` (most popular Node.js client)
 - **Local Dev**: Docker Compose with single-node Kafka
 
 ### Retry Strategy:
+
 - Dead Letter Queue (DLQ) for failed messages
 - Exponential backoff for retries
 - Max 3 retries before DLQ
@@ -117,17 +126,20 @@ candidate.scored
 ## Consequences
 
 ### Positive:
+
 - Ready for high-volume event processing in Phase 2
 - Can replay events for debugging or reprocessing
 - Multiple consumers can process same events (e.g., analytics service)
 - Industry-proven for similar use cases
 
 ### Negative:
+
 - Higher learning curve for team
 - More infrastructure to manage (Kafka + Zookeeper/KRaft)
 - More complex local development setup
 
 ### Mitigation:
+
 - Use Docker Compose for easy local setup
 - Implement good monitoring (Kafka lag, consumer errors)
 - Document common Kafka operations clearly
@@ -137,12 +149,14 @@ candidate.scored
 ## Monitoring & Observability
 
 Must track:
+
 - ✅ Kafka consumer lag
 - ✅ Message processing time
 - ✅ Failed messages in DLQ
 - ✅ Topic throughput
 
 Tools:
+
 - Kafka Manager / Redpanda Console
 - Prometheus + Grafana for metrics
 

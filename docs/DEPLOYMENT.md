@@ -27,17 +27,18 @@
 ### Deployment Strategy
 
 **Philosophy:** Deploy early, deploy often
+
 - **Staging:** Deploy mỗi PR merge → `develop` branch
 - **Production:** Deploy mỗi release tag → `main` branch
 
 ### Deployment Timeline
 
-| Week | Environment | Purpose |
-|------|-------------|---------|
-| **Week 2** | Vercel (Frontend) | Demo #1 - UI prototype |
-| **Week 4** | Railway (Backend) + Neon | Demo #2 - Working API |
-| **Week 6** | Full stack + RabbitMQ | Demo #3 - CV upload |
-| **Week 8** | Production + Monitoring | Demo #4 - MVP launch |
+| Week       | Environment              | Purpose                |
+| ---------- | ------------------------ | ---------------------- |
+| **Week 2** | Vercel (Frontend)        | Demo #1 - UI prototype |
+| **Week 4** | Railway (Backend) + Neon | Demo #2 - Working API  |
+| **Week 6** | Full stack + RabbitMQ    | Demo #3 - CV upload    |
+| **Week 8** | Production + Monitoring  | Demo #4 - MVP launch   |
 
 ---
 
@@ -157,6 +158,7 @@ External Services:
 ## ✅ Pre-Deployment Checklist
 
 ### Code Quality
+
 - [ ] All tests pass (`npm run test`)
 - [ ] Coverage > 80% (`npm run test:cov`)
 - [ ] ESLint no errors (`npm run lint`)
@@ -164,6 +166,7 @@ External Services:
 - [ ] E2E tests pass (`npm run test:e2e`)
 
 ### Security
+
 - [ ] No secrets in code (check `.env` in `.gitignore`)
 - [ ] JWT_SECRET is strong and unique
 - [ ] CORS configured correctly
@@ -171,12 +174,14 @@ External Services:
 - [ ] File upload validation active
 
 ### Database
+
 - [ ] Migrations tested locally
 - [ ] Seed data ready (optional)
 - [ ] Backup strategy documented
 - [ ] Indexes created
 
 ### Documentation
+
 - [ ] API_REFERENCE.md updated
 - [ ] CHANGELOG.md updated
 - [ ] Environment variables documented
@@ -187,11 +192,11 @@ External Services:
 
 ### Environment Types
 
-| Environment | Branch | Auto-Deploy | Purpose |
-|-------------|--------|-------------|---------|
-| **Development** | `develop` | ✅ Yes | Team testing |
-| **Staging** | `develop` | ✅ Yes | Client demos |
-| **Production** | `main` | ⚠️ Manual | Live users |
+| Environment     | Branch    | Auto-Deploy | Purpose      |
+| --------------- | --------- | ----------- | ------------ |
+| **Development** | `develop` | ✅ Yes      | Team testing |
+| **Staging**     | `develop` | ✅ Yes      | Client demos |
+| **Production**  | `main`    | ⚠️ Manual   | Live users   |
 
 ### Repositories
 
@@ -216,6 +221,7 @@ External Services:
 ### Step 2: Configure Project
 
 **Build Settings:**
+
 ```
 Framework Preset: Next.js
 Build Command: npm run build
@@ -224,6 +230,7 @@ Install Command: npm install
 ```
 
 **Environment Variables:**
+
 ```bash
 NEXT_PUBLIC_API_URL=https://api.talentflow.ai
 NEXT_PUBLIC_WS_URL=wss://api.talentflow.ai
@@ -277,11 +284,13 @@ curl https://app.talentflow.ai
 ### Step 2: Deploy API Gateway
 
 **Add Service:**
+
 1. Click "New Service" → "GitHub Repo"
 2. Select: `talentflow-backend`
 3. Root Directory: `/apps/api-gateway` (nếu monorepo)
 
 **Build Configuration:**
+
 ```json
 // railway.json (in apps/api-gateway/)
 {
@@ -298,6 +307,7 @@ curl https://app.talentflow.ai
 ```
 
 **Environment Variables:**
+
 ```bash
 # Railway Dashboard → Variables
 DATABASE_URL=${{Neon.DATABASE_URL}}
@@ -311,10 +321,12 @@ NODE_ENV=production
 ### Step 3: Deploy AI Worker
 
 **Add Another Service:**
+
 1. Same repo: `talentflow-backend`
 2. Root Directory: `/apps/ai-worker`
 
 **Start Command:**
+
 ```bash
 node dist/apps/ai-worker/main.js
 ```
@@ -395,6 +407,7 @@ railway run npx prisma db pull
 ### Step 1: Use Railway Redis + RabbitMQ
 
 **Option 1: Add RabbitMQ to Docker Compose (Local Development)**
+
 ```yaml
 # docker-compose.yml
 services:
@@ -402,8 +415,8 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: talentflow-rabbitmq
     ports:
-      - "5672:5672"    # AMQP protocol
-      - "15672:15672"  # Management UI
+      - "5672:5672" # AMQP protocol
+      - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
@@ -417,6 +430,7 @@ services:
 ```
 
 **Option 2: CloudAMQP (Production - Managed RabbitMQ)**
+
 1. Đi tới [cloudamqp.com](https://cloudamqp.com)
 2. Create instance (Free tier: Little Lemur)
 3. Region: US East (same as Railway)
@@ -446,6 +460,7 @@ RabbitMQ exchanges and queues are created by the application on startup:
 **Exchange:** `cv-events` (type: topic)
 
 **Queues:**
+
 - `cv-processing` (routing key: `cv.uploaded`) → CV Parser (Spring Boot)
 - `cv-notifications` (routing key: `cv.*`) → Notification Service (ASP.NET Core)
 - `cv-parsing-dlq` (Dead Letter Queue)
@@ -453,10 +468,12 @@ RabbitMQ exchanges and queues are created by the application on startup:
 ### Step 5: Monitor Queues
 
 **RabbitMQ Management UI:**
+
 - **Local:** http://localhost:15672 (rabbitmq/rabbitmq)
 - **CloudAMQP:** Via CloudAMQP Dashboard
 
 **Features:**
+
 - View queue depths
 - Monitor message rates
 - Check consumer connections
@@ -469,6 +486,7 @@ RabbitMQ exchanges and queues are created by the application on startup:
 ### Option 1: Railway Built-in (Minimal)
 
 **Included Free:**
+
 - ✅ CPU/Memory metrics
 - ✅ Request logs
 - ✅ Deployment logs
@@ -482,14 +500,16 @@ RabbitMQ exchanges and queues are created by the application on startup:
 #### Setup Elasticsearch + Kibana
 
 **Using Elastic Cloud (Managed):**
+
 1. Signup at [elastic.co/cloud](https://elastic.co/cloud)
 2. Create deployment (14-day free trial)
 3. Get credentials
 
 **Or Self-Hosted (Docker):**
+
 ```yaml
 # docker-compose.monitoring.yml
-version: '3.8'
+version: "3.8"
 
 services:
   elasticsearch:
@@ -519,16 +539,16 @@ services:
 
 ```typescript
 // main.ts
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
-import { ElasticsearchTransport } from 'winston-elasticsearch';
+import { WinstonModule } from "nest-winston";
+import * as winston from "winston";
+import { ElasticsearchTransport } from "winston-elasticsearch";
 
 const app = await NestFactory.create(AppModule, {
   logger: WinstonModule.createLogger({
     transports: [
       new winston.transports.Console(),
       new ElasticsearchTransport({
-        level: 'info',
+        level: "info",
         clientOpts: {
           node: process.env.ELASTICSEARCH_URL,
         },
@@ -546,42 +566,44 @@ const app = await NestFactory.create(AppModule, {
 
 ```yaml
 # docker-compose.monitoring.yml (continued)
-  prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - 9090:9090
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+prometheus:
+  image: prom/prometheus:latest
+  ports:
+    - 9090:9090
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  command:
+    - "--config.file=/etc/prometheus/prometheus.yml"
 ```
 
 **prometheus.yml:**
+
 ```yaml
 global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'nestjs-api'
+  - job_name: "nestjs-api"
     static_configs:
-      - targets: ['api.talentflow.ai:3000']
-    metrics_path: '/metrics'
+      - targets: ["api.talentflow.ai:3000"]
+    metrics_path: "/metrics"
 ```
 
 #### Setup Grafana
 
 ```yaml
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - 3001:3000
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana_data:/var/lib/grafana
+grafana:
+  image: grafana/grafana:latest
+  ports:
+    - 3001:3000
+  environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+  volumes:
+    - grafana_data:/var/lib/grafana
 ```
 
 **Access Grafana:**
+
 - URL: http://localhost:3001
 - Login: admin / admin
 - Add Prometheus datasource
@@ -595,12 +617,12 @@ npm install @willsoto/nestjs-prometheus prom-client
 
 ```typescript
 // app.module.ts
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { PrometheusModule } from "@willsoto/nestjs-prometheus";
 
 @Module({
   imports: [
     PrometheusModule.register({
-      path: '/metrics',
+      path: "/metrics",
       defaultMetrics: {
         enabled: true,
       },
@@ -729,6 +751,7 @@ curl https://api.talentflow.ai/health
 ```
 
 **Expected Response:**
+
 ```json
 {
   "status": "ok",
@@ -915,6 +938,7 @@ git push origin main
 ### Database Rollback
 
 **Prisma Migrations:**
+
 ```bash
 # ⚠️ Prisma doesn't support automatic rollback
 
@@ -927,6 +951,7 @@ railway run psql $DATABASE_URL < previous_migration.sql
 ```
 
 **Neon Point-in-Time Recovery:**
+
 ```bash
 # Neon Dashboard → Backups
 # Select timestamp before bug
@@ -940,30 +965,33 @@ railway run psql $DATABASE_URL < previous_migration.sql
 
 ### Key Metrics to Track
 
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| **API Response Time (p95)** | < 500ms | Alert if > 1s |
-| **Error Rate** | < 1% | Alert if > 5% |
-| **CPU Usage** | < 70% | Alert if > 85% |
-| **Memory Usage** | < 80% | Alert if > 90% |
-| **RabbitMQ Consumer Lag** | < 1000 msgs | Alert if > 5000 |
-| **Database Connections** | < 80% pool | Alert if > 90% |
+| Metric                      | Threshold   | Action          |
+| --------------------------- | ----------- | --------------- |
+| **API Response Time (p95)** | < 500ms     | Alert if > 1s   |
+| **Error Rate**              | < 1%        | Alert if > 5%   |
+| **CPU Usage**               | < 70%       | Alert if > 85%  |
+| **Memory Usage**            | < 80%       | Alert if > 90%  |
+| **RabbitMQ Consumer Lag**   | < 1000 msgs | Alert if > 5000 |
+| **Database Connections**    | < 80% pool  | Alert if > 90%  |
 
 ### Grafana Dashboards
 
 **Dashboard 1: API Performance**
+
 - Request rate (req/s)
 - Response time (p50, p95, p99)
 - Error rate (%)
 - Status code distribution
 
 **Dashboard 2: Infrastructure**
+
 - CPU usage (%)
 - Memory usage (%)
 - Database connections
 - RabbitMQ consumer lag
 
 **Dashboard 3: Business Metrics**
+
 - Active users
 - Jobs created (per day)
 - CVs uploaded (per day)
@@ -1017,7 +1045,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
       - run: npm ci
       - run: npm run test:cov
       - run: npm run lint
@@ -1053,18 +1081,19 @@ jobs:
 
 ### Monthly Costs (Production)
 
-| Service | Plan | Cost |
-|---------|------|------|
-| **Vercel** | Pro (if > 100GB bandwidth) | $20/mo |
-| **Railway** | 2 services x $20 | $40/mo |
-| **Neon** | Pro (> 3GB data) | $19/mo |
-| **Upstash Kafka** | Pay-as-you-go | ~$10/mo |
-| **Upstash Redis** | Pay-as-you-go | ~$10/mo |
-| **AWS S3** | Storage + bandwidth | ~$10/mo |
-| **Elastic Cloud** (Optional) | Basic | ~$50/mo |
-| **Total** | | **~$159/mo** |
+| Service                      | Plan                       | Cost         |
+| ---------------------------- | -------------------------- | ------------ |
+| **Vercel**                   | Pro (if > 100GB bandwidth) | $20/mo       |
+| **Railway**                  | 2 services x $20           | $40/mo       |
+| **Neon**                     | Pro (> 3GB data)           | $19/mo       |
+| **Upstash Kafka**            | Pay-as-you-go              | ~$10/mo      |
+| **Upstash Redis**            | Pay-as-you-go              | ~$10/mo      |
+| **AWS S3**                   | Storage + bandwidth        | ~$10/mo      |
+| **Elastic Cloud** (Optional) | Basic                      | ~$50/mo      |
+| **Total**                    |                            | **~$159/mo** |
 
 **Optimization Tips:**
+
 - Use free tiers initially
 - Monitor usage closely
 - Optimize before scaling
@@ -1116,17 +1145,20 @@ curl http://localhost:15672/api/overview
 ## 📞 Support & Escalation
 
 ### On-Call Rotation (Phase 2)
+
 - **Week 1-2:** Developer 1
 - **Week 3-4:** Developer 2
 - Rotate every 2 weeks
 
 ### Incident Response
+
 1. **P0 (Critical):** Service down → Fix ASAP (< 1 hour)
 2. **P1 (High):** Major bug → Fix within 4 hours
 3. **P2 (Medium):** Minor bug → Fix within 24 hours
 4. **P3 (Low):** Enhancement → Next sprint
 
 ### Contacts
+
 - **Tech Support:** tech@talentflow.ai
 - **Security:** security@talentflow.ai
 - **On-Call:** [PagerDuty or phone number]

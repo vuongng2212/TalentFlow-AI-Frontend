@@ -42,9 +42,7 @@ export const endpoints = {
   candidates: {
     list: "/candidates",
     detail: (id: string) => `/candidates/${id}`,
-    create: "/candidates",
     update: (id: string) => `/candidates/${id}`,
-    updateStage: (id: string) => `/candidates/${id}/stage`,
   },
   applications: {
     list: "/applications",

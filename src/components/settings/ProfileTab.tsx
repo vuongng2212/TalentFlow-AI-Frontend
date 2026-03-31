@@ -25,7 +25,9 @@ interface ProfileTabProps {
 
 export function ProfileTab({ user }: ProfileTabProps) {
   const [fullName, setFullName] = useState(user?.fullName ?? "");
-  const { trigger: updateUser, isMutating: isSaving } = useUpdateUser(user?.id ?? "");
+  const { trigger: updateUser, isMutating: isSaving } = useUpdateUser(
+    user?.id ?? "",
+  );
 
   const handleSaveProfile = useCallback(async () => {
     if (!user?.id) {
@@ -117,7 +119,9 @@ export function ProfileTab({ user }: ProfileTabProps) {
           <Button
             className="gap-2"
             onClick={handleSaveProfile}
-            disabled={isSaving || !fullName.trim() || fullName.trim() === user?.fullName}
+            disabled={
+              isSaving || !fullName.trim() || fullName.trim() === user?.fullName
+            }
           >
             {isSaving ? (
               <Loader2 className="h-4 w-4 animate-spin" />

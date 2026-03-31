@@ -47,8 +47,5 @@ export function useUpdateUserRole(id: string) {
  * Hook for deleting a user
  */
 export function useDeleteUser(id: string) {
-  return useMutation<void>(
-    endpoints.users.delete(id),
-    "DELETE",
-  );
+  return useMutation<void>(endpoints.users.delete(id), "DELETE");
 }

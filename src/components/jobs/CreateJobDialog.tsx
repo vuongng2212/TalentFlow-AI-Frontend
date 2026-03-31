@@ -120,7 +120,10 @@ export function CreateJobDialog({
               <Select
                 value={formData.employmentType}
                 onValueChange={(value) =>
-                  onFormChange({ ...formData, employmentType: value as EmploymentType })
+                  onFormChange({
+                    ...formData,
+                    employmentType: value as EmploymentType,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -217,7 +220,11 @@ export function CreateJobDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button onClick={onSubmit} disabled={!isFormValid || isSubmitting}>
@@ -226,8 +233,10 @@ export function CreateJobDialog({
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 {isEdit ? "Saving..." : "Creating..."}
               </>
+            ) : isEdit ? (
+              "Save Changes"
             ) : (
-              isEdit ? "Save Changes" : "Create Job"
+              "Create Job"
             )}
           </Button>
         </DialogFooter>

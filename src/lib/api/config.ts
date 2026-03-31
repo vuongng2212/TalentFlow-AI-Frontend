@@ -7,7 +7,10 @@
 
 export const apiConfig = {
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "/api/v1",
-  internalUrl: process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api/v1",
+  internalUrl:
+    process.env.API_INTERNAL_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "http://localhost:8080/api/v1",
   timeout: 30_000,
   retryAttempts: 2,
   retryDelay: 1_000,
@@ -15,7 +18,8 @@ export const apiConfig = {
 
 export const authConfig = {
   tokenKey: process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || "talentflow_access_token",
-  refreshKey: process.env.NEXT_PUBLIC_AUTH_REFRESH_KEY || "talentflow_refresh_token",
+  refreshKey:
+    process.env.NEXT_PUBLIC_AUTH_REFRESH_KEY || "talentflow_refresh_token",
   endpoints: {
     login: "/auth/login",
     signup: "/auth/signup",

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import {
   CreateJobDialog,
-  DeleteJobDialog,
   JobFilters,
   JobCard,
   EmptyJobsState,
@@ -19,9 +19,24 @@ import type { Job } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 
+const DeleteJobDialog = dynamic(
+  () =>
+    import("@/components/jobs/DeleteJobDialog").then(
+      (mod) => mod.DeleteJobDialog,
+    ),
+  { ssr: false },
+);
+
 export default function JobsPage() {
   const [page, setPage] = useState(1);
-  const { data: jobs = [], pagination, isLoading, isValidating, error, mutate } = useJobs({ page, limit: 12 });
+  const {
+    data: jobs = [],
+    pagination,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  } = useJobs({ page, limit: 12 });
   const { trigger: createJob, isMutating: isCreating } = useCreateJob();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<JobStatusFilter>("ALL");
@@ -32,7 +47,9 @@ export default function JobsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState<NewJobForm>(initialNewJobState);
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
-  const { trigger: updateJob, isMutating: isUpdating } = useUpdateJob(editingJobId ?? "");
+  const { trigger: updateJob, isMutating: isUpdating } = useUpdateJob(
+    editingJobId ?? "",
+  );
 
   // Delete state
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -43,20 +60,22 @@ export default function JobsPage() {
     return jobs.filter((job) => {
       const matchesSearch =
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (job.description ?? "").toLowerCase().includes(searchQuery.toLowerCase());
+        (job.description ?? "")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || job.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [jobs, searchQuery, statusFilter]);
 
-  // Calculate status counts
-  const statusCounts = useMemo(() => ({
+  // Calculate status counts directly without useMemo
+  const statusCounts = {
     ALL: jobs.length,
     OPEN: jobs.filter((j) => j.status === "OPEN").length,
     DRAFT: jobs.filter((j) => j.status === "DRAFT").length,
     CLOSED: jobs.filter((j) => j.status === "CLOSED").length,
-  }), [jobs]);
+  };
 
   // Stable callbacks
   const handleSearchChange = useCallback((query: string) => {
@@ -174,7 +193,9 @@ export default function JobsPage() {
           <Loader2 className="h-8 w-8 rotate-45" />
         </div>
         <h3 className="text-xl font-semibold">Failed to load jobs</h3>
-        <p className="text-muted-foreground">Please try again later or contact support.</p>
+        <p className="text-muted-foreground">
+          Please try again later or contact support.
+        </p>
       </div>
     );
   }
@@ -212,7 +233,12 @@ export default function JobsPage() {
       {filteredJobs.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredJobs.map((job) => (
-            <JobCard key={job.id} job={job} onEdit={handleEditFromCard} onDelete={handleDeleteFromCard} />
+            <JobCard
+              key={job.id}
+              job={job}
+              onEdit={handleEditFromCard}
+              onDelete={handleDeleteFromCard}
+            />
           ))}
         </div>
       ) : (
@@ -223,7 +249,7 @@ export default function JobsPage() {
       )}
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {pagination && pagination.totalPages > 1 ? (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             Showing {jobs.length} of {pagination.total} jobs
@@ -235,7 +261,7 @@ export default function JobsPage() {
             disabled={isValidating}
           />
         </div>
-      )}
+      ) : null}
 
       {/* Edit Job Dialog */}
       <CreateJobDialog
@@ -250,7 +276,7 @@ export default function JobsPage() {
       />
 
       {/* Delete Job Dialog */}
-      {deletingJob && (
+      {deletingJob ? (
         <DeleteJobDialog
           jobId={deletingJob.id}
           jobTitle={deletingJob.title}
@@ -258,7 +284,7 @@ export default function JobsPage() {
           onOpenChange={setDeleteOpen}
           onDeleted={handleDeleted}
         />
-      )}
+      ) : null}
     </div>
   );
 }

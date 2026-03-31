@@ -16,7 +16,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
       className={cn(
         "flex h-16 items-center justify-between",
         "border-b border-border/50",
-        "px-3"
+        "px-3",
       )}
     >
       <Link
@@ -24,7 +24,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
         className={cn(
           "group relative flex items-center rounded-lg",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          collapsed ? "justify-center p-1" : "gap-2.5 px-2 py-1"
+          collapsed ? "justify-center p-1" : "gap-2.5 px-2 py-1",
         )}
         title={collapsed ? APP_NAME : undefined}
       >
@@ -35,7 +35,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
             "bg-linear-to-br from-primary via-indigo-500 to-purple-500",
             "shadow-soft-sm",
             "transition-transform duration-200 group-hover:scale-105",
-            collapsed ? "h-10 w-10" : "h-9 w-9"
+            collapsed ? "h-10 w-10" : "h-9 w-9",
           )}
         >
           <Sparkles className="h-5 w-5 text-white" />
@@ -68,7 +68,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
         className={cn(
           "h-8 w-8 text-muted-foreground hover:text-foreground",
           "transition-transform duration-200",
-          collapsed && "rotate-180"
+          collapsed && "rotate-180",
         )}
       >
         {collapsed ? (

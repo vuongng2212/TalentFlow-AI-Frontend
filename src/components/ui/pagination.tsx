@@ -2,7 +2,12 @@
 
 import { useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
@@ -13,7 +18,11 @@ interface PaginationProps {
   maxVisible?: number;
 }
 
-function getPageRange(current: number, total: number, maxVisible: number): (number | "ellipsis")[] {
+function getPageRange(
+  current: number,
+  total: number,
+  maxVisible: number,
+): (number | "ellipsis")[] {
   if (total <= maxVisible) {
     return Array.from({ length: total }, (_, i) => i + 1);
   }

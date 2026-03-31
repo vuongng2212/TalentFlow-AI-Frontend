@@ -9,7 +9,7 @@ interface UseScrollAnimationOptions {
 }
 
 export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
-  options: UseScrollAnimationOptions = {}
+  options: UseScrollAnimationOptions = {},
 ) {
   const { threshold = 0.1, rootMargin = "0px", triggerOnce = true } = options;
   const ref = useRef<T>(null);
@@ -21,7 +21,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
 
     // Respect user's motion preferences
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
 
     if (prefersReducedMotion) {
@@ -41,7 +41,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
           setIsVisible(false);
         }
       },
-      { threshold, rootMargin }
+      { threshold, rootMargin },
     );
 
     observer.observe(element);
@@ -57,7 +57,7 @@ export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
 // Hook for staggered animations (lists, grids)
 export function useStaggeredAnimation<T extends HTMLElement = HTMLDivElement>(
   itemCount: number,
-  options: UseScrollAnimationOptions & { staggerDelay?: number } = {}
+  options: UseScrollAnimationOptions & { staggerDelay?: number } = {},
 ) {
   const { staggerDelay = 100, ...scrollOptions } = options;
   const { ref, isVisible } = useScrollAnimation<T>(scrollOptions);
@@ -66,7 +66,7 @@ export function useStaggeredAnimation<T extends HTMLElement = HTMLDivElement>(
     (index: number): React.CSSProperties => ({
       transitionDelay: isVisible ? `${index * staggerDelay}ms` : "0ms",
     }),
-    [isVisible, staggerDelay]
+    [isVisible, staggerDelay],
   );
 
   return { ref, isVisible, getStaggerStyle };

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
-const apiBaseUrl = process.env.API_INTERNAL_URL || "http://localhost:8080/api/v1";
+const apiBaseUrl =
+  process.env.API_INTERNAL_URL || "http://localhost:8080/api/v1";
 
 const nextConfig: NextConfig = {
   /** Proxy API requests to backend during development (avoids CORS) */

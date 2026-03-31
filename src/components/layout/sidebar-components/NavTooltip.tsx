@@ -21,7 +21,7 @@ export function NavTooltip({ visible, label, badge }: NavTooltipProps) {
         "shadow-soft-md",
         "opacity-0 scale-95 transition-all duration-150",
         "group-hover:opacity-100 group-hover:scale-100",
-        "group-focus-within:opacity-100 group-focus-within:scale-100"
+        "group-focus-within:opacity-100 group-focus-within:scale-100",
       )}
     >
       {label}

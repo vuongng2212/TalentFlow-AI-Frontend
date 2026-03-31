@@ -3,19 +3,12 @@
 import { cn } from "@/lib/utils";
 import { useStaggeredAnimation } from "@/hooks/use-scroll-animation";
 
-const companies = [
-  "Google",
-  "Microsoft",
-  "Amazon",
-  "Meta",
-  "Apple",
-  "Netflix",
-];
+const companies = ["Google", "Microsoft", "Amazon", "Meta", "Apple", "Netflix"];
 
 export function LogosSection() {
   const { ref, isVisible, getStaggerStyle } = useStaggeredAnimation(
     companies.length,
-    { staggerDelay: 60 }
+    { staggerDelay: 60 },
   );
 
   return (
@@ -33,7 +26,7 @@ export function LogosSection() {
               key={company}
               className={cn(
                 "text-xl font-bold text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors scroll-fade",
-                isVisible && "is-visible"
+                isVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >

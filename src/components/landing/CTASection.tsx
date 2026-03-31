@@ -17,7 +17,7 @@ export function CTASection() {
           ref={ref}
           className={cn(
             "relative rounded-3xl bg-linear-to-r from-primary to-indigo-600 p-12 lg:p-16 overflow-hidden scroll-scale",
-            isVisible && "is-visible"
+            isVisible && "is-visible",
           )}
         >
           {/* Background Pattern */}

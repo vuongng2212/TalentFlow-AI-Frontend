@@ -13,7 +13,11 @@ interface JobCardProps {
   onDelete?: (job: Job) => void;
 }
 
-export const JobCard = React.memo(function JobCard({ job, onEdit, onDelete }: JobCardProps) {
+export const JobCard = React.memo(function JobCard({
+  job,
+  onEdit,
+  onDelete,
+}: JobCardProps) {
   return (
     <Card className="hover-lift group cursor-pointer">
       <CardHeader>
@@ -24,8 +28,8 @@ export const JobCard = React.memo(function JobCard({ job, onEdit, onDelete }: Jo
                 job.status === "OPEN"
                   ? "success"
                   : job.status === "DRAFT"
-                  ? "secondary"
-                  : "outline"
+                    ? "secondary"
+                    : "outline"
               }
               className="mb-2"
             >
@@ -51,8 +55,8 @@ export const JobCard = React.memo(function JobCard({ job, onEdit, onDelete }: Jo
                 {job.salaryMin && job.salaryMax
                   ? `$${job.salaryMin.toLocaleString()} – $${job.salaryMax.toLocaleString()}`
                   : job.salaryMin
-                  ? `From $${job.salaryMin.toLocaleString()}`
-                  : `Up to $${job.salaryMax!.toLocaleString()}`}
+                    ? `From $${job.salaryMin.toLocaleString()}`
+                    : `Up to $${job.salaryMax!.toLocaleString()}`}
               </span>
             </div>
           ) : null}
@@ -68,14 +72,26 @@ export const JobCard = React.memo(function JobCard({ job, onEdit, onDelete }: Jo
 
         {/* Skills */}
         <div className="flex flex-wrap gap-2">
-          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).slice(0, 3).map((skill: string) => (
-            <Badge key={skill} variant="outline" className="text-xs">
-              {skill}
-            </Badge>
-          ))}
-          {(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length > 3 ? (
+          {(
+            ((job.requirements as Record<string, unknown>)
+              ?.skills as string[]) ?? []
+          )
+            .slice(0, 3)
+            .map((skill: string) => (
+              <Badge key={skill} variant="outline" className="text-xs">
+                {skill}
+              </Badge>
+            ))}
+          {(
+            ((job.requirements as Record<string, unknown>)
+              ?.skills as string[]) ?? []
+          ).length > 3 ? (
             <Badge variant="outline" className="text-xs">
-              +{(((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []).length - 3}
+              +
+              {(
+                ((job.requirements as Record<string, unknown>)
+                  ?.skills as string[]) ?? []
+              ).length - 3}
             </Badge>
           ) : null}
         </div>

@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
 
   // Check if the current route is a protected route
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   // Check if the current route is an auth page

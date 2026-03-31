@@ -63,11 +63,15 @@ export function WithdrawDialog({
           </div>
           <DialogDescription className="pt-2">
             Are you sure you want to withdraw{" "}
-            <span className="font-semibold text-foreground">{candidateName}</span>
+            <span className="font-semibold text-foreground">
+              {candidateName}
+            </span>
             {jobTitle ? (
               <>
                 &apos;s application for{" "}
-                <span className="font-semibold text-foreground">&quot;{jobTitle}&quot;</span>
+                <span className="font-semibold text-foreground">
+                  &quot;{jobTitle}&quot;
+                </span>
               </>
             ) : (
               "&apos;s application"

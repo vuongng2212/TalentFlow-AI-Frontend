@@ -19,7 +19,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Sidebar - Mobile Overlay */}
-      {sidebarOpen && (
+      {sidebarOpen ? (
         <>
           <div
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -29,7 +29,7 @@ export default function DashboardLayout({
             <Sidebar />
           </aside>
         </>
-      )}
+      ) : null}
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">

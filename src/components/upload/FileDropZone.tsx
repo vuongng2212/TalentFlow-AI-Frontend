@@ -83,7 +83,10 @@ export function FileDropZone({
                   key={index}
                   className="flex items-center gap-3 p-3 rounded-lg border border-border bg-accent/50"
                 >
-                  <FileText className="h-5 w-5 text-primary shrink-0" aria-hidden="true" />
+                  <FileText
+                    className="h-5 w-5 text-primary shrink-0"
+                    aria-hidden="true"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{file.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -97,7 +100,10 @@ export function FileDropZone({
                     className="h-8 w-8 hover:bg-destructive/10"
                     aria-label={`Remove ${file.name}`}
                   >
-                    <X className="h-4 w-4 text-muted-foreground hover:text-destructive" aria-hidden="true" />
+                    <X
+                      className="h-4 w-4 text-muted-foreground hover:text-destructive"
+                      aria-hidden="true"
+                    />
                   </Button>
                 </div>
               ))}

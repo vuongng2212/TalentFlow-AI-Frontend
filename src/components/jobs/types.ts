@@ -30,7 +30,8 @@ export function jobToForm(job: Job): NewJobForm {
   // Backend returns requirements as string[] or legacy Record with .skills
   const skillsList: string[] = Array.isArray(job.requirements)
     ? job.requirements
-    : ((job.requirements as Record<string, unknown>)?.skills as string[]) ?? [];
+    : (((job.requirements as Record<string, unknown>)?.skills as string[]) ??
+      []);
 
   return {
     title: job.title,

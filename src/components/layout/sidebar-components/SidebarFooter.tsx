@@ -28,7 +28,7 @@ export function SidebarFooter({
           "group relative flex items-center rounded-lg",
           "transition-colors duration-200",
           "hover:bg-accent/50",
-          collapsed ? "justify-center p-2" : "gap-3 p-2"
+          collapsed ? "justify-center p-2" : "gap-3 p-2",
         )}
       >
         <Avatar
@@ -61,7 +61,7 @@ export function SidebarFooter({
           "transition-all duration-200",
           "hover:bg-destructive/10 hover:text-destructive",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive",
-          collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-3 px-3 py-2"
+          collapsed ? "justify-center h-10 w-10 mx-auto" : "gap-3 px-3 py-2",
         )}
       >
         <LogOut className="h-[18px] w-[18px] transition-transform duration-200 group-hover:-translate-x-0.5" />

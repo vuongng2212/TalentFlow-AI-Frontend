@@ -61,10 +61,14 @@ export function TeamTab() {
                   <p className="font-medium">
                     {member.fullName}
                     {member.id === currentUser?.id && (
-                      <span className="ml-2 text-xs text-muted-foreground">(You)</span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        (You)
+                      </span>
                     )}
                   </p>
-                  <p className="text-sm text-muted-foreground">{member.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {member.email}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

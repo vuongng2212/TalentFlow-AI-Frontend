@@ -38,8 +38,11 @@ const testimonials = [
 
 export function TestimonialsSection() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
-    useStaggeredAnimation(testimonials.length, { staggerDelay: 120 });
+  const {
+    ref: gridRef,
+    isVisible: gridVisible,
+    getStaggerStyle,
+  } = useStaggeredAnimation(testimonials.length, { staggerDelay: 120 });
 
   return (
     <section className="py-24 lg:py-32">
@@ -49,7 +52,7 @@ export function TestimonialsSection() {
           ref={headerRef}
           className={cn(
             "text-center max-w-2xl mx-auto mb-16 scroll-animate",
-            headerVisible && "is-visible"
+            headerVisible && "is-visible",
           )}
         >
           <Badge variant="outline" className="mb-4">
@@ -70,7 +73,7 @@ export function TestimonialsSection() {
               key={testimonial.author}
               className={cn(
                 "hover-lift scroll-stagger-item",
-                gridVisible && "is-visible"
+                gridVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >
@@ -97,7 +100,9 @@ export function TestimonialsSection() {
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">{testimonial.author}</p>
+                    <p className="font-semibold text-sm">
+                      {testimonial.author}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {testimonial.role}
                     </p>

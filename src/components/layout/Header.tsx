@@ -38,7 +38,10 @@ export function Header({ onMenuClick }: HeaderProps) {
       {/* Search Bar */}
       <div className="flex-1 max-w-md">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Search
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             type="search"
             placeholder="Search candidates, jobs…"
@@ -57,11 +60,20 @@ export function Header({ onMenuClick }: HeaderProps) {
           onClick={toggleTheme}
           aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
         >
-          {isDark ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
+          {isDark ? (
+            <Sun className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <Moon className="h-5 w-5" aria-hidden="true" />
+          )}
         </Button>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          aria-label="Notifications"
+        >
           <Bell className="h-5 w-5" aria-hidden="true" />
           <Badge
             variant="destructive"

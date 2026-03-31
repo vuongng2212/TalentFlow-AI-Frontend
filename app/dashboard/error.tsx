@@ -28,13 +28,15 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-sm text-muted-foreground">
-            An unexpected error occurred while loading this page.
-            Please try again or return to the dashboard.
+            An unexpected error occurred while loading this page. Please try
+            again or return to the dashboard.
           </p>
 
           {process.env.NODE_ENV === "development" && error.message ? (
             <div className="rounded-lg bg-muted/50 p-3 text-xs">
-              <p className="font-medium text-destructive mb-1">Error details:</p>
+              <p className="font-medium text-destructive mb-1">
+                Error details:
+              </p>
               <p className="text-muted-foreground font-mono break-all">
                 {error.message}
               </p>

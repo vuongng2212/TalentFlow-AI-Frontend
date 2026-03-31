@@ -4,13 +4,22 @@ import { z } from "zod";
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/;
 
 export const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
 export const signupSchema = z.object({
-  fullName: z.string().min(1, "Full name is required").max(100, "Full name is too long"),
-  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  fullName: z
+    .string()
+    .min(1, "Full name is required")
+    .max(100, "Full name is too long"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long")

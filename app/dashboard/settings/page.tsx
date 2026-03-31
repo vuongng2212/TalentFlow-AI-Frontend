@@ -31,14 +31,17 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Sidebar Navigation */}
-        <SettingsNavigation activeTab={activeTab} onTabChange={handleTabChange} />
+        <SettingsNavigation
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
 
         {/* Content Area */}
         <div className="lg:col-span-3 space-y-6">
-          {activeTab === "profile" && <ProfileTab user={user} />}
-          {activeTab === "notifications" && <NotificationsTab />}
-          {activeTab === "team" && <TeamTab />}
-          {activeTab === "preferences" && <PreferencesTab />}
+          {activeTab === "profile" ? <ProfileTab user={user} /> : null}
+          {activeTab === "notifications" ? <NotificationsTab /> : null}
+          {activeTab === "team" ? <TeamTab /> : null}
+          {activeTab === "preferences" ? <PreferencesTab /> : null}
         </div>
       </div>
     </div>

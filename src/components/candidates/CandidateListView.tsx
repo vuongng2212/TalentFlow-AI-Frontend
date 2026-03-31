@@ -54,8 +54,8 @@ const CandidateListItem = React.memo(function CandidateListItem({
               candidate.aiScore >= 85
                 ? "bg-emerald-500"
                 : candidate.aiScore >= 70
-                ? "bg-amber-500"
-                : "bg-rose-500"
+                  ? "bg-amber-500"
+                  : "bg-rose-500"
             }`}
           />
           <span className="text-xs font-medium tabular-nums">

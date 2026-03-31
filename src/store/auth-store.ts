@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { api, endpoints } from "@/lib/api";
 import { getErrorMessage } from "@/lib/api/errors";
-import type { AuthUser, LoginRequest, SignupRequest, ApiResponse, LoginResponseData } from "@/lib/api/types";
+import type {
+  AuthUser,
+  LoginRequest,
+  SignupRequest,
+  ApiResponse,
+  LoginResponseData,
+} from "@/lib/api/types";
 
 interface AuthState {
   user: AuthUser | null;
@@ -26,7 +32,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   login: async (data: LoginRequest) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post<ApiResponse<LoginResponseData>>(endpoints.auth.login, data);
+      const response = await api.post<ApiResponse<LoginResponseData>>(
+        endpoints.auth.login,
+        data,
+      );
       const userData = response.data.user;
 
       set({
@@ -45,7 +54,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       // Step 1: Create account
-      await api.post<ApiResponse<{ user: AuthUser }>>(endpoints.auth.signup, data);
+      await api.post<ApiResponse<{ user: AuthUser }>>(
+        endpoints.auth.signup,
+        data,
+      );
 
       // Step 2: Auto-login to set HttpOnly cookies
       const { login } = get();
@@ -76,7 +88,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   checkAuth: async () => {
     set({ isLoading: true });
     try {
-      const response = await api.get<ApiResponse<{ user: AuthUser }>>(endpoints.auth.me);
+      const response = await api.get<ApiResponse<{ user: AuthUser }>>(
+        endpoints.auth.me,
+      );
       set({
         user: response.data.user,
         isAuthenticated: true,

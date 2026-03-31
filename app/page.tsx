@@ -29,7 +29,9 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-          <p className="mt-4 text-muted-foreground">Redirecting to dashboard...</p>
+          <p className="mt-4 text-muted-foreground">
+            Redirecting to dashboard...
+          </p>
         </div>
       </div>
     );

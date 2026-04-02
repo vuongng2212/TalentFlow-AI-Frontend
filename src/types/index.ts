@@ -13,15 +13,9 @@ export type ApplicationStage =
   | "HIRED"
   | "REJECTED";
 export type ApplicationStatus =
-  | "SUBMITTED"
-  | "REVIEWING"
-  | "SHORTLISTED"
-  | "INTERVIEW_SCHEDULED"
-  | "INTERVIEWED"
-  | "OFFERED"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "WITHDRAWN";
+  | "ACTIVE"
+  | "WITHDRAWN"
+  | "REJECTED";
 
 export interface User {
   id: string;

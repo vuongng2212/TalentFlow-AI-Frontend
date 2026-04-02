@@ -4,15 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { CrudDialog } from "@/components/shared/crud-dialog";
 import {
   Select,
   SelectContent,
@@ -49,24 +41,31 @@ export function CreateJobDialog({
   const isEdit = mode === "edit";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      {!hideTrigger && (
-        <DialogTrigger asChild>
+    <CrudDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEdit ? "Edit Job" : "Create New Job"}
+      description={
+        isEdit
+          ? "Update the job posting details. Click Save Changes when you're done."
+          : "Fill in the details for your new job posting. Click Create Job when you're done."
+      }
+      trigger={
+        !hideTrigger ? (
           <Button className="gap-2">
             <Plus className="h-4 w-4" aria-hidden="true" />
             Create Job
           </Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Job" : "Create New Job"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the job posting details. Click save when you\u0027re done."
-              : "Fill in the details for your new job posting. Click save when you\u0027re done."}
-          </DialogDescription>
-        </DialogHeader>
+        ) : undefined
+      }
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+        className="flex flex-col h-full"
+      >
         <div className="grid gap-4 py-4">
           {/* Job Title */}
           <div className="grid gap-2">
@@ -80,6 +79,7 @@ export function CreateJobDialog({
               }
               autoComplete="off"
               maxLength={200}
+              autoFocus
             />
           </div>
 
@@ -219,15 +219,18 @@ export function CreateJobDialog({
             </p>
           </div>
         </div>
-        <DialogFooter>
+
+        {/* Footer actions inside the form */}
+        <div className="mt-4 -mx-6 -mb-4 px-6 py-4 bg-muted/30 border-t flex items-center justify-end gap-2 sticky bottom-0">
           <Button
+            type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button onClick={onSubmit} disabled={!isFormValid || isSubmitting}>
+          <Button type="submit" disabled={!isFormValid || isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -239,8 +242,8 @@ export function CreateJobDialog({
               "Create Job"
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </form>
+    </CrudDialog>
   );
 }

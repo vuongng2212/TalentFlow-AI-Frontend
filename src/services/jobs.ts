@@ -7,7 +7,11 @@
 
 import { useFetch, useFetchList, useMutation } from "@/hooks/use-fetch";
 import { endpoints } from "@/lib/api/config";
-import type { JobListParams, CreateJobRequest, UpdateJobRequest } from "@/lib/api/types";
+import type {
+  JobListParams,
+  CreateJobRequest,
+  UpdateJobRequest,
+} from "@/lib/api/types";
 import type { Job as DomainJob } from "@/types";
 
 /**
@@ -34,7 +38,10 @@ export function useJob(id: string | null) {
  * Hook for creating a new job
  */
 export function useCreateJob() {
-  return useMutation<DomainJob, CreateJobRequest>(endpoints.jobs.create, "POST");
+  return useMutation<DomainJob, CreateJobRequest>(
+    endpoints.jobs.create,
+    "POST",
+  );
 }
 
 /**
@@ -43,7 +50,10 @@ export function useCreateJob() {
  * @param id Job ID
  */
 export function useUpdateJob(id: string) {
-  return useMutation<DomainJob, UpdateJobRequest>(endpoints.jobs.detail(id), "PUT");
+  return useMutation<DomainJob, UpdateJobRequest>(
+    endpoints.jobs.detail(id),
+    "PUT",
+  );
 }
 
 /**

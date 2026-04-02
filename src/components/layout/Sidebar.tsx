@@ -41,7 +41,7 @@ export function Sidebar() {
         "border-r border-border/60 bg-card/98",
         "shadow-soft-sm",
         "transition-[width] duration-300 ease-out",
-        collapsed ? "w-18" : "w-64"
+        collapsed ? "w-18" : "w-64",
       )}
     >
       {/* Header - Logo & Toggle */}

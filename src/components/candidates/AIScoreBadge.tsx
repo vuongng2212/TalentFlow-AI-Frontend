@@ -7,7 +7,13 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { Sparkles, Target, Briefcase, GraduationCap, TrendingUp } from "lucide-react";
+import {
+  Sparkles,
+  Target,
+  Briefcase,
+  GraduationCap,
+  TrendingUp,
+} from "lucide-react";
 
 interface AIScoreBreakdown {
   skillsMatch: number;
@@ -33,10 +39,22 @@ function seededRandom(seed: number): number {
 // Generate deterministic breakdown based on score
 function generateBreakdown(score: number): AIScoreBreakdown {
   return {
-    skillsMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 1) * 10) - 5)),
-    experienceMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 2) * 15) - 7)),
-    educationMatch: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 3) * 12) - 6)),
-    cultureFit: Math.min(100, Math.max(0, score + Math.floor(seededRandom(score * 4) * 8) - 4)),
+    skillsMatch: Math.min(
+      100,
+      Math.max(0, score + Math.floor(seededRandom(score * 1) * 10) - 5),
+    ),
+    experienceMatch: Math.min(
+      100,
+      Math.max(0, score + Math.floor(seededRandom(score * 2) * 15) - 7),
+    ),
+    educationMatch: Math.min(
+      100,
+      Math.max(0, score + Math.floor(seededRandom(score * 3) * 12) - 6),
+    ),
+    cultureFit: Math.min(
+      100,
+      Math.max(0, score + Math.floor(seededRandom(score * 4) * 8) - 4),
+    ),
   };
 }
 
@@ -73,7 +91,15 @@ function getScoreLevel(score: number): {
   };
 }
 
-function ScoreBar({ value, label, icon: Icon }: { value: number; label: string; icon: React.ElementType }) {
+function ScoreBar({
+  value,
+  label,
+  icon: Icon,
+}: {
+  value: number;
+  label: string;
+  icon: React.ElementType;
+}) {
   const { bgClass } = getScoreLevel(value);
 
   return (
@@ -87,7 +113,10 @@ function ScoreBar({ value, label, icon: Icon }: { value: number; label: string; 
       </div>
       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all duration-500", bgClass)}
+          className={cn(
+            "h-full rounded-full transition-all duration-500",
+            bgClass,
+          )}
           style={{ width: `${value}%` }}
         />
       </div>
@@ -131,7 +160,7 @@ export const AIScoreBadge = React.memo(function AIScoreBadge({
         bgClass,
         colorClass,
         sizeClasses[size],
-        className
+        className,
       )}
     >
       <Sparkles className={iconSizes[size]} />

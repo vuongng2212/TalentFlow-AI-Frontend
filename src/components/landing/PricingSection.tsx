@@ -64,8 +64,11 @@ const plans = [
 
 export function PricingSection() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: gridRef, isVisible: gridVisible, getStaggerStyle } =
-    useStaggeredAnimation(plans.length, { staggerDelay: 120 });
+  const {
+    ref: gridRef,
+    isVisible: gridVisible,
+    getStaggerStyle,
+  } = useStaggeredAnimation(plans.length, { staggerDelay: 120 });
 
   return (
     <section className="py-24 lg:py-32 bg-muted/30">
@@ -75,7 +78,7 @@ export function PricingSection() {
           ref={headerRef}
           className={cn(
             "text-center max-w-2xl mx-auto mb-16 scroll-animate",
-            headerVisible && "is-visible"
+            headerVisible && "is-visible",
           )}
         >
           <Badge variant="outline" className="mb-4">
@@ -99,7 +102,7 @@ export function PricingSection() {
                 gridVisible && "is-visible",
                 plan.popular
                   ? "border-primary shadow-soft-lg scale-105"
-                  : "border-border/50"
+                  : "border-border/50",
               )}
               style={getStaggerStyle(index)}
             >

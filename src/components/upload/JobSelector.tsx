@@ -35,7 +35,9 @@ export function JobSelector({
             disabled={isLoading}
             className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
           >
-            <option value="">{isLoading ? "Loading jobs..." : "Select a job..."}</option>
+            <option value="">
+              {isLoading ? "Loading jobs..." : "Select a job..."}
+            </option>
             {openJobs.map((job) => (
               <option key={job.id} value={job.id}>
                 {job.title} - {job.location}

@@ -27,7 +27,7 @@ const TooltipContent = React.forwardRef<
         "data-[side=right]:slide-in-from-left-2",
         "data-[side=top]:slide-in-from-bottom-2",
         "shadow-soft-md",
-        className
+        className,
       )}
       {...props}
     />

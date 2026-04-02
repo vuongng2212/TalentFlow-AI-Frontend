@@ -46,7 +46,9 @@ export function PipelineOverview({
         <div className="flex flex-wrap gap-4 mt-4">
           {columns.map((column) => (
             <div key={column.id} className="flex items-center gap-2 text-xs">
-              <div className={`h-2.5 w-2.5 rounded-full ${colorMap[column.id]}`} />
+              <div
+                className={`h-2.5 w-2.5 rounded-full ${colorMap[column.id]}`}
+              />
               <span className="text-muted-foreground">{column.title}</span>
               <span className="font-semibold tabular-nums">{column.count}</span>
             </div>

@@ -38,14 +38,20 @@ export function useApplication(id: string | null) {
  * Hook for submitting a new application
  */
 export function useCreateApplication() {
-  return useMutation<Application, CreateApplicationRequest>(endpoints.applications.create, "POST");
+  return useMutation<Application, CreateApplicationRequest>(
+    endpoints.applications.create,
+    "POST",
+  );
 }
 
 /**
  * Hook for updating an application (e.g., stage or status)
  */
 export function useUpdateApplication(id: string) {
-  return useMutation<Application, UpdateApplicationRequest>(endpoints.applications.detail(id), "PUT");
+  return useMutation<Application, UpdateApplicationRequest>(
+    endpoints.applications.detail(id),
+    "PUT",
+  );
 }
 
 /**
@@ -74,6 +80,14 @@ export async function updateApplicationStage(
 }
 
 /**
+ * Imperative function for deleting an application.
+ * Used in handlers where hook-based approach isn't practical.
+ */
+export async function deleteApplication(id: string): Promise<void> {
+  await api.delete(endpoints.applications.delete(id));
+}
+
+/**
  * Hook for uploading a CV with multipart/form-data
  *
  * Uses api.upload() to send FormData to POST /applications/upload
@@ -86,7 +100,10 @@ export function useUploadCV() {
     { file: File; jobId: string; coverLetter?: string }
   >(
     endpoints.applications.upload,
-    async (url: string, { arg }: { arg: { file: File; jobId: string; coverLetter?: string } }) => {
+    async (
+      url: string,
+      { arg }: { arg: { file: File; jobId: string; coverLetter?: string } },
+    ) => {
       const formData = new FormData();
       formData.append("file", arg.file);
       formData.append("jobId", arg.jobId);

@@ -32,17 +32,18 @@
 
 ### Core Entities (MVP - Phase 1)
 
-| Entity | Purpose | Service Owner | Status |
-|--------|---------|---------------|--------|
-| **User** | System users (Admin, Recruiter, Interviewer) | API Gateway | ✅ MVP |
-| **Job** | Job postings | API Gateway | ✅ MVP |
-| **Candidate** | Job applicants | **CV Parser** | ✅ MVP |
-| **Application** | Application submissions | API Gateway | ✅ MVP |
-| **Interview** | Interview scheduling | API Gateway | 🔜 Phase 2 |
-| **CandidateNote** | Recruiter notes on candidates | API Gateway | 🔜 Phase 2 |
-| **AuditLog** | System audit trail | API Gateway | 🔜 Phase 2 |
+| Entity            | Purpose                                      | Service Owner | Status     |
+| ----------------- | -------------------------------------------- | ------------- | ---------- |
+| **User**          | System users (Admin, Recruiter, Interviewer) | API Gateway   | ✅ MVP     |
+| **Job**           | Job postings                                 | API Gateway   | ✅ MVP     |
+| **Candidate**     | Job applicants                               | **CV Parser** | ✅ MVP     |
+| **Application**   | Application submissions                      | API Gateway   | ✅ MVP     |
+| **Interview**     | Interview scheduling                         | API Gateway   | 🔜 Phase 2 |
+| **CandidateNote** | Recruiter notes on candidates                | API Gateway   | 🔜 Phase 2 |
+| **AuditLog**      | System audit trail                           | API Gateway   | 🔜 Phase 2 |
 
 **Service Ownership Rules:**
+
 - ✅ **API Gateway (NestJS):** Owns `users`, `jobs`, `applications`, `interviews`, `candidate_notes`, `audit_logs`
 - ✅ **CV Parser (Spring Boot):** Owns `candidates` table (writes `resume_text`, `ai_score`)
 - ✅ **Notification Service (ASP.NET Core):** Stateless (no table ownership, reads from Redis cache)
@@ -137,6 +138,7 @@ erDiagram
 ### Full Schema
 
 **Location Options:**
+
 - **Option 1 (Recommended):** `shared/prisma/schema.prisma` - Shared schema for all services
 - **Option 2:** `api-gateway/prisma/schema.prisma` - API Gateway owns Prisma, CV Parser uses JDBC
 
@@ -357,6 +359,7 @@ model AuditLog {
 **Purpose**: System users with different roles
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `email` (String, Unique): Login email
 - `password` (String): Bcrypt hashed password
@@ -365,17 +368,19 @@ model AuditLog {
 - `createdAt`, `updatedAt`, `deletedAt`: Timestamps
 
 **Indexes**:
+
 - `email` (Unique): Fast login lookup
 - `role`: Filter by role
 
 **Example**:
+
 ```typescript
 const user = await prisma.user.create({
   data: {
-    email: 'recruiter@talentflow.ai',
-    password: await bcrypt.hash('password123', 10),
-    role: 'RECRUITER',
-    fullName: 'Jane Doe',
+    email: "recruiter@talentflow.ai",
+    password: await bcrypt.hash("password123", 10),
+    role: "RECRUITER",
+    fullName: "Jane Doe",
   },
 });
 ```
@@ -387,6 +392,7 @@ const user = await prisma.user.create({
 **Purpose**: Job postings created by recruiters
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `title` (String): Job title
 - `description` (Text): Full job description
@@ -404,22 +410,24 @@ const user = await prisma.user.create({
 - `createdAt`, `updatedAt`: Timestamps
 
 **Indexes**:
+
 - `status`: Filter active jobs
 - `createdById`: Jobs by recruiter
 - `createdAt`: Sort by date
 
 **Example**:
+
 ```typescript
 const job = await prisma.job.create({
   data: {
-    title: 'Senior Full-Stack Developer',
-    description: 'We are looking for...',
+    title: "Senior Full-Stack Developer",
+    description: "We are looking for...",
     requirements: {
-      skills: ['NestJS', 'Next.js', 'PostgreSQL'],
-      experience: '5+ years',
+      skills: ["NestJS", "Next.js", "PostgreSQL"],
+      experience: "5+ years",
     },
-    salaryRange: '$100k - $150k',
-    status: 'OPEN',
+    salaryRange: "$100k - $150k",
+    status: "OPEN",
     createdById: user.id,
   },
 });
@@ -432,6 +440,7 @@ const job = await prisma.job.create({
 **Purpose**: Job applicants
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `email` (String, Unique): Contact email
 - `fullName` (String): Candidate name
@@ -442,18 +451,21 @@ const job = await prisma.job.create({
 - `createdAt`, `updatedAt`: Timestamps
 
 **Indexes**:
+
 - `email` (Unique): Prevent duplicate candidates
 - `fullName`: Search by name
 
 **Example**:
+
 ```typescript
 const candidate = await prisma.candidate.create({
   data: {
-    email: 'john.doe@email.com',
-    fullName: 'John Doe',
-    phone: '+1234567890',
-    resumeUrl: 'https://talentflow-cvs.r2.cloudflarestorage.com/resumes/john-doe-cv.pdf',
-    resumeText: 'Extracted text content...',
+    email: "john.doe@email.com",
+    fullName: "John Doe",
+    phone: "+1234567890",
+    resumeUrl:
+      "https://talentflow-cvs.r2.cloudflarestorage.com/resumes/john-doe-cv.pdf",
+    resumeText: "Extracted text content...",
   },
 });
 ```
@@ -465,6 +477,7 @@ const candidate = await prisma.candidate.create({
 **Purpose**: Tracks candidate applications to jobs
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `jobId` (UUID, FK): Job being applied to
 - `candidateId` (UUID, FK): Candidate applying
@@ -475,19 +488,21 @@ const candidate = await prisma.candidate.create({
 - `appliedAt`, `updatedAt`: Timestamps
 
 **Indexes**:
+
 - `[jobId, candidateId]` (Unique): Prevent duplicate applications
 - `jobId`: Applications for a job
 - `candidateId`: Applications by candidate
 - `stage`, `status`: Filter by pipeline stage
 
 **Example**:
+
 ```typescript
 const application = await prisma.application.create({
   data: {
     jobId: job.id,
     candidateId: candidate.id,
-    stage: 'APPLIED',
-    status: 'PENDING',
+    stage: "APPLIED",
+    status: "PENDING",
   },
   include: {
     job: true,
@@ -503,6 +518,7 @@ const application = await prisma.application.create({
 **Purpose**: Schedule and track interviews
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `applicationId` (UUID, FK): Related application
 - `interviewerId` (UUID, FK): Interviewer (User)
@@ -514,6 +530,7 @@ const application = await prisma.application.create({
 - `createdAt`, `updatedAt`: Timestamps
 
 **Indexes**:
+
 - `applicationId`: Interviews for application
 - `interviewerId`: Interviews by interviewer
 - `scheduledAt`: Upcoming interviews
@@ -526,6 +543,7 @@ const application = await prisma.application.create({
 **Purpose**: Internal notes about candidates
 
 **Fields**:
+
 - `id` (UUID): Primary key
 - `applicationId` (UUID, FK): Related application
 - `authorId` (UUID, FK): User who wrote note
@@ -533,12 +551,13 @@ const application = await prisma.application.create({
 - `createdAt`: Timestamp
 
 **Example**:
+
 ```typescript
 await prisma.candidateNote.create({
   data: {
     applicationId: application.id,
     authorId: recruiter.id,
-    content: 'Great communication skills during phone screen',
+    content: "Great communication skills during phone screen",
   },
 });
 ```
@@ -571,7 +590,7 @@ await prisma.candidateNote.create({
 ```typescript
 // Fast: Uses index on jobs.status
 const openJobs = await prisma.job.findMany({
-  where: { status: 'OPEN' },
+  where: { status: "OPEN" },
   include: { createdBy: true },
 });
 
@@ -579,15 +598,15 @@ const openJobs = await prisma.job.findMany({
 const existingApplication = await prisma.application.findUnique({
   where: {
     jobId_candidateId: {
-      jobId: '123',
-      candidateId: '456',
+      jobId: "123",
+      candidateId: "456",
     },
   },
 });
 
 // Fast: Uses index on applications.jobId
 const applicationCount = await prisma.application.count({
-  where: { jobId: '123' },
+  where: { jobId: "123" },
 });
 ```
 
@@ -637,54 +656,54 @@ ALTER TABLE users DROP COLUMN phone_number;
 ### Development Seed (`prisma/seed.ts`)
 
 ```typescript
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log("🌱 Seeding database...");
 
   // Create admin user
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@talentflow.ai' },
+    where: { email: "admin@talentflow.ai" },
     update: {},
     create: {
-      email: 'admin@talentflow.ai',
-      password: await bcrypt.hash('admin123', 10),
-      role: 'ADMIN',
-      fullName: 'Admin User',
+      email: "admin@talentflow.ai",
+      password: await bcrypt.hash("admin123", 10),
+      role: "ADMIN",
+      fullName: "Admin User",
     },
   });
 
   // Create recruiter
   const recruiter = await prisma.user.upsert({
-    where: { email: 'recruiter@talentflow.ai' },
+    where: { email: "recruiter@talentflow.ai" },
     update: {},
     create: {
-      email: 'recruiter@talentflow.ai',
-      password: await bcrypt.hash('recruiter123', 10),
-      role: 'RECRUITER',
-      fullName: 'Jane Recruiter',
+      email: "recruiter@talentflow.ai",
+      password: await bcrypt.hash("recruiter123", 10),
+      role: "RECRUITER",
+      fullName: "Jane Recruiter",
     },
   });
 
   // Create sample job
   const job = await prisma.job.create({
     data: {
-      title: 'Senior Full-Stack Developer',
-      description: 'We are looking for an experienced full-stack developer...',
+      title: "Senior Full-Stack Developer",
+      description: "We are looking for an experienced full-stack developer...",
       requirements: {
-        skills: ['NestJS', 'Next.js', 'PostgreSQL', 'Spring Boot'],
-        experience: '5+ years',
+        skills: ["NestJS", "Next.js", "PostgreSQL", "Spring Boot"],
+        experience: "5+ years",
       },
-      salaryRange: '$100k - $150k',
-      status: 'OPEN',
+      salaryRange: "$100k - $150k",
+      status: "OPEN",
       createdById: recruiter.id,
     },
   });
 
-  console.log('✅ Seed completed');
+  console.log("✅ Seed completed");
   console.log({ admin, recruiter, job });
 }
 
@@ -699,6 +718,7 @@ main()
 ```
 
 **Run seed:**
+
 ```bash
 npm run prisma:seed
 ```
@@ -708,6 +728,7 @@ npm run prisma:seed
 ## Service Access Patterns
 
 ### API Gateway (NestJS) - Prisma Client
+
 ```typescript
 // API Gateway có full access với Prisma
 const user = await prisma.user.create({...});
@@ -721,6 +742,7 @@ const candidates = await prisma.candidate.findMany({...});
 ### CV Parser (Spring Boot) - JDBC or Prisma (via Node bridge)
 
 **Option 1: Spring Data JPA (JDBC)**
+
 ```java
 @Entity
 @Table(name = "candidates")
@@ -739,6 +761,7 @@ public class Candidate {
 ```
 
 **Option 2: Call Prisma via Node.js wrapper** (if needed)
+
 ```typescript
 // shared/prisma-bridge/update-candidate.ts
 export async function updateCandidate(id: string, data: UpdateData) {
@@ -747,6 +770,7 @@ export async function updateCandidate(id: string, data: UpdateData) {
 ```
 
 ### Notification Service (NestJS) - Read-only
+
 ```typescript
 // Notification service chỉ đọc (via Redis cache hoặc API Gateway)
 // KHÔNG trực tiếp write vào database

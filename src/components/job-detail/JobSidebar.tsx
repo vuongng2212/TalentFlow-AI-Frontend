@@ -49,7 +49,9 @@ export function JobSidebar({ job, applicants }: JobSidebarProps) {
             <p className="text-sm text-muted-foreground mb-1">
               Total Applications
             </p>
-            <p className="text-2xl font-bold">{job._count?.applications ?? applicants.length}</p>
+            <p className="text-2xl font-bold">
+              {job._count?.applications ?? applicants.length}
+            </p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground mb-1">

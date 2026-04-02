@@ -1,16 +1,9 @@
 "use client";
 
 import { useCallback } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { CrudDialog } from "@/components/shared/crud-dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useDeleteJob } from "@/services/jobs";
 import { toast } from "sonner";
 
@@ -47,45 +40,35 @@ export function DeleteJobDialog({
   }, [deleteJob, jobTitle, onOpenChange, onDeleted]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-destructive/10 p-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-            </div>
-            <DialogTitle>Delete Job</DialogTitle>
-          </div>
-          <DialogDescription className="pt-2">
-            Are you sure you want to delete{" "}
-            <span className="font-semibold text-foreground">&quot;{jobTitle}&quot;</span>?
-            This action cannot be undone. All applications for this job will also be removed.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Deleting...
-              </>
-            ) : (
-              "Delete Job"
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <CrudDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete Job"
+      description={`Are you sure you want to delete "${jobTitle}"? This action cannot be undone. All applications for this job will also be removed.`}
+    >
+      <div className="mt-4 -mx-6 -mb-4 px-6 py-4 bg-muted/30 border-t flex items-center justify-end gap-2 sticky bottom-0">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isDeleting}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Deleting...
+            </>
+          ) : (
+            "Delete Job"
+          )}
+        </Button>
+      </div>
+    </CrudDialog>
   );
 }

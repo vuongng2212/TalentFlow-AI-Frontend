@@ -13,6 +13,7 @@
 ## Context
 
 Original ADR-002 recommended Apache Kafka for message queue, citing:
+
 - Event streaming capabilities
 - High throughput
 - Event replay support
@@ -21,6 +22,7 @@ Original ADR-002 recommended Apache Kafka for message queue, citing:
 However, after analyzing **actual MVP requirements** and **team constraints**, we identified critical issues:
 
 ### MVP Reality:
+
 - **Expected volume:** < 1000 CV uploads/day
 - **Team size:** 3 developers (no Kafka expertise)
 - **Timeline:** 2 months MVP
@@ -28,6 +30,7 @@ However, after analyzing **actual MVP requirements** and **team constraints**, w
 - **Learning curve:** Kafka requires 6+ hours to learn basics
 
 ### The Kafka Overkill Problem:
+
 ```
 Kafka can handle: 1,000,000+ messages/second
 MVP needs:        ~10 messages/second (at peak)
@@ -49,25 +52,27 @@ We will use **BullMQ (Redis-based queue)** instead of Apache Kafka for MVP.
 
 ### Comparison Matrix
 
-| Criterion | Apache Kafka | BullMQ (Redis) | Winner |
-|-----------|--------------|----------------|--------|
-| **Setup Time** | 2-4 hours (Kafka + Zookeeper/KRaft) | 15 minutes (just Redis) | 🏆 BullMQ |
-| **Learning Curve** | High (6+ hours) | Low (< 2 hours) | 🏆 BullMQ |
-| **Throughput** | 1M+ msg/s | 10k msg/s | Kafka (but we need 10/s) |
-| **Latency** | ~5-10ms | ~1-5ms | 🏆 BullMQ |
-| **Memory Usage** | 512MB+ | 50MB+ | 🏆 BullMQ |
-| **Dashboard** | Complex (Kafka Manager) | Simple (Bull Board) | 🏆 BullMQ |
-| **Retry Logic** | Manual implementation | Built-in | 🏆 BullMQ |
-| **Priority Queues** | Manual | Built-in | 🏆 BullMQ |
-| **Delayed Jobs** | Manual | Built-in | 🏆 BullMQ |
-| **Event Replay** | Built-in | Not available | 🏆 Kafka |
-| **Event Sourcing** | Native support | Not designed for it | 🏆 Kafka |
-| **Multi-Consumer** | Native | Possible but hacky | 🏆 Kafka |
+| Criterion           | Apache Kafka                        | BullMQ (Redis)          | Winner                   |
+| ------------------- | ----------------------------------- | ----------------------- | ------------------------ |
+| **Setup Time**      | 2-4 hours (Kafka + Zookeeper/KRaft) | 15 minutes (just Redis) | 🏆 BullMQ                |
+| **Learning Curve**  | High (6+ hours)                     | Low (< 2 hours)         | 🏆 BullMQ                |
+| **Throughput**      | 1M+ msg/s                           | 10k msg/s               | Kafka (but we need 10/s) |
+| **Latency**         | ~5-10ms                             | ~1-5ms                  | 🏆 BullMQ                |
+| **Memory Usage**    | 512MB+                              | 50MB+                   | 🏆 BullMQ                |
+| **Dashboard**       | Complex (Kafka Manager)             | Simple (Bull Board)     | 🏆 BullMQ                |
+| **Retry Logic**     | Manual implementation               | Built-in                | 🏆 BullMQ                |
+| **Priority Queues** | Manual                              | Built-in                | 🏆 BullMQ                |
+| **Delayed Jobs**    | Manual                              | Built-in                | 🏆 BullMQ                |
+| **Event Replay**    | Built-in                            | Not available           | 🏆 Kafka                 |
+| **Event Sourcing**  | Native support                      | Not designed for it     | 🏆 Kafka                 |
+| **Multi-Consumer**  | Native                              | Possible but hacky      | 🏆 Kafka                 |
 
 ### For MVP (< 1000 CVs/day):
+
 **Winner:** 🏆 **BullMQ** (9 vs 3)
 
 ### For Phase 2 (> 100k events/day):
+
 **Winner:** 🏆 **Kafka** (3 vs 9)
 
 ---
@@ -77,6 +82,7 @@ We will use **BullMQ (Redis-based queue)** instead of Apache Kafka for MVP.
 ### ✅ **Pros:**
 
 **1. Simplicity**
+
 ```yaml
 # Kafka setup (3 services!)
 services:
@@ -101,37 +107,36 @@ services:
 ```
 
 **2. Built-in Features**
+
 ```typescript
 // Retry with exponential backoff (built-in!)
-queue.add('parse-cv', data, {
+queue.add("parse-cv", data, {
   attempts: 3,
   backoff: {
-    type: 'exponential',
-    delay: 2000  // 2s, 4s, 8s
-  }
+    type: "exponential",
+    delay: 2000, // 2s, 4s, 8s
+  },
 });
 
 // Priority queues
-queue.add('urgent-cv', data, { priority: 1 });
-queue.add('normal-cv', data, { priority: 10 });
+queue.add("urgent-cv", data, { priority: 1 });
+queue.add("normal-cv", data, { priority: 10 });
 
 // Delayed jobs
-queue.add('retry-later', data, {
-  delay: 60000  // 1 minute
+queue.add("retry-later", data, {
+  delay: 60000, // 1 minute
 });
 ```
 
 **3. Beautiful Dashboard**
+
 ```typescript
 // Bull Board - Web UI
-import { createBullBoard } from '@bull-board/api';
-import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { createBullBoard } from "@bull-board/api";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 
 createBullBoard({
-  queues: [
-    new BullMQAdapter(cvQueue),
-    new BullMQAdapter(notificationQueue),
-  ],
+  queues: [new BullMQAdapter(cvQueue), new BullMQAdapter(notificationQueue)],
 });
 
 // Access at: http://localhost:3000/admin/queues
@@ -139,6 +144,7 @@ createBullBoard({
 ```
 
 **4. Redis Dual Purpose**
+
 ```typescript
 // Same Redis for:
 // 1. BullMQ queues
@@ -150,6 +156,7 @@ createBullBoard({
 ```
 
 **5. TypeScript-First**
+
 ```typescript
 // Type-safe queue interfaces
 interface CvUploadedPayload {
@@ -159,14 +166,14 @@ interface CvUploadedPayload {
 }
 
 // Producer
-await cvQueue.add('process', {
-  candidateId: '123',
-  fileUrl: 'https://...',
-  jobId: '456',
+await cvQueue.add("process", {
+  candidateId: "123",
+  fileUrl: "https://...",
+  jobId: "456",
 } as CvUploadedPayload);
 
 // Consumer
-cvQueue.process('process', async (job: Job<CvUploadedPayload>) => {
+cvQueue.process("process", async (job: Job<CvUploadedPayload>) => {
   const { candidateId, fileUrl } = job.data;
   // TypeScript auto-complete! ✨
 });
@@ -175,16 +182,19 @@ cvQueue.process('process', async (job: Job<CvUploadedPayload>) => {
 ### ❌ **Cons:**
 
 **1. No Event Replay**
+
 - Messages deleted after processing
 - Cannot replay events from specific timestamp
 - **Mitigation:** Audit logs in PostgreSQL
 
 **2. Not Designed for Event Sourcing**
+
 - Queues are ephemeral
 - Cannot rebuild state from events
 - **Mitigation:** Database is source of truth (not queue)
 
 **3. Single Consumer Pattern**
+
 - Each job consumed by one worker
 - Multiple consumers need separate queues
 - **Mitigation:** Fan-out pattern if needed
@@ -196,6 +206,7 @@ cvQueue.process('process', async (job: Job<CvUploadedPayload>) => {
 ### ❌ **Problems:**
 
 **1. Complexity Overhead**
+
 ```bash
 # Kafka basics - 6 hours learning:
 - Brokers, Partitions, Topics
@@ -210,6 +221,7 @@ cvQueue.process('process', async (job: Job<CvUploadedPayload>) => {
 ```
 
 **2. Infrastructure Burden**
+
 ```yaml
 # Kafka resource requirements (minimum):
 - Kafka broker: 512MB RAM
@@ -225,6 +237,7 @@ Total: 50MB RAM
 ```
 
 **3. Debugging Difficulty**
+
 ```typescript
 // Kafka: Check multiple places
 // 1. Is broker running?
@@ -240,6 +253,7 @@ Total: 50MB RAM
 ```
 
 **4. Premature Optimization**
+
 ```
 YAGNI Principle: "You Ain't Gonna Need It"
 
@@ -259,25 +273,27 @@ Kafka features we DON'T need for MVP:
 ### Queue Topics
 
 **MVP Queues:**
+
 ```typescript
 // Queue 1: CV Processing
-const cvQueue = new Queue('cv-processing', {
+const cvQueue = new Queue("cv-processing", {
   connection: {
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
   },
 });
 
 // Queue 2: Notifications
-const notificationQueue = new Queue('notifications', {
+const notificationQueue = new Queue("notifications", {
   connection: {
-    host: 'localhost',
+    host: "localhost",
     port: 6379,
   },
 });
 ```
 
 **Event Payloads:**
+
 ```typescript
 // cv-processing queue
 interface CvUploadedEvent {
@@ -291,7 +307,7 @@ interface CvUploadedEvent {
 interface CvProcessedEvent {
   candidateId: string;
   aiScore: number;
-  status: 'success' | 'failed';
+  status: "success" | "failed";
   extractedData: {
     skills: string[];
     experience: string;
@@ -303,14 +319,14 @@ interface CvProcessedEvent {
 
 ```typescript
 // src/queue/queue.service.ts
-import { Queue } from 'bullmq';
+import { Queue } from "bullmq";
 
 @Injectable()
 export class QueueService {
   private cvQueue: Queue;
 
   constructor() {
-    this.cvQueue = new Queue('cv-processing', {
+    this.cvQueue = new Queue("cv-processing", {
       connection: {
         host: process.env.REDIS_HOST,
         port: parseInt(process.env.REDIS_PORT),
@@ -319,14 +335,14 @@ export class QueueService {
   }
 
   async emitCvUploaded(data: CvUploadedEvent): Promise<void> {
-    await this.cvQueue.add('parse-cv', data, {
+    await this.cvQueue.add("parse-cv", data, {
       attempts: 3,
       backoff: {
-        type: 'exponential',
+        type: "exponential",
         delay: 2000,
       },
-      removeOnComplete: 100,  // Keep last 100 successful jobs
-      removeOnFail: 500,      // Keep last 500 failed jobs
+      removeOnComplete: 100, // Keep last 100 successful jobs
+      removeOnFail: 500, // Keep last 500 failed jobs
     });
   }
 }
@@ -338,57 +354,61 @@ export class QueueService {
 // CV Parser Service (Spring Boot or ASP.NET)
 // Using Node.js example for clarity
 
-import { Worker } from 'bullmq';
+import { Worker } from "bullmq";
 
-const worker = new Worker('cv-processing', async (job) => {
-  const { candidateId, fileUrl, jobId } = job.data;
+const worker = new Worker(
+  "cv-processing",
+  async (job) => {
+    const { candidateId, fileUrl, jobId } = job.data;
 
-  // Update progress
-  await job.updateProgress(25);
-  console.log(`Downloading CV: ${fileUrl}`);
+    // Update progress
+    await job.updateProgress(25);
+    console.log(`Downloading CV: ${fileUrl}`);
 
-  // Download file
-  const buffer = await downloadFile(fileUrl);
-  await job.updateProgress(50);
+    // Download file
+    const buffer = await downloadFile(fileUrl);
+    await job.updateProgress(50);
 
-  // Parse PDF/DOCX
-  const text = await parseDocument(buffer);
-  await job.updateProgress(75);
+    // Parse PDF/DOCX
+    const text = await parseDocument(buffer);
+    await job.updateProgress(75);
 
-  // Extract skills & calculate score
-  const skills = extractSkills(text);
-  const score = calculateAIScore(skills, jobId);
-  await job.updateProgress(100);
+    // Extract skills & calculate score
+    const skills = extractSkills(text);
+    const score = calculateAIScore(skills, jobId);
+    await job.updateProgress(100);
 
-  // Update database
-  await updateCandidate(candidateId, { skills, score });
+    // Update database
+    await updateCandidate(candidateId, { skills, score });
 
-  // Emit next event
-  await notificationQueue.add('cv-processed', {
-    candidateId,
-    aiScore: score,
-    status: 'success',
-    extractedData: { skills, experience: '5 years' },
-  });
+    // Emit next event
+    await notificationQueue.add("cv-processed", {
+      candidateId,
+      aiScore: score,
+      status: "success",
+      extractedData: { skills, experience: "5 years" },
+    });
 
-  return { success: true };
-}, {
-  connection: {
-    host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT),
+    return { success: true };
   },
-  concurrency: 5,  // Process 5 CVs simultaneously
-  limiter: {
-    max: 10,       // Max 10 jobs
-    duration: 1000, // Per second
+  {
+    connection: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT),
+    },
+    concurrency: 5, // Process 5 CVs simultaneously
+    limiter: {
+      max: 10, // Max 10 jobs
+      duration: 1000, // Per second
+    },
   },
-});
+);
 
-worker.on('completed', (job) => {
+worker.on("completed", (job) => {
   console.log(`Job ${job.id} completed`);
 });
 
-worker.on('failed', (job, err) => {
+worker.on("failed", (job, err) => {
   console.error(`Job ${job.id} failed:`, err);
 });
 ```
@@ -398,6 +418,7 @@ worker.on('failed', (job, err) => {
 ## Migration Path: BullMQ → Kafka
 
 **When to migrate:**
+
 - Throughput > 100,000 events/day
 - Need event sourcing & replay
 - Multiple services need same events
@@ -406,6 +427,7 @@ worker.on('failed', (job, err) => {
 **Migration effort:** 3-5 days
 
 **Steps:**
+
 ```typescript
 // 1. Create Kafka adapter (abstraction layer)
 interface QueueService {
@@ -428,6 +450,7 @@ const queue: QueueService = process.env.USE_KAFKA
 ```
 
 **Data migration:**
+
 - None needed (queues are ephemeral)
 - Historical data in PostgreSQL (not queue)
 - Kafka starts fresh with new events
@@ -439,22 +462,26 @@ const queue: QueueService = process.env.USE_KAFKA
 ### Positive:
 
 ✅ **Fast MVP Development:**
+
 - Setup in 15 minutes vs 2-4 hours
 - Learn in 2 hours vs 6+ hours
 - Debug in 1 click (Bull Board) vs multiple tools
 
 ✅ **Cost Efficient:**
+
 - 1 Redis instance (50MB RAM)
 - vs Kafka + Zookeeper (900MB RAM)
 - **18x less memory for MVP scale**
 
 ✅ **Developer Experience:**
+
 - Beautiful dashboard (Bull Board)
 - TypeScript-first
 - Built-in retry, priority, delays
 - Easy to reason about
 
 ✅ **Operational Simplicity:**
+
 - Single Redis service to monitor
 - Fewer moving parts
 - Easier troubleshooting
@@ -462,20 +489,24 @@ const queue: QueueService = process.env.USE_KAFKA
 ### Negative:
 
 ⚠️ **No Event Replay:**
+
 - Cannot replay events from past
 - **Mitigation:** Audit logs in PostgreSQL
 
 ⚠️ **Limited Throughput:**
+
 - Max ~10k jobs/minute (still 100x more than MVP needs)
 - **Mitigation:** Migrate to Kafka when needed
 
 ⚠️ **Ephemeral Queue:**
+
 - Redis restart = messages lost (if not persisted)
 - **Mitigation:** Redis persistence (RDB/AOF)
 
 ### Mitigation Strategies:
 
 **Persistence:**
+
 ```yaml
 # docker-compose.yml
 redis:
@@ -486,6 +517,7 @@ redis:
 ```
 
 **Monitoring:**
+
 ```typescript
 // Health check endpoint
 @Get('health/queue')
@@ -504,12 +536,13 @@ async queueHealth() {
 ```
 
 **Alerting:**
+
 ```typescript
 // Alert if queue backlog > 100
 if (waiting > 100) {
   await sendAlert({
-    message: 'CV queue backlog high',
-    severity: 'warning',
+    message: "CV queue backlog high",
+    severity: "warning",
   });
 }
 ```
@@ -539,6 +572,7 @@ if (waiting > 100) {
 ### BullMQ will be considered successful if:
 
 **MVP (Week 8):**
+
 - [ ] CV processing time < 10s (p95)
 - [ ] Queue lag < 10 jobs (p95)
 - [ ] Zero message loss
@@ -546,6 +580,7 @@ if (waiting > 100) {
 - [ ] Team can debug issues in < 5 minutes
 
 **Post-MVP (Month 3-6):**
+
 - [ ] Handle 1000+ CVs/day
 - [ ] < 0.1% message loss
 - [ ] No performance issues

@@ -39,9 +39,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SWRProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </SWRProvider>
 
         {/* Global Toast Notifications */}
@@ -71,4 +69,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -13,12 +13,15 @@ interface ScoreItem {
 }
 
 export function AIScoreBreakdownCard({ aiScore }: AIScoreBreakdownCardProps) {
-  const breakdown = useMemo<ScoreItem[]>(() => [
-    { label: "Skills Match", score: aiScore - 5, max: 100 },
-    { label: "Experience Level", score: aiScore - 3, max: 100 },
-    { label: "Education", score: Math.min(aiScore + 2, 100), max: 100 },
-    { label: "Culture Fit", score: aiScore - 8, max: 100 },
-  ], [aiScore]);
+  const breakdown = useMemo<ScoreItem[]>(
+    () => [
+      { label: "Skills Match", score: aiScore - 5, max: 100 },
+      { label: "Experience Level", score: aiScore - 3, max: 100 },
+      { label: "Education", score: Math.min(aiScore + 2, 100), max: 100 },
+      { label: "Culture Fit", score: aiScore - 8, max: 100 },
+    ],
+    [aiScore],
+  );
 
   return (
     <Card>

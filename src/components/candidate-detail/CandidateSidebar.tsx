@@ -3,9 +3,25 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, Linkedin, Github, Globe, MessageSquare, UserX } from "lucide-react";
-import { WithdrawDialog } from "@/components/candidates";
+import {
+  FileText,
+  Download,
+  Linkedin,
+  Github,
+  Globe,
+  MessageSquare,
+  UserX,
+} from "lucide-react";
 import { CandidateViewModel, ApplicationStage } from "@/types";
+import dynamic from "next/dynamic";
+
+const WithdrawDialog = dynamic(
+  () =>
+    import("@/components/candidates/WithdrawDialog").then(
+      (mod) => mod.WithdrawDialog,
+    ),
+  { ssr: false },
+);
 
 interface CandidateSidebarProps {
   candidate: CandidateViewModel;
@@ -23,7 +39,12 @@ const stageOptions: ApplicationStage[] = [
   "REJECTED",
 ];
 
-export function CandidateSidebar({ candidate, applicationId, onStageUpdate, onWithdrawn }: CandidateSidebarProps) {
+export function CandidateSidebar({
+  candidate,
+  applicationId,
+  onStageUpdate,
+  onWithdrawn,
+}: CandidateSidebarProps) {
   const [selectedStage, setSelectedStage] = useState<ApplicationStage>(
     candidate.stage ?? "APPLIED",
   );
@@ -40,7 +61,9 @@ export function CandidateSidebar({ candidate, applicationId, onStageUpdate, onWi
           <select
             aria-label="Select application stage"
             value={selectedStage}
-            onChange={(e) => setSelectedStage(e.target.value as ApplicationStage)}
+            onChange={(e) =>
+              setSelectedStage(e.target.value as ApplicationStage)
+            }
             className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
           >
             {stageOptions.map((stage) => (

@@ -15,11 +15,19 @@ import {
 } from "@/components/job-detail";
 import {
   CreateJobDialog,
-  DeleteJobDialog,
   jobToForm,
   initialNewJobState,
 } from "@/components/jobs";
+import dynamic from "next/dynamic";
 import type { NewJobForm } from "@/components/jobs";
+
+const DeleteJobDialog = dynamic(
+  () =>
+    import("@/components/jobs/DeleteJobDialog").then(
+      (mod) => mod.DeleteJobDialog,
+    ),
+  { ssr: false },
+);
 import { useJob, useUpdateJob } from "@/services/jobs";
 import { useApplications } from "@/services/applications";
 import type { UpdateJobRequest } from "@/lib/api/types";
@@ -31,8 +39,15 @@ export default function JobDetailPage() {
   const router = useRouter();
   const jobId = params.id as string;
 
-  const { data: job, isLoading: isJobLoading, error: jobError, mutate } = useJob(jobId);
-  const { data: applications = [], isLoading: isAppsLoading } = useApplications({ jobId });
+  const {
+    data: job,
+    isLoading: isJobLoading,
+    error: jobError,
+    mutate,
+  } = useJob(jobId);
+  const { data: applications = [], isLoading: isAppsLoading } = useApplications(
+    { jobId },
+  );
   const { trigger: updateJob, isMutating: isUpdating } = useUpdateJob(jobId);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -117,7 +132,11 @@ export default function JobDetailPage() {
       </Button>
 
       {/* Header */}
-      <JobHeader job={job} onEdit={handleEditOpen} onDelete={() => setDeleteOpen(true)} />
+      <JobHeader
+        job={job}
+        onEdit={handleEditOpen}
+        onDelete={() => setDeleteOpen(true)}
+      />
 
       {/* Edit Dialog */}
       <CreateJobDialog
@@ -149,7 +168,8 @@ export default function JobDetailPage() {
             skills={
               Array.isArray(job.requirements)
                 ? [] // requirements are already shown as list items above
-                : ((job.requirements as Record<string, unknown>)?.skills as string[]) ?? []
+                : (((job.requirements as Record<string, unknown>)
+                    ?.skills as string[]) ?? [])
             }
           />
           <ApplicantsList applicants={applicants} />

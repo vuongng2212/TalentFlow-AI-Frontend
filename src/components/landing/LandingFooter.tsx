@@ -5,7 +5,13 @@ import { Sparkles } from "lucide-react";
 const footerLinks = {
   Product: ["Features", "Pricing", "Integrations", "Changelog", "Roadmap"],
   Company: ["About", "Blog", "Careers", "Press", "Contact"],
-  Resources: ["Documentation", "Help Center", "API Reference", "Status", "Community"],
+  Resources: [
+    "Documentation",
+    "Help Center",
+    "API Reference",
+    "Status",
+    "Community",
+  ],
   Legal: ["Privacy Policy", "Terms of Service", "Cookie Policy", "GDPR"],
 };
 

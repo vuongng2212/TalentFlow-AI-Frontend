@@ -24,7 +24,9 @@ const ACCEPTED_FILE_TYPES = [
 
 export default function UploadCVPage() {
   const router = useRouter();
-  const { data: jobs = [], isLoading: isJobsLoading } = useJobs({ status: "OPEN" });
+  const { data: jobs = [], isLoading: isJobsLoading } = useJobs({
+    status: "OPEN",
+  });
   const { trigger: uploadCV, isMutating: isUploading } = useUploadCV();
   const [files, setFiles] = useState<File[]>([]);
   const [selectedJob, setSelectedJob] = useState<string>("");
@@ -46,7 +48,7 @@ export default function UploadCVPage() {
     setIsDragging(false);
 
     const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
-      ACCEPTED_FILE_TYPES.includes(file.type)
+      ACCEPTED_FILE_TYPES.includes(file.type),
     );
 
     setFiles((prev) => [...prev, ...droppedFiles]);
@@ -59,7 +61,7 @@ export default function UploadCVPage() {
         setFiles((prev) => [...prev, ...selectedFiles]);
       }
     },
-    []
+    [],
   );
 
   const removeFile = useCallback((index: number) => {
@@ -73,15 +75,18 @@ export default function UploadCVPage() {
   const handleUpload = useCallback(async () => {
     if (files.length === 0 || !selectedJob) {
       toast.error("Missing required information", {
-        description:
-          "Please select at least one CV and choose a job position.",
+        description: "Please select at least one CV and choose a job position.",
       });
       return;
     }
 
     try {
       for (const file of files) {
-        await uploadCV({ file, jobId: selectedJob, coverLetter: coverLetter || undefined });
+        await uploadCV({
+          file,
+          jobId: selectedJob,
+          coverLetter: coverLetter || undefined,
+        });
       }
 
       setUploadSuccess(true);
@@ -142,11 +147,16 @@ export default function UploadCVPage() {
           {/* Cover Letter */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Cover Letter (Optional)</CardTitle>
+              <CardTitle className="text-base">
+                Cover Letter (Optional)
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="cover-letter" className="text-sm text-muted-foreground">
+                <Label
+                  htmlFor="cover-letter"
+                  className="text-sm text-muted-foreground"
+                >
                   Add a cover letter to strengthen the application
                 </Label>
                 <Textarea
@@ -167,7 +177,11 @@ export default function UploadCVPage() {
 
           {/* Upload Button */}
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleCancel} disabled={isUploading}>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isUploading}
+            >
               Cancel
             </Button>
             <Button

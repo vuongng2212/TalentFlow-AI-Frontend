@@ -13,17 +13,23 @@ import {
   Users,
   Loader2,
   Plus,
+  Pencil,
+  XCircle,
 } from "lucide-react";
 import { useInterviews } from "@/services/interviews";
+import { InterviewCrudDialog } from "@/components/interviews/interview-crud-dialog";
 import type { Interview, InterviewStatus } from "@/types";
 
 const STATUS_COLORS: Record<InterviewStatus, string> = {
   SCHEDULED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  CONFIRMED: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  IN_PROGRESS: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+  CONFIRMED:
+    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  IN_PROGRESS:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
   COMPLETED: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-  NO_SHOW: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+  NO_SHOW:
+    "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -56,8 +62,38 @@ function formatDate(dateStr: string): string {
 type StatusFilter = "all" | InterviewStatus;
 
 export default function InterviewsPage() {
-  const { data: interviews = [], isLoading, error } = useInterviews({ page: 1, limit: 50 });
+  const {
+    data: interviews = [],
+    isLoading,
+    error,
+    mutate: refetch,
+  } = useInterviews({ page: 1, limit: 50 });
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+
+  const handleEdit = (interview: Interview) => {
+    setSelectedInterview(interview);
+    setIsDialogOpen(true);
+  };
+
+  const handleCancel = async (id: string) => {
+    if (confirm("Are you sure you want to cancel this interview?")) {
+        try {
+            await fetch(`http://localhost:3000/api/v1/interviews/${id}/cancel`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // Authorization header would go here if needed
+                }
+            });
+            refetch();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to cancel interview");
+        }
+    }
+  };
 
   const filteredInterviews = useMemo(() => {
     if (statusFilter === "all") return interviews;
@@ -75,15 +111,15 @@ export default function InterviewsPage() {
     return groups;
   }, [filteredInterviews]);
 
-  // Stats
-  const stats = useMemo(() => {
-    const upcoming = interviews.filter(
+  // Stats - compute directly
+  const stats = {
+    upcoming: interviews.filter(
       (i) => i.status === "SCHEDULED" || i.status === "CONFIRMED",
-    ).length;
-    const completed = interviews.filter((i) => i.status === "COMPLETED").length;
-    const cancelled = interviews.filter((i) => i.status === "CANCELLED").length;
-    return { upcoming, completed, cancelled, total: interviews.length };
-  }, [interviews]);
+    ).length,
+    completed: interviews.filter((i) => i.status === "COMPLETED").length,
+    cancelled: interviews.filter((i) => i.status === "CANCELLED").length,
+    total: interviews.length,
+  };
 
   const handleStatusFilter = useCallback((status: StatusFilter) => {
     setStatusFilter(status);
@@ -119,7 +155,10 @@ export default function InterviewsPage() {
             Manage and schedule candidate interviews
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => {
+            setSelectedInterview(null);
+            setIsDialogOpen(true);
+        }}>
           <Plus className="h-4 w-4" />
           Schedule Interview
         </Button>
@@ -135,19 +174,25 @@ export default function InterviewsPage() {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-blue-600">{stats.upcoming}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.upcoming}
+            </div>
             <p className="text-sm text-muted-foreground">Upcoming</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.completed}
+            </div>
             <p className="text-sm text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold text-red-600">{stats.cancelled}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.cancelled}
+            </div>
             <p className="text-sm text-muted-foreground">Cancelled</p>
           </CardContent>
         </Card>
@@ -155,18 +200,21 @@ export default function InterviewsPage() {
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        {(["all", "SCHEDULED", "CONFIRMED", "COMPLETED", "CANCELLED"] as const).map(
-          (status) => (
-            <Button
-              key={status}
-              variant={statusFilter === status ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleStatusFilter(status)}
-            >
-              {status === "all" ? "All" : status.charAt(0) + status.slice(1).toLowerCase().replace("_", " ")}
-            </Button>
-          ),
-        )}
+        {(
+          ["all", "SCHEDULED", "CONFIRMED", "COMPLETED", "CANCELLED"] as const
+        ).map((status) => (
+          <Button
+            key={status}
+            variant={statusFilter === status ? "default" : "outline"}
+            size="sm"
+            onClick={() => handleStatusFilter(status)}
+          >
+            {status === "all"
+              ? "All"
+              : status.charAt(0) +
+                status.slice(1).toLowerCase().replace("_", " ")}
+          </Button>
+        ))}
       </div>
 
       {/* Interview List */}
@@ -193,18 +241,24 @@ export default function InterviewsPage() {
               </h3>
               <div className="space-y-3">
                 {dateInterviews.map((interview) => (
-                  <Card key={interview.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={interview.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardContent className="flex items-center gap-4 py-4">
                       {/* Type Icon */}
                       <div className="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary shrink-0">
-                        {TYPE_ICONS[interview.type] ?? <Calendar className="h-4 w-4" />}
+                        {TYPE_ICONS[interview.type] ?? (
+                          <Calendar className="h-4 w-4" />
+                        )}
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-semibold truncate">
-                            {interview.application?.candidate.fullName ?? "Unknown Candidate"}
+                            {interview.application?.candidate.fullName ??
+                              "Unknown Candidate"}
                           </h4>
                           <Badge
                             className={`text-xs ${STATUS_COLORS[interview.status]}`}
@@ -215,20 +269,35 @@ export default function InterviewsPage() {
                         </div>
                         <p className="text-sm text-muted-foreground truncate">
                           {interview.application?.job.title ?? "Unknown Job"} •{" "}
-                          {interview.type.replace("_", " ")} • {interview.duration}min
+                          {interview.type.replace("_", " ")} •{" "}
+                          {interview.duration}min
                         </p>
                       </div>
 
                       {/* Time */}
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-medium">
-                          {formatDateTime(interview.scheduledAt)}
-                        </p>
-                        {interview.interviewer && (
-                          <p className="text-xs text-muted-foreground">
-                            with {interview.interviewer.fullName}
+                      <div className="text-right shrink-0 flex flex-col justify-between items-end">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {formatDateTime(interview.scheduledAt)}
                           </p>
-                        )}
+                          {interview.interviewer ? (
+                            <p className="text-xs text-muted-foreground">
+                              with {interview.interviewer.fullName}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                           <Button variant="outline" size="sm" onClick={() => handleEdit(interview)}>
+                               <Pencil className="h-4 w-4 mr-1" />
+                               Edit
+                           </Button>
+                           {interview.status !== "CANCELLED" && (
+                               <Button variant="destructive" size="sm" onClick={() => handleCancel(interview.id)}>
+                                   <XCircle className="h-4 w-4 mr-1" />
+                                   Cancel
+                               </Button>
+                           )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -238,6 +307,12 @@ export default function InterviewsPage() {
           ))}
         </div>
       )}
+      <InterviewCrudDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        interview={selectedInterview}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }

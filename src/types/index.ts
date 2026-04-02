@@ -13,15 +13,9 @@ export type ApplicationStage =
   | "HIRED"
   | "REJECTED";
 export type ApplicationStatus =
-  | "SUBMITTED"
-  | "REVIEWING"
-  | "SHORTLISTED"
-  | "INTERVIEW_SCHEDULED"
-  | "INTERVIEWED"
-  | "OFFERED"
-  | "ACCEPTED"
-  | "REJECTED"
-  | "WITHDRAWN";
+  | "ACTIVE"
+  | "WITHDRAWN"
+  | "REJECTED";
 
 export interface User {
   id: string;
@@ -56,11 +50,13 @@ export interface Job {
   createdAt: string | Date;
   updatedAt: string | Date;
   /** Included by backend via Prisma `include` on list queries */
-  createdBy?: {
-    id: string;
-    email: string;
-    fullName: string;
-  } | User;
+  createdBy?:
+    | {
+        id: string;
+        email: string;
+        fullName: string;
+      }
+    | User;
   /** Included by backend via Prisma `_count` on list queries */
   _count?: {
     applications: number;

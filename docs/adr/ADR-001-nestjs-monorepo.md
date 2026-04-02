@@ -15,6 +15,7 @@
 We need to choose the backend architecture for TalentFlow AI. Initial plan (in SRS) suggested a Polyglot approach with Java Spring Boot for core services and NestJS for AI workers.
 
 **Options considered:**
+
 1. **Polyglot (Java Spring Boot + NestJS)** - Original plan
 2. **NestJS Monorepo** - Unified TypeScript stack
 3. **Java Spring Boot only** - Traditional enterprise stack
@@ -26,6 +27,7 @@ We need to choose the backend architecture for TalentFlow AI. Initial plan (in S
 We will use **NestJS Monorepo** with Clean Architecture.
 
 **Architecture:**
+
 ```
 NestJS Monorepo
 ├── apps/
@@ -46,6 +48,7 @@ NestJS Monorepo
 ### Why NestJS Monorepo?
 
 ✅ **Pros:**
+
 1. **Unified Tech Stack**: TypeScript end-to-end (Backend + Frontend Next.js)
 2. **Team Size**: 2 full-stack developers - easier to maintain one stack
 3. **Code Sharing**: Share types, DTOs, interfaces between apps
@@ -54,6 +57,7 @@ NestJS Monorepo
 6. **Easier Deployment**: Single build pipeline, consistent tooling
 
 ❌ **Cons:**
+
 1. Less mature enterprise ecosystem than Spring Boot
 2. Not as battle-tested for high-scale applications
 
@@ -75,17 +79,20 @@ NestJS Monorepo
 ## Consequences
 
 ### Positive:
+
 - Faster development velocity with unified stack
 - Easier onboarding (only need to know TypeScript)
 - Better type safety across frontend and backend
 - Simpler deployment and monitoring
 
 ### Negative:
+
 - Need to ensure NestJS best practices for scalability
 - Less enterprise-grade patterns compared to Spring Boot
 - May need to refactor to microservices later if scaling issues arise
 
 ### Mitigation:
+
 - Follow Clean Architecture principles
 - Use message queue for async communication (supports future migration)
 - Implement proper monitoring and observability from day 1

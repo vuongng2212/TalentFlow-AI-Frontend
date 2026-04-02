@@ -54,7 +54,9 @@ export function UploadInfoSidebar() {
         <CardContent className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-            <span className="text-muted-foreground">PDF, DOC, DOCX formats</span>
+            <span className="text-muted-foreground">
+              PDF, DOC, DOCX formats
+            </span>
           </div>
           <div className="flex items-start gap-2">
             <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />

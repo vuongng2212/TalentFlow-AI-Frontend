@@ -24,7 +24,8 @@ import { Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { signup, isLoading, error, clearError, isAuthenticated } =
+    useAuthStore();
 
   const {
     register,
@@ -53,7 +54,8 @@ export default function SignupPage() {
 
     if (!agreedToTerms) {
       toast.warning("Please agree to terms and conditions", {
-        description: "You must accept the Terms of Service and Privacy Policy to continue.",
+        description:
+          "You must accept the Terms of Service and Privacy Policy to continue.",
       });
       return;
     }
@@ -68,7 +70,8 @@ export default function SignupPage() {
       if (err instanceof ApiError) {
         if (err.isConflict) {
           toast.error("Email already in use", {
-            description: "An account with this email already exists. Please sign in instead.",
+            description:
+              "An account with this email already exists. Please sign in instead.",
           });
           return;
         }
@@ -80,7 +83,8 @@ export default function SignupPage() {
         }
         toast.error("Signup failed", { description: err.message });
       } else {
-        const errorMessage = err instanceof Error ? err.message : "Please try again.";
+        const errorMessage =
+          err instanceof Error ? err.message : "Please try again.";
         toast.error("Signup failed", { description: errorMessage });
       }
     }
@@ -114,7 +118,9 @@ export default function SignupPage() {
                 autoComplete="name"
               />
               {fieldErrors.fullName && (
-                <p className="text-xs text-destructive">{fieldErrors.fullName.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.fullName.message}
+                </p>
               )}
             </div>
 
@@ -130,7 +136,9 @@ export default function SignupPage() {
                 autoComplete="email"
               />
               {fieldErrors.email && (
-                <p className="text-xs text-destructive">{fieldErrors.email.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.email.message}
+                </p>
               )}
             </div>
 
@@ -146,10 +154,13 @@ export default function SignupPage() {
                 autoComplete="new-password"
               />
               {fieldErrors.password ? (
-                <p className="text-xs text-destructive">{fieldErrors.password.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.password.message}
+                </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  At least 8 characters with uppercase, lowercase, numbers, and special characters (!@#$%^&*)
+                  At least 8 characters with uppercase, lowercase, numbers, and
+                  special characters (!@#$%^&*)
                 </p>
               )}
             </div>
@@ -177,7 +188,9 @@ export default function SignupPage() {
                 )}
               />
               {fieldErrors.role && (
-                <p className="text-xs text-destructive">{fieldErrors.role.message}</p>
+                <p className="text-xs text-destructive">
+                  {fieldErrors.role.message}
+                </p>
               )}
             </div>
 
@@ -220,7 +233,10 @@ export default function SignupPage() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" aria-hidden="true" />
+                  <Loader2
+                    className="h-4 w-4 animate-spin mr-2"
+                    aria-hidden="true"
+                  />
                   Creating account…
                 </>
               ) : (
@@ -244,7 +260,11 @@ export default function SignupPage() {
           {/* Social Signup - Visual Only */}
           <div className="grid grid-cols-2 gap-3">
             <Button variant="outline" disabled>
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="w-5 h-5 mr-2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

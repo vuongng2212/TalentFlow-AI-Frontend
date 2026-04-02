@@ -29,6 +29,7 @@
 > **"Write tests that give you confidence, not just coverage"**
 
 Chúng ta test để:
+
 1. ✅ **Prevent bugs** - Catch lỗi trước khi deploy
 2. ✅ **Enable refactoring** - Tự tin refactor code
 3. ✅ **Document behavior** - Tests = living documentation
@@ -36,12 +37,12 @@ Chúng ta test để:
 
 ### Testing Tools
 
-| Tool | Purpose | Version |
-|------|---------|---------|
-| **Jest** | Test runner, assertions | 29.x |
-| **Supertest** | HTTP assertions (E2E) | 6.x |
-| **@nestjs/testing** | NestJS testing utilities | 10.x |
-| **faker-js** | Generate fake test data | 8.x |
+| Tool                | Purpose                  | Version |
+| ------------------- | ------------------------ | ------- |
+| **Jest**            | Test runner, assertions  | 29.x    |
+| **Supertest**       | HTTP assertions (E2E)    | 6.x     |
+| **@nestjs/testing** | NestJS testing utilities | 10.x    |
+| **faker-js**        | Generate fake test data  | 8.x     |
 
 ---
 
@@ -61,11 +62,11 @@ Chúng ta test để:
 
 ### Breakdown
 
-| Type | % Coverage | Speed | When to Write |
-|------|-----------|-------|---------------|
-| **Unit** | 70% | ⚡ Fast (ms) | Always - test business logic |
-| **Integration** | 20% | ⚡⚡ Medium (seconds) | Test module interactions |
-| **E2E** | 10% | 🐢 Slow (seconds) | Test critical user flows |
+| Type            | % Coverage | Speed                 | When to Write                |
+| --------------- | ---------- | --------------------- | ---------------------------- |
+| **Unit**        | 70%        | ⚡ Fast (ms)          | Always - test business logic |
+| **Integration** | 20%        | ⚡⚡ Medium (seconds) | Test module interactions     |
+| **E2E**         | 10%        | 🐢 Slow (seconds)     | Test critical user flows     |
 
 ### Why This Ratio?
 
@@ -80,6 +81,7 @@ Chúng ta test để:
 ### ✅ DO Test:
 
 1. **Business Logic**
+
    ```typescript
    // ✅ Test this
    calculateMatchScore(candidate, job) {
@@ -88,18 +90,21 @@ Chúng ta test để:
    ```
 
 2. **Validation Logic**
+
    ```typescript
    // ✅ Test this
    validateEmail(email: string): boolean
    ```
 
 3. **Error Handling**
+
    ```typescript
    // ✅ Test this
    if (!user) throw new NotFoundException();
    ```
 
 4. **Edge Cases**
+
    ```typescript
    // ✅ Test: empty array, null, undefined, large numbers
    ```
@@ -113,6 +118,7 @@ Chúng ta test để:
 ### ❌ DON'T Test:
 
 1. **Framework Code**
+
    ```typescript
    // ❌ Don't test NestJS decorators
    @Controller('jobs')
@@ -120,12 +126,14 @@ Chúng ta test để:
    ```
 
 2. **Third-party Libraries**
+
    ```typescript
    // ❌ Don't test Prisma, Kafka, bcrypt
    await prisma.job.create(...)
    ```
 
 3. **Trivial Code**
+
    ```typescript
    // ❌ Don't test simple getters
    getName() { return this.name; }
@@ -190,9 +198,9 @@ const mockKafkaService = {
 
 ```typescript
 const mockStorageService = {
-  upload: jest.fn().mockResolvedValue('https://s3.amazonaws.com/file.pdf'),
+  upload: jest.fn().mockResolvedValue("https://s3.amazonaws.com/file.pdf"),
   delete: jest.fn().mockResolvedValue(undefined),
-  getSignedUrl: jest.fn().mockResolvedValue('https://signed-url'),
+  getSignedUrl: jest.fn().mockResolvedValue("https://signed-url"),
 };
 ```
 
@@ -200,8 +208,8 @@ const mockStorageService = {
 
 ```typescript
 const mockJwtService = {
-  sign: jest.fn().mockReturnValue('mock-token'),
-  verify: jest.fn().mockReturnValue({ userId: '123', role: 'RECRUITER' }),
+  sign: jest.fn().mockReturnValue("mock-token"),
+  verify: jest.fn().mockReturnValue({ userId: "123", role: "RECRUITER" }),
 };
 ```
 
@@ -213,11 +221,11 @@ const mockJwtService = {
 
 ```typescript
 // src/modules/jobs/jobs.service.spec.ts
-import { Test, TestingModule } from '@nestjs/testing';
-import { JobService } from './jobs.service';
-import { PrismaService } from '@app/database';
+import { Test, TestingModule } from "@nestjs/testing";
+import { JobService } from "./jobs.service";
+import { PrismaService } from "@app/database";
 
-describe('JobService', () => {
+describe("JobService", () => {
   let service: JobService;
   let prisma: PrismaService;
 
@@ -240,61 +248,63 @@ describe('JobService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createJob', () => {
-    it('should create a job successfully', async () => {
+  describe("createJob", () => {
+    it("should create a job successfully", async () => {
       // Arrange
       const createJobDto = {
-        title: 'Senior Developer',
-        description: 'We are hiring...',
-        status: 'DRAFT',
+        title: "Senior Developer",
+        description: "We are hiring...",
+        status: "DRAFT",
       };
-      const expectedJob = { id: '123', ...createJobDto };
+      const expectedJob = { id: "123", ...createJobDto };
 
-      jest.spyOn(prisma.job, 'create').mockResolvedValue(expectedJob);
+      jest.spyOn(prisma.job, "create").mockResolvedValue(expectedJob);
 
       // Act
-      const result = await service.createJob(createJobDto, 'user-id');
+      const result = await service.createJob(createJobDto, "user-id");
 
       // Assert
       expect(result).toEqual(expectedJob);
       expect(prisma.job.create).toHaveBeenCalledWith({
         data: {
           ...createJobDto,
-          createdById: 'user-id',
+          createdById: "user-id",
         },
       });
     });
 
-    it('should throw BadRequestException for invalid title', async () => {
+    it("should throw BadRequestException for invalid title", async () => {
       // Arrange
-      const invalidDto = { title: 'ab', description: 'Test' }; // Too short
+      const invalidDto = { title: "ab", description: "Test" }; // Too short
 
       // Act & Assert
-      await expect(service.createJob(invalidDto, 'user-id'))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.createJob(invalidDto, "user-id")).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
-  describe('getJobById', () => {
-    it('should return job when found', async () => {
+  describe("getJobById", () => {
+    it("should return job when found", async () => {
       // Arrange
-      const mockJob = { id: '123', title: 'Developer' };
-      jest.spyOn(prisma.job, 'findUnique').mockResolvedValue(mockJob);
+      const mockJob = { id: "123", title: "Developer" };
+      jest.spyOn(prisma.job, "findUnique").mockResolvedValue(mockJob);
 
       // Act
-      const result = await service.getJobById('123');
+      const result = await service.getJobById("123");
 
       // Assert
       expect(result).toEqual(mockJob);
     });
 
-    it('should throw NotFoundException when job not found', async () => {
+    it("should throw NotFoundException when job not found", async () => {
       // Arrange
-      jest.spyOn(prisma.job, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.job, "findUnique").mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getJobById('invalid-id'))
-        .rejects.toThrow(NotFoundException);
+      await expect(service.getJobById("invalid-id")).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
@@ -303,6 +313,7 @@ describe('JobService', () => {
 ### Best Practices
 
 1. **AAA Pattern** (Arrange, Act, Assert)
+
    ```typescript
    it('should do something', async () => {
      // Arrange - Setup data, mocks
@@ -317,32 +328,34 @@ describe('JobService', () => {
    ```
 
 2. **One Assertion Per Test** (nếu có thể)
+
    ```typescript
    // ✅ Good
-   it('should return user email', () => {
-     expect(user.email).toBe('test@test.com');
+   it("should return user email", () => {
+     expect(user.email).toBe("test@test.com");
    });
 
-   it('should return user name', () => {
-     expect(user.fullName).toBe('John Doe');
+   it("should return user name", () => {
+     expect(user.fullName).toBe("John Doe");
    });
 
    // ❌ Bad (testing multiple things)
-   it('should return user', () => {
-     expect(user.email).toBe('test@test.com');
-     expect(user.fullName).toBe('John Doe');
-     expect(user.role).toBe('RECRUITER');
+   it("should return user", () => {
+     expect(user.email).toBe("test@test.com");
+     expect(user.fullName).toBe("John Doe");
+     expect(user.role).toBe("RECRUITER");
    });
    ```
 
 3. **Descriptive Test Names**
+
    ```typescript
    // ✅ Good
-   it('should throw NotFoundException when job does not exist', () => {});
+   it("should throw NotFoundException when job does not exist", () => {});
 
    // ❌ Bad
-   it('should throw error', () => {});
-   it('test1', () => {});
+   it("should throw error", () => {});
+   it("test1", () => {});
    ```
 
 ---
@@ -353,16 +366,17 @@ describe('JobService', () => {
 
 ```typescript
 // test/integration/job.service.integration.spec.ts
-import { Test } from '@nestjs/testing';
-import { PrismaService } from '@app/database';
+import { Test } from "@nestjs/testing";
+import { PrismaService } from "@app/database";
 
-describe('JobService Integration', () => {
+describe("JobService Integration", () => {
   let prisma: PrismaService;
   let service: JobService;
 
   beforeAll(async () => {
     // Use test database
-    process.env.DATABASE_URL = 'postgresql://postgres:password@localhost:5432/talentflow_test';
+    process.env.DATABASE_URL =
+      "postgresql://postgres:password@localhost:5432/talentflow_test";
 
     const module = await Test.createTestingModule({
       providers: [JobService, PrismaService],
@@ -372,24 +386,27 @@ describe('JobService Integration', () => {
     service = module.get(JobService);
 
     // Clean database
-    await prisma.$executeRawUnsafe('TRUNCATE TABLE jobs CASCADE');
+    await prisma.$executeRawUnsafe("TRUNCATE TABLE jobs CASCADE");
   });
 
   afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  it('should create and retrieve job from real database', async () => {
+  it("should create and retrieve job from real database", async () => {
     // Create job (real DB write)
-    const job = await service.createJob({
-      title: 'Developer',
-      description: 'Test job',
-    }, 'user-id');
+    const job = await service.createJob(
+      {
+        title: "Developer",
+        description: "Test job",
+      },
+      "user-id",
+    );
 
     // Retrieve job (real DB read)
     const retrieved = await service.getJobById(job.id);
 
-    expect(retrieved.title).toBe('Developer');
+    expect(retrieved.title).toBe("Developer");
   });
 });
 ```
@@ -398,33 +415,33 @@ describe('JobService Integration', () => {
 
 ```typescript
 // test/integration/kafka.integration.spec.ts
-describe('Kafka Integration', () => {
+describe("Kafka Integration", () => {
   let kafkaService: KafkaService;
   let consumer: Consumer;
 
   beforeAll(async () => {
     // Connect to test Kafka instance
     kafkaService = new KafkaService({
-      brokers: ['localhost:9092'],
+      brokers: ["localhost:9092"],
     });
 
     await kafkaService.connect();
   });
 
-  it('should publish and consume message', async () => {
-    const testMessage = { candidateId: '123', fileUrl: 'test.pdf' };
+  it("should publish and consume message", async () => {
+    const testMessage = { candidateId: "123", fileUrl: "test.pdf" };
     let receivedMessage;
 
     // Subscribe to topic
-    await kafkaService.subscribe('cv.uploaded', (message) => {
+    await kafkaService.subscribe("cv.uploaded", (message) => {
       receivedMessage = message;
     });
 
     // Publish message
-    await kafkaService.emit('cv.uploaded', testMessage);
+    await kafkaService.emit("cv.uploaded", testMessage);
 
     // Wait for consumption
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     expect(receivedMessage).toEqual(testMessage);
   });
@@ -439,12 +456,12 @@ describe('Kafka Integration', () => {
 
 ```typescript
 // test/e2e/auth.e2e-spec.ts
-import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { Test } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import * as request from "supertest";
+import { AppModule } from "../src/app.module";
 
-describe('Authentication (E2E)', () => {
+describe("Authentication (E2E)", () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -460,77 +477,77 @@ describe('Authentication (E2E)', () => {
     await app.close();
   });
 
-  describe('/auth/signup (POST)', () => {
-    it('should register new user', () => {
+  describe("/auth/signup (POST)", () => {
+    it("should register new user", () => {
       return request(app.getHttpServer())
-        .post('/auth/signup')
+        .post("/auth/signup")
         .send({
-          email: 'newuser@test.com',
-          password: 'SecurePass123!',
-          fullName: 'Test User',
-          role: 'RECRUITER',
+          email: "newuser@test.com",
+          password: "SecurePass123!",
+          fullName: "Test User",
+          role: "RECRUITER",
         })
         .expect(201)
         .expect((res) => {
-          expect(res.body.data.user.email).toBe('newuser@test.com');
+          expect(res.body.data.user.email).toBe("newuser@test.com");
           expect(res.body.data.accessToken).toBeDefined();
           expect(res.body.data.refreshToken).toBeDefined();
         });
     });
 
-    it('should reject weak password', () => {
+    it("should reject weak password", () => {
       return request(app.getHttpServer())
-        .post('/auth/signup')
+        .post("/auth/signup")
         .send({
-          email: 'test@test.com',
-          password: '123', // Too weak
-          fullName: 'Test',
+          email: "test@test.com",
+          password: "123", // Too weak
+          fullName: "Test",
         })
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toContain('password');
+          expect(res.body.message).toContain("password");
         });
     });
 
-    it('should reject duplicate email', () => {
+    it("should reject duplicate email", () => {
       return request(app.getHttpServer())
-        .post('/auth/signup')
+        .post("/auth/signup")
         .send({
-          email: 'duplicate@test.com',
-          password: 'SecurePass123!',
-          fullName: 'Test',
+          email: "duplicate@test.com",
+          password: "SecurePass123!",
+          fullName: "Test",
         })
         .expect(201)
         .then(() => {
           // Try signup with same email
           return request(app.getHttpServer())
-            .post('/auth/signup')
+            .post("/auth/signup")
             .send({
-              email: 'duplicate@test.com',
-              password: 'SecurePass123!',
-              fullName: 'Test2',
+              email: "duplicate@test.com",
+              password: "SecurePass123!",
+              fullName: "Test2",
             })
             .expect(409); // Conflict
         });
     });
   });
 
-  describe('Complete Auth Flow (E2E)', () => {
-    it('should signup → login → access protected route → refresh token', async () => {
-      const email = 'flowtest@test.com';
-      const password = 'SecurePass123!';
+  describe("Complete Auth Flow (E2E)", () => {
+    it("should signup → login → access protected route → refresh token", async () => {
+      const email = "flowtest@test.com";
+      const password = "SecurePass123!";
 
       // 1. Signup
       const signupRes = await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send({ email, password, fullName: 'Flow Test' })
+        .post("/auth/signup")
+        .send({ email, password, fullName: "Flow Test" })
         .expect(201);
 
       const { accessToken, refreshToken } = signupRes.body.data;
 
       // 2. Login
       const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
+        .post("/auth/login")
         .send({ email, password })
         .expect(200);
 
@@ -538,15 +555,15 @@ describe('Authentication (E2E)', () => {
 
       // 3. Access protected route
       const meRes = await request(app.getHttpServer())
-        .get('/auth/me')
-        .set('Authorization', `Bearer ${accessToken}`)
+        .get("/auth/me")
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
       expect(meRes.body.data.email).toBe(email);
 
       // 4. Refresh token
       const refreshRes = await request(app.getHttpServer())
-        .post('/auth/refresh')
+        .post("/auth/refresh")
         .send({ refreshToken })
         .expect(200);
 
@@ -563,6 +580,7 @@ describe('Authentication (E2E)', () => {
 ### Strategy 1: Mock External Services (Always)
 
 **Mock:**
+
 - Prisma (unit tests only)
 - Kafka
 - S3/MinIO
@@ -574,6 +592,7 @@ describe('Authentication (E2E)', () => {
 ### Strategy 2: Use Real Services (Integration/E2E)
 
 **Use Real:**
+
 - PostgreSQL (test database)
 - Redis (test instance)
 - Kafka (Docker container)
@@ -613,14 +632,15 @@ export const createMockKafkaService = () => ({
 });
 
 export const createMockStorageService = () => ({
-  upload: jest.fn().mockResolvedValue('https://s3.example.com/file.pdf'),
+  upload: jest.fn().mockResolvedValue("https://s3.example.com/file.pdf"),
   delete: jest.fn().mockResolvedValue(undefined),
 });
 ```
 
 **Usage:**
+
 ```typescript
-import { createMockPrismaService } from '@test/helpers/mocks';
+import { createMockPrismaService } from "@test/helpers/mocks";
 
 const mockPrisma = createMockPrismaService();
 ```
@@ -633,15 +653,15 @@ const mockPrisma = createMockPrismaService();
 
 ```typescript
 // test/factories/user.factory.ts
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 export const userFactory = {
   build: (overrides = {}) => ({
     id: faker.string.uuid(),
     email: faker.internet.email(),
-    password: 'HashedPassword123',
+    password: "HashedPassword123",
     fullName: faker.person.fullName(),
-    role: 'RECRUITER',
+    role: "RECRUITER",
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -653,7 +673,7 @@ export const userFactory = {
 };
 
 // Usage in tests
-const mockUser = userFactory.build({ role: 'ADMIN' });
+const mockUser = userFactory.build({ role: "ADMIN" });
 const mockUsers = userFactory.buildMany(10);
 ```
 
@@ -663,20 +683,20 @@ const mockUsers = userFactory.buildMany(10);
 // test/fixtures/jobs.fixture.ts
 export const jobFixtures = {
   validJob: {
-    title: 'Senior Full-Stack Developer',
-    description: 'We are looking for...',
+    title: "Senior Full-Stack Developer",
+    description: "We are looking for...",
     requirements: {
-      skills: ['NestJS', 'React'],
-      experience: '5+ years',
+      skills: ["NestJS", "React"],
+      experience: "5+ years",
     },
-    salaryRange: '$100k - $150k',
-    status: 'OPEN',
+    salaryRange: "$100k - $150k",
+    status: "OPEN",
   },
 
   draftJob: {
-    title: 'Junior Developer',
-    description: 'Entry level position',
-    status: 'DRAFT',
+    title: "Junior Developer",
+    description: "Entry level position",
+    status: "DRAFT",
   },
 };
 
@@ -690,14 +710,14 @@ const job = await service.createJob(jobFixtures.validJob, userId);
 
 ### Overall Target: 80%
 
-| Component | Target | Critical? |
-|-----------|--------|-----------|
-| **Services** | 90%+ | ✅ Yes |
-| **Controllers** | 70%+ | No |
-| **Guards** | 90%+ | ✅ Yes |
-| **Pipes** | 80%+ | No |
-| **Filters** | 70%+ | No |
-| **Utilities** | 80%+ | No |
+| Component       | Target | Critical? |
+| --------------- | ------ | --------- |
+| **Services**    | 90%+   | ✅ Yes    |
+| **Controllers** | 70%+   | No        |
+| **Guards**      | 90%+   | ✅ Yes    |
+| **Pipes**       | 80%+   | No        |
+| **Filters**     | 70%+   | No        |
+| **Utilities**   | 80%+   | No        |
 
 ### Critical Paths (90%+ Required)
 
@@ -766,8 +786,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -863,19 +883,19 @@ npm run test:integration
 ```javascript
 // jest.config.js
 module.exports = {
-  moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
-  testRegex: '.*\\.spec\\.ts$',
+  moduleFileExtensions: ["js", "json", "ts"],
+  rootDir: "src",
+  testRegex: ".*\\.spec\\.ts$",
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    "^.+\\.(t|j)s$": "ts-jest",
   },
   collectCoverageFrom: [
-    '**/*.(t|j)s',
-    '!**/*.spec.ts',
-    '!**/*.module.ts',
-    '!**/main.ts',
+    "**/*.(t|j)s",
+    "!**/*.spec.ts",
+    "!**/*.module.ts",
+    "!**/main.ts",
   ],
-  coverageDirectory: '../coverage',
+  coverageDirectory: "../coverage",
   coverageThreshold: {
     global: {
       lines: 80,
@@ -884,7 +904,7 @@ module.exports = {
       statements: 80,
     },
   },
-  testEnvironment: 'node',
+  testEnvironment: "node",
 };
 ```
 
@@ -979,19 +999,21 @@ All files           |   82.5  |   78.3   |   85.1  |   82.8  |
 ### DOs ✅
 
 1. **Test behavior, not implementation**
+
    ```typescript
    // ✅ Good: Test what it does
-   it('should return sorted jobs by date', () => {
+   it("should return sorted jobs by date", () => {
      expect(jobs[0].createdAt > jobs[1].createdAt).toBe(true);
    });
 
    // ❌ Bad: Test how it does
-   it('should call sort function', () => {
+   it("should call sort function", () => {
      expect(sortSpy).toHaveBeenCalled();
    });
    ```
 
 2. **Keep tests independent**
+
    ```typescript
    // ✅ Good: Each test cleans up
    afterEach(() => {
@@ -1002,12 +1024,13 @@ All files           |   82.5  |   78.3   |   85.1  |   82.8  |
    ```
 
 3. **Use descriptive names**
+
    ```typescript
    // ✅ Good
-   it('should throw NotFoundException when job with given ID does not exist')
+   it("should throw NotFoundException when job with given ID does not exist");
 
    // ❌ Bad
-   it('test job not found')
+   it("test job not found");
    ```
 
 ### DON'Ts ❌
@@ -1056,6 +1079,7 @@ npm run test:debug
 Khi implement feature mới, đảm bảo:
 
 ### Unit Tests
+
 - [ ] Service methods có unit tests
 - [ ] Happy path covered
 - [ ] Error cases covered (NotFoundException, BadRequestException)
@@ -1063,15 +1087,18 @@ Khi implement feature mới, đảm bảo:
 - [ ] Mocks configured correctly
 
 ### Integration Tests (Optional)
+
 - [ ] Database operations work
 - [ ] Kafka events emitted correctly
 
 ### E2E Tests (Critical paths only)
+
 - [ ] Complete user flow tested
 - [ ] Authentication required endpoints protected
 - [ ] Error responses correct
 
 ### Coverage
+
 - [ ] Module coverage > 80%
 - [ ] Critical paths > 90%
 - [ ] CI passes
@@ -1081,21 +1108,25 @@ Khi implement feature mới, đảm bảo:
 ## 🎯 Team Workflow
 
 ### Before Coding
+
 1. ✅ Hiểu requirement
 2. ✅ Design API contract
 3. 🔴 **Write failing test first** (TDD)
 
 ### While Coding
+
 4. 🟢 Implement code to pass test
 5. 🔵 Refactor
 6. ✅ Add more tests for edge cases
 
 ### Before PR
+
 7. ✅ Run `npm run test:cov` → Check 80%+
 8. ✅ Run `npm run test:e2e` → All pass
 9. ✅ Commit tests với code
 
 ### PR Review
+
 10. ✅ Reviewer checks tests quality
 11. ✅ CI must pass (automated)
 

@@ -13,7 +13,7 @@ export function JobDescriptionCard({ description }: JobDescriptionCardProps) {
         <CardTitle>Job Description</CardTitle>
       </CardHeader>
       <CardContent className="prose prose-sm max-w-none dark:prose-invert">
-          <p>{description || "No description available."}</p>
+        <p>{description || "No description available."}</p>
       </CardContent>
     </Card>
   );
@@ -23,7 +23,9 @@ interface JobRequirementsCardProps {
   requirements: Job["requirements"];
 }
 
-export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) {
+export function JobRequirementsCard({
+  requirements,
+}: JobRequirementsCardProps) {
   if (!requirements) {
     return null;
   }
@@ -34,8 +36,12 @@ export function JobRequirementsCard({ requirements }: JobRequirementsCardProps) 
     ? requirements
     : typeof requirements === "object"
       ? [
-          requirements.experience ? `Experience: ${String(requirements.experience)}` : "",
-          requirements.education ? `Education: ${String(requirements.education)}` : "",
+          requirements.experience
+            ? `Experience: ${String(requirements.experience)}`
+            : "",
+          requirements.education
+            ? `Education: ${String(requirements.education)}`
+            : "",
           ...((requirements.skills as string[]) ?? []),
         ].filter(Boolean)
       : [];

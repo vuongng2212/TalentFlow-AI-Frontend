@@ -74,15 +74,21 @@ export function ViewModeToggle({
             <p className="font-medium mb-2">Keyboard Shortcuts</p>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Search</span>
-              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">⌘K</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
+                ⌘K
+              </kbd>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Toggle View</span>
-              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">⌘V</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
+                ⌘V
+              </kbd>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Clear Filters</span>
-              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Esc</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
+                Esc
+              </kbd>
             </div>
           </div>
         </TooltipContent>

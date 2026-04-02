@@ -22,11 +22,13 @@ function formatSalary(min: number | null, max: number | null): string {
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { data: jobs = [], isLoading: isJobsLoading } = useJobs();
-  const { data: applications = [], isLoading: isAppsLoading } = useApplications({
-    sortBy: "appliedAt",
-    sortOrder: "desc",
-    limit: 10,
-  });
+  const { data: applications = [], isLoading: isAppsLoading } = useApplications(
+    {
+      sortBy: "appliedAt",
+      sortOrder: "desc",
+      limit: 10,
+    },
+  );
 
   const recentCandidates = useMemo(
     () => applications.map(mapApplicationToViewModel),
@@ -134,7 +136,8 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <h3 className="font-semibold">{job.title}</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {job.location} &bull; {formatSalary(job.salaryMin, job.salaryMax)}
+                      {job.location} &bull;{" "}
+                      {formatSalary(job.salaryMin, job.salaryMax)}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -194,9 +197,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    {candidate.aiScore && (
+                    {candidate.aiScore ? (
                       <AIScoreBadge score={candidate.aiScore} size="sm" />
-                    )}
+                    ) : null}
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">
                         {candidate.appliedDate
@@ -204,7 +207,7 @@ export default function DashboardPage() {
                           : ""}
                       </p>
                     </div>
-                    {candidate.stage && <Badge>{candidate.stage}</Badge>}
+                    {candidate.stage ? <Badge>{candidate.stage}</Badge> : null}
                   </div>
                 </Link>
               ))}

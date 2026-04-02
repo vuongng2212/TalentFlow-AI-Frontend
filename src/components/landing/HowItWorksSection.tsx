@@ -40,8 +40,11 @@ const steps = [
 
 export function HowItWorksSection() {
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation();
-  const { ref: stepsRef, isVisible: stepsVisible, getStaggerStyle } =
-    useStaggeredAnimation(steps.length, { staggerDelay: 150 });
+  const {
+    ref: stepsRef,
+    isVisible: stepsVisible,
+    getStaggerStyle,
+  } = useStaggeredAnimation(steps.length, { staggerDelay: 150 });
 
   return (
     <section className="py-24 lg:py-32 bg-muted/30">
@@ -51,7 +54,7 @@ export function HowItWorksSection() {
           ref={headerRef}
           className={cn(
             "text-center max-w-2xl mx-auto mb-16 scroll-animate",
-            headerVisible && "is-visible"
+            headerVisible && "is-visible",
           )}
         >
           <Badge variant="outline" className="mb-4">
@@ -67,13 +70,16 @@ export function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <div ref={stepsRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div
+          ref={stepsRef}
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
+        >
           {steps.map((step, index) => (
             <div
               key={step.number}
               className={cn(
                 "relative scroll-stagger-item",
-                stepsVisible && "is-visible"
+                stepsVisible && "is-visible",
               )}
               style={getStaggerStyle(index)}
             >

@@ -17,7 +17,11 @@ import {
 } from "@/services/analytics";
 
 export default function AnalyticsPage() {
-  const { data: overview, isLoading: overviewLoading, error: overviewError } = useAnalyticsOverview();
+  const {
+    data: overview,
+    isLoading: overviewLoading,
+    error: overviewError,
+  } = useAnalyticsOverview();
   const { data: pipeline, isLoading: pipelineLoading } = useAnalyticsPipeline();
   const { data: topJobs, isLoading: topJobsLoading } = useAnalyticsTopJobs(5);
 
@@ -59,27 +63,40 @@ export default function AnalyticsPage() {
   const offerCount = stageCountMap.get("OFFER") ?? 0;
   const pipelineHiredCount = stageCountMap.get("HIRED") ?? 0;
 
-  const activeCandidates = totalApplications - hiredCount - (stageCountMap.get("REJECTED") ?? 0);
+  const activeCandidates =
+    totalApplications - hiredCount - (stageCountMap.get("REJECTED") ?? 0);
 
   const conversionRates = [
     {
       stage: "Applied → Screening",
-      rate: appliedCount > 0 ? Math.round((screeningCount / appliedCount) * 100) : 0,
+      rate:
+        appliedCount > 0
+          ? Math.round((screeningCount / appliedCount) * 100)
+          : 0,
       count: `${screeningCount}/${appliedCount}`,
     },
     {
       stage: "Screening → Interview",
-      rate: screeningCount > 0 ? Math.round((interviewCount / screeningCount) * 100) : 0,
+      rate:
+        screeningCount > 0
+          ? Math.round((interviewCount / screeningCount) * 100)
+          : 0,
       count: `${interviewCount}/${screeningCount}`,
     },
     {
       stage: "Interview → Offer",
-      rate: interviewCount > 0 ? Math.round((offerCount / interviewCount) * 100) : 0,
+      rate:
+        interviewCount > 0
+          ? Math.round((offerCount / interviewCount) * 100)
+          : 0,
       count: `${offerCount}/${interviewCount}`,
     },
     {
       stage: "Offer → Hired",
-      rate: offerCount > 0 ? Math.round((pipelineHiredCount / offerCount) * 100) : 0,
+      rate:
+        offerCount > 0
+          ? Math.round((pipelineHiredCount / offerCount) * 100)
+          : 0,
       count: `${pipelineHiredCount}/${offerCount}`,
     },
   ];
@@ -245,9 +262,13 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold">{job.applicationCount}</p>
-                    <p className="text-xs text-muted-foreground">Applications</p>
+                    <p className="text-xs text-muted-foreground">
+                      Applications
+                    </p>
                   </div>
-                  <Badge variant={job.status === "OPEN" ? "success" : "secondary"}>
+                  <Badge
+                    variant={job.status === "OPEN" ? "success" : "secondary"}
+                  >
                     {job.status}
                   </Badge>
                 </div>
@@ -295,9 +316,12 @@ export default function AnalyticsPage() {
             <CardTitle className="text-base">Total Jobs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold mb-2">{overview?.totalJobs ?? 0}</div>
+            <div className="text-4xl font-bold mb-2">
+              {overview?.totalJobs ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {openJobs} open • {(overview?.totalJobs ?? 0) - openJobs} closed/draft
+              {openJobs} open • {(overview?.totalJobs ?? 0) - openJobs}{" "}
+              closed/draft
             </p>
           </CardContent>
         </Card>
@@ -309,7 +333,10 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="text-4xl font-bold mb-2">
               {totalApplications > 0
-                ? Math.round(((stageCountMap.get("REJECTED") ?? 0) / totalApplications) * 100)
+                ? Math.round(
+                    ((stageCountMap.get("REJECTED") ?? 0) / totalApplications) *
+                      100,
+                  )
                 : 0}
               %
             </div>

@@ -13,8 +13,11 @@ import {
   Users,
   Loader2,
   Plus,
+  Pencil,
+  XCircle,
 } from "lucide-react";
 import { useInterviews } from "@/services/interviews";
+import { InterviewCrudDialog } from "@/components/interviews/interview-crud-dialog";
 import type { Interview, InterviewStatus } from "@/types";
 
 const STATUS_COLORS: Record<InterviewStatus, string> = {
@@ -63,8 +66,34 @@ export default function InterviewsPage() {
     data: interviews = [],
     isLoading,
     error,
+    mutate: refetch,
   } = useInterviews({ page: 1, limit: 50 });
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+
+  const handleEdit = (interview: Interview) => {
+    setSelectedInterview(interview);
+    setIsDialogOpen(true);
+  };
+
+  const handleCancel = async (id: string) => {
+    if (confirm("Are you sure you want to cancel this interview?")) {
+        try {
+            await fetch(`http://localhost:3000/api/v1/interviews/${id}/cancel`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // Authorization header would go here if needed
+                }
+            });
+            refetch();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to cancel interview");
+        }
+    }
+  };
 
   const filteredInterviews = useMemo(() => {
     if (statusFilter === "all") return interviews;
@@ -126,7 +155,10 @@ export default function InterviewsPage() {
             Manage and schedule candidate interviews
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => {
+            setSelectedInterview(null);
+            setIsDialogOpen(true);
+        }}>
           <Plus className="h-4 w-4" />
           Schedule Interview
         </Button>
@@ -243,15 +275,29 @@ export default function InterviewsPage() {
                       </div>
 
                       {/* Time */}
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-medium">
-                          {formatDateTime(interview.scheduledAt)}
-                        </p>
-                        {interview.interviewer ? (
-                          <p className="text-xs text-muted-foreground">
-                            with {interview.interviewer.fullName}
+                      <div className="text-right shrink-0 flex flex-col justify-between items-end">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {formatDateTime(interview.scheduledAt)}
                           </p>
-                        ) : null}
+                          {interview.interviewer ? (
+                            <p className="text-xs text-muted-foreground">
+                              with {interview.interviewer.fullName}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                           <Button variant="outline" size="sm" onClick={() => handleEdit(interview)}>
+                               <Pencil className="h-4 w-4 mr-1" />
+                               Edit
+                           </Button>
+                           {interview.status !== "CANCELLED" && (
+                               <Button variant="destructive" size="sm" onClick={() => handleCancel(interview.id)}>
+                                   <XCircle className="h-4 w-4 mr-1" />
+                                   Cancel
+                               </Button>
+                           )}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -261,6 +307,12 @@ export default function InterviewsPage() {
           ))}
         </div>
       )}
+      <InterviewCrudDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        interview={selectedInterview}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }

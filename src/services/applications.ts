@@ -80,6 +80,14 @@ export async function updateApplicationStage(
 }
 
 /**
+ * Imperative function for deleting an application.
+ * Used in handlers where hook-based approach isn't practical.
+ */
+export async function deleteApplication(id: string): Promise<void> {
+  await api.delete(endpoints.applications.delete(id));
+}
+
+/**
  * Hook for uploading a CV with multipart/form-data
  *
  * Uses api.upload() to send FormData to POST /applications/upload

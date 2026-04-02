@@ -32,7 +32,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(ROUTES.DASHBOARD);
+      const searchParams = new URLSearchParams(window.location.search);
+      const callbackUrl = searchParams.get("callbackUrl");
+      const targetUrl = callbackUrl || ROUTES.DASHBOARD;
+      if (window.location.pathname !== targetUrl) {
+        router.push(targetUrl);
+      }
     }
   }, [isAuthenticated, router]);
 
@@ -48,7 +53,12 @@ export default function LoginPage() {
       toast.success("Welcome back!", {
         description: "You have successfully signed in.",
       });
-      router.push(ROUTES.DASHBOARD);
+      const searchParams = new URLSearchParams(window.location.search);
+      const callbackUrl = searchParams.get("callbackUrl");
+      const targetUrl = callbackUrl || ROUTES.DASHBOARD;
+      if (window.location.pathname !== targetUrl) {
+        router.push(targetUrl);
+      }
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         // Account lockout detection

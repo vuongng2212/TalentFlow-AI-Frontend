@@ -12,7 +12,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateInterview, useUpdateInterview } from "@/services/interviews";
-import type { Interview, InterviewType, InterviewStatus } from "@/types";
+import { useApplications } from "@/services/applications";
+import type {
+  Interview,
+  InterviewType,
+  InterviewStatus,
+  Application,
+} from "@/types";
 
 interface InterviewCrudDialogProps {
   interview?: Interview | null;
@@ -40,6 +46,10 @@ export function InterviewCrudDialog({
 
   const createInterview = useCreateInterview();
   const updateInterview = useUpdateInterview(interview?.id || "");
+  const { data: applicationsRes, isLoading: isLoadingApps } = useApplications();
+  const applicationsList =
+    (applicationsRes as { data?: Application[] })?.data ||
+    (Array.isArray(applicationsRes) ? (applicationsRes as Application[]) : []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,7 +57,9 @@ export function InterviewCrudDialog({
     if (open && interview) {
       const date = new Date(interview.scheduledAt);
       // Format to YYYY-MM-DDThh:mm
-      const formattedDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      const formattedDate = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000,
+      )
         .toISOString()
         .slice(0, 16);
 
@@ -85,9 +97,15 @@ export function InterviewCrudDialog({
       };
 
       if (isEditing) {
-        await updateInterview.trigger(payload);
+        // Exclude applicationId which is not allowed in UpdateInterviewDto
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { applicationId, ...updatePayload } = payload;
+        await updateInterview.trigger(updatePayload);
       } else {
-        await createInterview.trigger(payload);
+        // For creation, we don't need the status field (backend sets it to SCHEDULED by default)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { status, ...createPayload } = payload;
+        await createInterview.trigger(createPayload);
       }
 
       onSuccess();
@@ -114,7 +132,11 @@ export function InterviewCrudDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <form id="interview-form" onSubmit={handleSubmit} className="flex flex-col h-full">
+      <form
+        id="interview-form"
+        onSubmit={handleSubmit}
+        className="flex flex-col h-full"
+      >
         <div className="space-y-4 py-4">
           {error && (
             <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">
@@ -124,17 +146,36 @@ export function InterviewCrudDialog({
 
           {!isEditing && (
             <div className="space-y-2">
-              <Label htmlFor="applicationId">Application ID</Label>
-              <Input
-                id="applicationId"
-                required
+              <Label htmlFor="applicationId">Application / Candidate</Label>
+              <Select
                 value={formData.applicationId}
-                onChange={(e) =>
-                  setFormData({ ...formData, applicationId: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, applicationId: value })
                 }
-                placeholder="e.g. app-123"
-                autoFocus
-              />
+              >
+                <SelectTrigger id="applicationId" className="w-full">
+                  <SelectValue
+                    placeholder={
+                      isLoadingApps
+                        ? "Loading applications..."
+                        : "Select an application to interview"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {applicationsList?.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>
+                      {app.candidateId} — {app.job?.title || app.jobId}
+                    </SelectItem>
+                  ))}
+                  {(!applicationsList || applicationsList.length === 0) &&
+                    !isLoadingApps && (
+                      <SelectItem value="" disabled>
+                        No applications available
+                      </SelectItem>
+                    )}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -161,7 +202,10 @@ export function InterviewCrudDialog({
                 required
                 value={formData.duration}
                 onChange={(e) =>
-                  setFormData({ ...formData, duration: parseInt(e.target.value) })
+                  setFormData({
+                    ...formData,
+                    duration: parseInt(e.target.value),
+                  })
                 }
               />
             </div>
@@ -190,27 +234,30 @@ export function InterviewCrudDialog({
             </div>
 
             {isEditing && (
-               <div className="space-y-2">
-               <Label htmlFor="status">Status</Label>
-               <Select
-                 value={formData.status}
-                 onValueChange={(value) =>
-                   setFormData({ ...formData, status: value as InterviewStatus })
-                 }
-               >
-                 <SelectTrigger id="status">
-                   <SelectValue placeholder="Select status" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                   <SelectItem value="CONFIRMED">Confirmed</SelectItem>
-                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                   <SelectItem value="COMPLETED">Completed</SelectItem>
-                   <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                   <SelectItem value="NO_SHOW">No Show</SelectItem>
-                 </SelectContent>
-               </Select>
-             </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      status: value as InterviewStatus,
+                    })
+                  }
+                >
+                  <SelectTrigger id="status">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+                    <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                    <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                    <SelectItem value="NO_SHOW">No Show</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             )}
           </div>
 

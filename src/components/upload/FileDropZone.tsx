@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -30,6 +31,19 @@ export function FileDropZone({
   onFileSelect,
   onRemoveFile,
 }: FileDropZoneProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openFilePicker();
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -40,7 +54,11 @@ export function FileDropZone({
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
           onDrop={onDrop}
-          className={`border-2 border-dashed rounded-lg p-12 text-center transition-all ${
+          onClick={openFilePicker}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+          className={`border-2 border-dashed rounded-lg p-12 text-center transition-all cursor-pointer ${
             isDragging
               ? "border-primary bg-primary/5"
               : "border-border hover:border-primary/50"
@@ -53,17 +71,16 @@ export function FileDropZone({
             <div>
               <p className="text-lg font-medium mb-1">
                 Drop your CV files here, or{" "}
-                <label className="text-primary cursor-pointer hover:underline">
-                  browse
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx"
-                    onChange={onFileSelect}
-                    className="hidden"
-                  />
-                </label>
+                <span className="text-primary hover:underline">browse</span>
               </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx"
+                onChange={onFileSelect}
+                className="hidden"
+              />
               <p className="text-sm text-muted-foreground">
                 Support: PDF, DOC, DOCX (Max 10&#160;MB each)
               </p>

@@ -6,5 +6,5 @@ export { JobCard } from "./JobCard";
 export { EmptyJobsState } from "./EmptyJobsState";
 
 // Types
-export type { NewJobForm, JobStatusFilter } from "./types";
+export type { NewJobForm, JobStatusFilter, JobEmploymentTypeFilter } from "./types";
 export { initialNewJobState, jobToForm } from "./types";

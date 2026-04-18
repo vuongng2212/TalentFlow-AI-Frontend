@@ -34,6 +34,7 @@ import {
 interface KanbanColumnProps {
   column: KanbanColumnType;
   className?: string;
+  canDrag?: boolean;
 }
 
 const stageConfig: Record<
@@ -86,8 +87,10 @@ const stageConfig: Record<
 // Sortable Candidate Item - memoized for performance
 const SortableCandidateItem = React.memo(function SortableCandidateItem({
   candidate,
+  canDrag,
 }: {
   candidate: CandidateViewModel;
+  canDrag: boolean;
 }) {
   const {
     attributes,
@@ -96,7 +99,7 @@ const SortableCandidateItem = React.memo(function SortableCandidateItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: candidate.id });
+  } = useSortable({ id: candidate.id, disabled: !canDrag });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -107,9 +110,13 @@ const SortableCandidateItem = React.memo(function SortableCandidateItem({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={cn("mb-2 last:mb-0", isDragging && "opacity-50")}
+      {...(canDrag ? attributes : {})}
+      {...(canDrag ? listeners : {})}
+      className={cn(
+        "mb-2 last:mb-0",
+        isDragging && "opacity-50",
+        !canDrag && "cursor-default",
+      )}
     >
       <CandidateCard candidate={candidate} isDragging={isDragging} />
     </div>
@@ -119,12 +126,14 @@ const SortableCandidateItem = React.memo(function SortableCandidateItem({
 export const KanbanColumn = React.memo(function KanbanColumn({
   column,
   className,
+  canDrag = true,
 }: KanbanColumnProps) {
   const config = stageConfig[column.id];
   const Icon = config.icon;
 
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
+    disabled: !canDrag,
   });
 
   return (
@@ -134,7 +143,7 @@ export const KanbanColumn = React.memo(function KanbanColumn({
           "flex h-full w-80 shrink-0 flex-col rounded-xl overflow-hidden",
           "border border-border/50 shadow-soft-sm",
           "transition-all duration-200",
-          isOver && "ring-2 ring-primary/30 border-primary/40",
+          canDrag && isOver && "ring-2 ring-primary/30 border-primary/40",
           className,
         )}
       >
@@ -195,17 +204,20 @@ export const KanbanColumn = React.memo(function KanbanColumn({
                   "flex h-32 flex-col items-center justify-center rounded-lg",
                   "border-2 border-dashed border-border/60",
                   "text-center text-sm text-muted-foreground/70",
-                  isOver && "border-primary/40 bg-primary/5",
+                  canDrag && isOver && "border-primary/40 bg-primary/5",
                 )}
               >
                 <Icon className="h-6 w-6 mb-2 opacity-40" />
-                <p className="text-xs">Drop candidates here</p>
+                <p className="text-xs">
+                  {canDrag ? "Drop candidates here" : "No candidates yet"}
+                </p>
               </div>
             ) : (
               column.candidates.map((candidate) => (
                 <SortableCandidateItem
                   key={candidate.id}
                   candidate={candidate}
+                  canDrag={canDrag}
                 />
               ))
             )}

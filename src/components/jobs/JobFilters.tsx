@@ -1,24 +1,50 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search } from "lucide-react";
-import { JobStatusFilter } from "./types";
+import { JobEmploymentTypeFilter, JobStatusFilter } from "./types";
 
 interface JobFiltersProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   statusFilter: JobStatusFilter;
   onStatusChange: (status: JobStatusFilter) => void;
+  employmentTypeFilter: JobEmploymentTypeFilter;
+  onEmploymentTypeChange: (employmentType: JobEmploymentTypeFilter) => void;
   statusCounts: Record<JobStatusFilter, number>;
 }
 
 const statuses: JobStatusFilter[] = ["ALL", "OPEN", "DRAFT", "CLOSED"];
+const employmentTypes: JobEmploymentTypeFilter[] = [
+  "ALL",
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACT",
+  "INTERNSHIP",
+];
+
+const employmentTypeLabels: Record<JobEmploymentTypeFilter, string> = {
+  ALL: "All Types",
+  FULL_TIME: "Full Time",
+  PART_TIME: "Part Time",
+  CONTRACT: "Contract",
+  INTERNSHIP: "Internship",
+};
 
 export function JobFilters({
   searchQuery,
   onSearchChange,
   statusFilter,
   onStatusChange,
+  employmentTypeFilter,
+  onEmploymentTypeChange,
   statusCounts,
 }: JobFiltersProps) {
   return (
@@ -37,8 +63,26 @@ export function JobFilters({
             />
           </div>
 
-          {/* Status Filter */}
-          <div className="flex gap-2">
+          {/* Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <Select
+              value={employmentTypeFilter}
+              onValueChange={(value) =>
+                onEmploymentTypeChange(value as JobEmploymentTypeFilter)
+              }
+            >
+              <SelectTrigger className="w-[170px]">
+                <SelectValue placeholder="Employment type" />
+              </SelectTrigger>
+              <SelectContent>
+                {employmentTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {employmentTypeLabels[type]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             {statuses.map((status) => (
               <Button
                 key={status}

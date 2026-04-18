@@ -25,6 +25,8 @@ import type {
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
+import { canPerformAction } from "@/lib/rbac/permissions";
+import { useAuthStore } from "@/store/auth-store";
 
 // Dynamic import for KanbanBoard - code-splits @dnd-kit from initial bundle
 const KanbanBoard = dynamic(
@@ -50,6 +52,11 @@ export default function CandidatesPage() {
     error,
     mutate,
   } = useApplications({ page, limit: 50 });
+  const role = useAuthStore((state) => state.user?.role);
+  const canUpdateApplicationStage = canPerformAction(
+    role,
+    "applications:updateStage",
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -114,6 +121,11 @@ export default function CandidatesPage() {
   // Handle stage drop — persist to API
   const handleStageDrop = useCallback(
     async (candidateId: string, newStage: ApplicationStage) => {
+      if (!canUpdateApplicationStage) {
+        setOptimisticColumns(null);
+        return;
+      }
+
       const movedCandidate = (optimisticColumns ?? apiColumns)
         .flatMap((col) => col.candidates)
         .find((c) => c.id === candidateId);
@@ -134,7 +146,7 @@ export default function CandidatesPage() {
         setOptimisticColumns(null);
       }
     },
-    [optimisticColumns, apiColumns, mutate],
+    [canUpdateApplicationStage, optimisticColumns, apiColumns, mutate],
   );
 
   // Stable callbacks
@@ -229,7 +241,8 @@ export default function CandidatesPage() {
           <KanbanBoard
             columns={filteredColumns}
             onColumnsChange={handleColumnsChange}
-            onStageDrop={handleStageDrop}
+            onStageDrop={canUpdateApplicationStage ? handleStageDrop : undefined}
+            canDrag={canUpdateApplicationStage}
           />
         ) : (
           <CandidateListView

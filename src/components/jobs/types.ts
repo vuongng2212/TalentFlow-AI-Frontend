@@ -13,6 +13,7 @@ export interface NewJobForm {
 }
 
 export type JobStatusFilter = "ALL" | "OPEN" | "DRAFT" | "CLOSED";
+export type JobEmploymentTypeFilter = "ALL" | EmploymentType;
 
 export const initialNewJobState: NewJobForm = {
   title: "",

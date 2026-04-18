@@ -8,9 +8,12 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   JOBS: "/dashboard/jobs",
   CANDIDATES: "/dashboard/candidates",
+  APPLICATIONS: "/dashboard/applications",
   INTERVIEWS: "/dashboard/interviews",
   ANALYTICS: "/dashboard/analytics",
+  UPLOAD: "/dashboard/upload",
   SETTINGS: "/dashboard/settings",
+  USERS: "/dashboard/users",
 } as const;
 
 export const APPLICATION_STAGES = {

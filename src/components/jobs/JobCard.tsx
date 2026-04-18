@@ -96,24 +96,27 @@ export const JobCard = React.memo(function JobCard({
           ) : null}
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 pt-2">
           <Link href={`/dashboard/jobs/${job.id}`} className="flex-1">
             <Button variant="outline" className="w-full" size="sm">
               View Details
             </Button>
           </Link>
-          <Button variant="ghost" size="sm" onClick={() => onEdit?.(job)}>
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => onDelete?.(job)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {onEdit ? (
+            <Button variant="ghost" size="sm" onClick={() => onEdit(job)}>
+              Edit
+            </Button>
+          ) : null}
+          {onDelete ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => onDelete(job)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,13 +38,22 @@ export function CreateJobDialog({
   mode = "create",
   hideTrigger = false,
 }: CreateJobDialogProps) {
-  const isFormValid = formData.title.trim().length > 0;
+  const [isTitleTouched, setIsTitleTouched] = useState(false);
+  const isTitleValid = formData.title.trim().length > 0;
   const isEdit = mode === "edit";
+  const showTitleError = isTitleTouched && !isTitleValid;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setIsTitleTouched(false);
+    }
+    onOpenChange(nextOpen);
+  };
 
   return (
     <CrudDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={isEdit ? "Edit Job" : "Create New Job"}
       description={
         isEdit
@@ -62,6 +72,8 @@ export function CreateJobDialog({
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setIsTitleTouched(true);
+          if (!isTitleValid) return;
           onSubmit();
         }}
         className="flex flex-col h-full"
@@ -69,7 +81,9 @@ export function CreateJobDialog({
         <div className="grid gap-4 py-4">
           {/* Job Title */}
           <div className="grid gap-2">
-            <Label htmlFor="title">Job Title *</Label>
+            <Label htmlFor="title">
+              Job Title <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="title"
               placeholder="e.g., Senior Frontend Developer"
@@ -77,10 +91,14 @@ export function CreateJobDialog({
               onChange={(e) =>
                 onFormChange({ ...formData, title: e.target.value })
               }
+              onBlur={() => setIsTitleTouched(true)}
               autoComplete="off"
               maxLength={200}
               autoFocus
             />
+            {showTitleError ? (
+              <p className="text-xs text-destructive">Job title is required.</p>
+            ) : null}
           </div>
 
           {/* Department & Location */}
@@ -151,7 +169,7 @@ export function CreateJobDialog({
                 <SelectContent>
                   <SelectItem value="DRAFT">Draft</SelectItem>
                   <SelectItem value="OPEN">Open</SelectItem>
-                  <SelectItem value="CLOSED">Closed</SelectItem>
+                  {isEdit ? <SelectItem value="CLOSED">Closed</SelectItem> : null}
                 </SelectContent>
               </Select>
             </div>
@@ -225,12 +243,12 @@ export function CreateJobDialog({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={!isFormValid || isSubmitting}>
+          <Button type="submit" disabled={!isTitleValid || isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

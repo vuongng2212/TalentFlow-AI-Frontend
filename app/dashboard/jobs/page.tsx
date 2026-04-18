@@ -12,12 +12,15 @@ import {
   jobToForm,
   NewJobForm,
   JobStatusFilter,
+  JobEmploymentTypeFilter,
 } from "@/components/jobs";
 import { useJobs, useCreateJob, useUpdateJob } from "@/services/jobs";
 import type { CreateJobRequest, UpdateJobRequest } from "@/lib/api/types";
 import type { Job } from "@/types";
 import { Loader2 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
+import { canPerformAction } from "@/lib/rbac/permissions";
+import { useAuthStore } from "@/store/auth-store";
 
 const DeleteJobDialog = dynamic(
   () =>
@@ -38,8 +41,14 @@ export default function JobsPage() {
     mutate,
   } = useJobs({ page, limit: 12 });
   const { trigger: createJob, isMutating: isCreating } = useCreateJob();
+  const role = useAuthStore((state) => state.user?.role);
+  const canCreateJob = canPerformAction(role, "jobs:create");
+  const canUpdateJob = canPerformAction(role, "jobs:update");
+  const canDeleteJob = canPerformAction(role, "jobs:delete");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<JobStatusFilter>("ALL");
+  const [employmentTypeFilter, setEmploymentTypeFilter] =
+    useState<JobEmploymentTypeFilter>("ALL");
   const [createJobOpen, setCreateJobOpen] = useState(false);
   const [newJob, setNewJob] = useState<NewJobForm>(initialNewJobState);
 
@@ -65,9 +74,13 @@ export default function JobsPage() {
           .includes(searchQuery.toLowerCase());
       const matchesStatus =
         statusFilter === "ALL" || job.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesEmploymentType =
+        employmentTypeFilter === "ALL" ||
+        job.employmentType === employmentTypeFilter;
+
+      return matchesSearch && matchesStatus && matchesEmploymentType;
     });
-  }, [jobs, searchQuery, statusFilter]);
+  }, [jobs, searchQuery, statusFilter, employmentTypeFilter]);
 
   // Calculate status counts directly without useMemo
   const statusCounts = {
@@ -87,6 +100,14 @@ export default function JobsPage() {
     setStatusFilter(status);
     setPage(1);
   }, []);
+
+  const handleEmploymentTypeChange = useCallback(
+    (employmentType: JobEmploymentTypeFilter) => {
+      setEmploymentTypeFilter(employmentType);
+      setPage(1);
+    },
+    [],
+  );
 
   const handleFormChange = useCallback((data: NewJobForm) => {
     setNewJob(data);
@@ -126,8 +147,9 @@ export default function JobsPage() {
   }, [newJob, createJob, mutate]);
 
   const handleOpenCreate = useCallback(() => {
+    if (!canCreateJob) return;
     setCreateJobOpen(true);
-  }, []);
+  }, [canCreateJob]);
 
   const handleEditFromCard = useCallback((job: Job) => {
     setEditingJobId(job.id);
@@ -210,14 +232,16 @@ export default function JobsPage() {
             Manage your open positions and recruitment campaigns
           </p>
         </div>
-        <CreateJobDialog
-          open={createJobOpen}
-          onOpenChange={setCreateJobOpen}
-          formData={newJob}
-          onFormChange={handleFormChange}
-          onSubmit={handleCreateJob}
-          isSubmitting={isCreating}
-        />
+        {canCreateJob ? (
+          <CreateJobDialog
+            open={createJobOpen}
+            onOpenChange={setCreateJobOpen}
+            formData={newJob}
+            onFormChange={handleFormChange}
+            onSubmit={handleCreateJob}
+            isSubmitting={isCreating}
+          />
+        ) : null}
       </div>
 
       {/* Filters */}
@@ -226,6 +250,8 @@ export default function JobsPage() {
         onSearchChange={handleSearchChange}
         statusFilter={statusFilter}
         onStatusChange={handleStatusChange}
+        employmentTypeFilter={employmentTypeFilter}
+        onEmploymentTypeChange={handleEmploymentTypeChange}
         statusCounts={statusCounts}
       />
 
@@ -236,8 +262,8 @@ export default function JobsPage() {
             <JobCard
               key={job.id}
               job={job}
-              onEdit={handleEditFromCard}
-              onDelete={handleDeleteFromCard}
+              onEdit={canUpdateJob ? handleEditFromCard : undefined}
+              onDelete={canDeleteJob ? handleDeleteFromCard : undefined}
             />
           ))}
         </div>
@@ -245,6 +271,7 @@ export default function JobsPage() {
         <EmptyJobsState
           hasSearchQuery={searchQuery !== ""}
           onCreateClick={handleOpenCreate}
+          canCreate={canCreateJob}
         />
       )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarNavItem,
   SidebarFooter,
-  navItems,
+  getNavItemsForRole,
 } from "./sidebar-components";
 
 // Removed unused function isNavItemActive per bundle optimization best practice
@@ -23,6 +23,7 @@ export function Sidebar() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
+  const visibleNavItems = useMemo(() => getNavItemsForRole(user?.role), [user?.role]);
 
   const handleToggle = useCallback(() => {
     setCollapsed((prev) => !prev);
@@ -49,7 +50,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {navItems.map((item, index) => (
+        {visibleNavItems.map((item, index) => (
           <SidebarNavItem
             key={item.href}
             item={item}

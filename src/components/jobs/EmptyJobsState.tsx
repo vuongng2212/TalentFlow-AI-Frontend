@@ -5,11 +5,13 @@ import { Briefcase, Plus } from "lucide-react";
 interface EmptyJobsStateProps {
   hasSearchQuery: boolean;
   onCreateClick: () => void;
+  canCreate?: boolean;
 }
 
 export function EmptyJobsState({
   hasSearchQuery,
   onCreateClick,
+  canCreate = true,
 }: EmptyJobsStateProps) {
   return (
     <Card>
@@ -21,7 +23,7 @@ export function EmptyJobsState({
             ? "Try adjusting your search or filters"
             : "Create your first job posting to get started"}
         </p>
-        {!hasSearchQuery ? (
+        {!hasSearchQuery && canCreate ? (
           <Button onClick={onCreateClick}>
             <Plus className="h-4 w-4 mr-2" />
             Create First Job

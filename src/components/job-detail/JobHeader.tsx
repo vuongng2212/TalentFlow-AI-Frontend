@@ -19,9 +19,17 @@ interface JobHeaderProps {
   job: Job;
   onEdit?: () => void;
   onDelete?: () => void;
+  canManageJob?: boolean;
+  canUploadCv?: boolean;
 }
 
-export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
+export function JobHeader({
+  job,
+  onEdit,
+  onDelete,
+  canManageJob = true,
+  canUploadCv = true,
+}: JobHeaderProps) {
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied!", {
@@ -83,27 +91,33 @@ export function JobHeader({ job, onEdit, onDelete }: JobHeaderProps) {
       </div>
 
       <div className="flex gap-2">
-        <Link href="/dashboard/upload">
-          <Button className="gap-2">
-            <Upload className="h-4 w-4" />
-            Upload CV
+        {canUploadCv ? (
+          <Link href="/dashboard/upload">
+            <Button className="gap-2">
+              <Upload className="h-4 w-4" />
+              Upload CV
+            </Button>
+          </Link>
+        ) : null}
+        {canManageJob ? (
+          <Button variant="outline" className="gap-2" onClick={handleEdit}>
+            <Edit className="h-4 w-4" />
+            Edit
           </Button>
-        </Link>
-        <Button variant="outline" className="gap-2" onClick={handleEdit}>
-          <Edit className="h-4 w-4" />
-          Edit
-        </Button>
+        ) : null}
         <Button variant="outline" size="icon" onClick={handleShare}>
           <Share2 className="h-4 w-4" />
         </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="text-destructive"
-          onClick={handleDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {canManageJob ? (
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        ) : null}
       </div>
     </div>
   );

@@ -33,6 +33,8 @@ import { useApplications } from "@/services/applications";
 import type { UpdateJobRequest } from "@/lib/api/types";
 import type { CandidateViewModel } from "@/types";
 import { toast } from "sonner";
+import { canPerformAction } from "@/lib/rbac/permissions";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -49,6 +51,9 @@ export default function JobDetailPage() {
     { jobId },
   );
   const { trigger: updateJob, isMutating: isUpdating } = useUpdateJob(jobId);
+  const role = useAuthStore((state) => state.user?.role);
+  const canManageJobs = canPerformAction(role, "jobs:update");
+  const canUploadCv = canPerformAction(role, "upload:create");
 
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState<NewJobForm>(initialNewJobState);
@@ -134,30 +139,34 @@ export default function JobDetailPage() {
       {/* Header */}
       <JobHeader
         job={job}
-        onEdit={handleEditOpen}
-        onDelete={() => setDeleteOpen(true)}
+        onEdit={canManageJobs ? handleEditOpen : undefined}
+        onDelete={canManageJobs ? () => setDeleteOpen(true) : undefined}
+        canManageJob={canManageJobs}
+        canUploadCv={canUploadCv}
       />
 
-      {/* Edit Dialog */}
-      <CreateJobDialog
-        mode="edit"
-        hideTrigger
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        formData={editForm}
-        onFormChange={setEditForm}
-        onSubmit={handleEditSubmit}
-        isSubmitting={isUpdating}
-      />
+      {canManageJobs ? (
+        <>
+          <CreateJobDialog
+            mode="edit"
+            hideTrigger
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            formData={editForm}
+            onFormChange={setEditForm}
+            onSubmit={handleEditSubmit}
+            isSubmitting={isUpdating}
+          />
 
-      {/* Delete Dialog */}
-      <DeleteJobDialog
-        jobId={jobId}
-        jobTitle={job.title}
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        onDeleted={() => router.push("/dashboard/jobs")}
-      />
+          <DeleteJobDialog
+            jobId={jobId}
+            jobTitle={job.title}
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            onDeleted={() => router.push("/dashboard/jobs")}
+          />
+        </>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
@@ -176,7 +185,7 @@ export default function JobDetailPage() {
         </div>
 
         {/* Sidebar */}
-        <JobSidebar job={job} applicants={applicants} />
+        <JobSidebar job={job} applicants={applicants} canUploadCv={canUploadCv} />
       </div>
     </div>
   );

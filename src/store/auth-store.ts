@@ -13,6 +13,7 @@ interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
   login: (data: LoginRequest) => Promise<void>;
   signup: (data: SignupRequest) => Promise<void>;
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: false,
+  isInitialized: false,
   error: null,
 
   clearError: () => set({ error: null }),
@@ -44,7 +46,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(error, "auth-login");
       set({ isLoading: false, error: errorMessage });
       throw error;
     }
@@ -63,7 +65,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const { login } = get();
       await login({ email: data.email, password: data.password });
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(error, "auth-signup");
       set({ isLoading: false, error: errorMessage });
       throw error;
     }
@@ -95,12 +97,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         user: response.data.user,
         isAuthenticated: true,
         isLoading: false,
+        isInitialized: true,
       });
     } catch {
       set({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        isInitialized: true,
       });
     }
   },

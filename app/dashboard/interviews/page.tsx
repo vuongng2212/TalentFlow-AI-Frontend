@@ -18,7 +18,11 @@ import {
 } from "lucide-react";
 import { useInterviews } from "@/services/interviews";
 import { InterviewCrudDialog } from "@/components/interviews/interview-crud-dialog";
+import { api, endpoints } from "@/lib/api";
+import { canPerformAction } from "@/lib/rbac/permissions";
+import { useAuthStore } from "@/store/auth-store";
 import type { Interview, InterviewStatus } from "@/types";
+import { toast } from "sonner";
 
 const STATUS_COLORS: Record<InterviewStatus, string> = {
   SCHEDULED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
@@ -71,29 +75,39 @@ export default function InterviewsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+  const role = useAuthStore((state) => state.user?.role);
+  const canCreateInterview = canPerformAction(role, "interviews:create");
+  const canUpdateInterview = canPerformAction(role, "interviews:update");
+  const canCancelInterview = canPerformAction(role, "interviews:cancel");
 
-  const handleEdit = (interview: Interview) => {
-    setSelectedInterview(interview);
-    setIsDialogOpen(true);
-  };
+  const handleEdit = useCallback(
+    (interview: Interview) => {
+      if (!canUpdateInterview) return;
+      setSelectedInterview(interview);
+      setIsDialogOpen(true);
+    },
+    [canUpdateInterview],
+  );
 
-  const handleCancel = async (id: string) => {
-    if (confirm("Are you sure you want to cancel this interview?")) {
-        try {
-            await fetch(`http://localhost:3000/api/v1/interviews/${id}/cancel`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    // Authorization header would go here if needed
-                }
-            });
-            refetch();
-        } catch (error) {
-            console.error(error);
-            alert("Failed to cancel interview");
-        }
-    }
-  };
+  const handleCancel = useCallback(
+    async (id: string) => {
+      if (!canCancelInterview) return;
+      if (!window.confirm("Are you sure you want to cancel this interview?")) {
+        return;
+      }
+
+      try {
+        await api.delete(endpoints.interviews.cancel(id));
+        toast.success("Interview cancelled.");
+        refetch();
+      } catch {
+        toast.error("Failed to cancel interview", {
+          description: "Please try again.",
+        });
+      }
+    },
+    [canCancelInterview, refetch],
+  );
 
   const filteredInterviews = useMemo(() => {
     if (statusFilter === "all") return interviews;
@@ -155,13 +169,18 @@ export default function InterviewsPage() {
             Manage and schedule candidate interviews
           </p>
         </div>
-        <Button className="gap-2" onClick={() => {
-            setSelectedInterview(null);
-            setIsDialogOpen(true);
-        }}>
-          <Plus className="h-4 w-4" />
-          Schedule Interview
-        </Button>
+        {canCreateInterview ? (
+          <Button
+            className="gap-2"
+            onClick={() => {
+              setSelectedInterview(null);
+              setIsDialogOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" />
+            Schedule Interview
+          </Button>
+        ) : null}
       </div>
 
       {/* Stats */}
@@ -287,16 +306,26 @@ export default function InterviewsPage() {
                           ) : null}
                         </div>
                         <div className="flex gap-2 mt-2">
-                           <Button variant="outline" size="sm" onClick={() => handleEdit(interview)}>
-                               <Pencil className="h-4 w-4 mr-1" />
-                               Edit
-                           </Button>
-                           {interview.status !== "CANCELLED" && (
-                               <Button variant="destructive" size="sm" onClick={() => handleCancel(interview.id)}>
-                                   <XCircle className="h-4 w-4 mr-1" />
-                                   Cancel
-                               </Button>
-                           )}
+                          {canUpdateInterview ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEdit(interview)}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                          ) : null}
+                          {canCancelInterview && interview.status !== "CANCELLED" ? (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleCancel(interview.id)}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" />
+                              Cancel
+                            </Button>
+                          ) : null}
                         </div>
                       </div>
                     </CardContent>
@@ -307,12 +336,14 @@ export default function InterviewsPage() {
           ))}
         </div>
       )}
-      <InterviewCrudDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        interview={selectedInterview}
-        onSuccess={() => refetch()}
-      />
+      {canCreateInterview || canUpdateInterview ? (
+        <InterviewCrudDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          interview={selectedInterview}
+          onSuccess={() => refetch()}
+        />
+      ) : null}
     </div>
   );
 }

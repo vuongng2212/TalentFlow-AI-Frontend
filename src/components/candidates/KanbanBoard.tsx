@@ -25,6 +25,7 @@ interface KanbanBoardProps {
   onColumnsChange: (columns: KanbanColumnType[]) => void;
   onStageDrop?: (candidateId: string, newStage: ApplicationStage) => void;
   className?: string;
+  canDrag?: boolean;
 }
 
 export function KanbanBoard({
@@ -32,6 +33,7 @@ export function KanbanBoard({
   onColumnsChange,
   onStageDrop,
   className,
+  canDrag = true,
 }: KanbanBoardProps) {
   const [activeCandidate, setActiveCandidate] =
     useState<CandidateViewModel | null>(null);
@@ -46,13 +48,15 @@ export function KanbanBoard({
 
   const handleDragStart = useCallback(
     (event: DragStartEvent) => {
+      if (!canDrag) return;
+
       const { active } = event;
       const candidate = columns
         .flatMap((col) => col.candidates)
         .find((c) => c.id === active.id);
       setActiveCandidate(candidate || null);
     },
-    [columns],
+    [canDrag, columns],
   );
 
   const handleDragOver = useCallback(() => {
@@ -61,6 +65,8 @@ export function KanbanBoard({
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
+      if (!canDrag) return;
+
       const { active, over } = event;
       setActiveCandidate(null);
 
@@ -112,16 +118,16 @@ export function KanbanBoard({
         },
       );
     },
-    [columns, onColumnsChange, onStageDrop],
+    [canDrag, columns, onColumnsChange, onStageDrop],
   );
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDragEnd={handleDragEnd}
+      onDragStart={canDrag ? handleDragStart : undefined}
+      onDragOver={canDrag ? handleDragOver : undefined}
+      onDragEnd={canDrag ? handleDragEnd : undefined}
     >
       <div
         className={`flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 min-h-125 ${className ?? ""}`}
@@ -132,7 +138,7 @@ export function KanbanBoard({
             className="animate-slide-up"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <KanbanColumn column={column} />
+            <KanbanColumn column={column} canDrag={canDrag} />
           </div>
         ))}
       </div>

@@ -9,6 +9,7 @@ import { Job, CandidateViewModel } from "@/types";
 interface JobSidebarProps {
   job: Job;
   applicants: CandidateViewModel[];
+  canUploadCv?: boolean;
 }
 
 interface TeamMember {
@@ -30,7 +31,11 @@ const hiringTeam: TeamMember[] = [
   },
 ];
 
-export function JobSidebar({ job, applicants }: JobSidebarProps) {
+export function JobSidebar({
+  job,
+  applicants,
+  canUploadCv = true,
+}: JobSidebarProps) {
   const avgAiScore = useMemo(() => {
     if (applicants.length === 0) return 0;
     const total = applicants.reduce((sum, c) => sum + (c.aiScore || 0), 0);
@@ -94,12 +99,14 @@ export function JobSidebar({ job, applicants }: JobSidebarProps) {
           <CardTitle className="text-base">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Link href="/dashboard/upload">
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <Upload className="h-4 w-4" />
-              Upload CV
-            </Button>
-          </Link>
+          {canUploadCv ? (
+            <Link href="/dashboard/upload">
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <Upload className="h-4 w-4" />
+                Upload CV
+              </Button>
+            </Link>
+          ) : null}
           <Link href="/dashboard/candidates">
             <Button variant="outline" size="sm" className="w-full gap-2">
               <Users className="h-4 w-4" />

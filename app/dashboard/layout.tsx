@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { ROUTES } from "@/lib/constants";
+import { canAccessRoute, getDefaultDashboardRoute } from "@/lib/rbac/permissions";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +15,51 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const role = useAuthStore((state) => state.user?.role);
+  const isAuthLoading = useAuthStore((state) => state.isLoading);
+  const isAuthInitialized = useAuthStore((state) => state.isInitialized);
+
+  const canAccessCurrentRoute = useMemo(
+    () => canAccessRoute(role, pathname),
+    [role, pathname],
+  );
+
+  const redirectPath = useMemo(() => getDefaultDashboardRoute(role), [role]);
+
+  useEffect(() => {
+    if (!isAuthInitialized || isAuthLoading) {
+      return;
+    }
+
+    if (!role) {
+      router.replace(ROUTES.LOGIN);
+      return;
+    }
+
+    if (canAccessCurrentRoute || pathname === redirectPath) {
+      return;
+    }
+
+    router.replace(redirectPath);
+  }, [
+    isAuthInitialized,
+    isAuthLoading,
+    role,
+    canAccessCurrentRoute,
+    pathname,
+    redirectPath,
+    router,
+  ]);
+
+  if (!isAuthInitialized || isAuthLoading || !role || !canAccessCurrentRoute) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">

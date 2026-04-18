@@ -127,13 +127,26 @@ export function createTimeoutError(): ApiError {
   return new ApiError(0, "TIMEOUT", "The request timed out. Please try again.");
 }
 
+type ErrorContext = "default" | "auth-login" | "auth-signup";
+
 /** User-friendly error message for display */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(
+  error: unknown,
+  context: ErrorContext = "default",
+): string {
   if (error instanceof ApiError) {
     if (error.isNetworkError)
       return "Connection lost. Please check your internet.";
     if (error.isTimeout) return "Request timed out. Please try again.";
-    if (error.isUnauthorized) return "Session expired. Please log in again.";
+    if (error.isUnauthorized) {
+      if (context === "auth-login") {
+        return error.message || "Invalid email or password.";
+      }
+      if (context === "auth-signup") {
+        return error.message || "Sign up failed. Please try again.";
+      }
+      return "Session expired. Please log in again.";
+    }
     if (error.isForbidden) return "You don't have permission for this action.";
     if (error.isServerError)
       return "Something went wrong on our end. Please try again later.";

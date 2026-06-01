@@ -66,7 +66,7 @@ export default function SignupPage() {
           </p>
         </div>
         <div className="quote-card">
-          Growth plan teams typically start with jobs, CV upload, AI triage, and kanban automation enabled.
+          Plus plan teams typically start with jobs, CV upload, AI triage, and kanban automation enabled.
         </div>
       </section>
       <section className="auth-form">

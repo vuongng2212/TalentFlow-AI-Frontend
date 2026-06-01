@@ -22,7 +22,7 @@ export default function LandingPage() {
     },
     {
       question: 'Does it support bulk CV upload?',
-      answer: 'Bulk upload, email ingestion, and job-board ingestion are supported in Growth and Business plans.',
+      answer: 'Bulk upload, email ingestion, and job-board ingestion are supported in Plus and Business plans.',
     },
     {
       question: 'Can recruiters override the AI?',

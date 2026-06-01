@@ -45,11 +45,11 @@ export default function BillingPage() {
             </button>
           </div>
           <div className="card pad" style={{ borderColor: 'var(--primary)', boxShadow: 'var(--shadow-ai)' }}>
-            <span className="badge screening">Current · Growth</span>
+            <span className="badge screening">Current · Plus</span>
             <h2 style={{ marginTop: '12px', fontSize: '20px', fontWeight: 'bold' }}>$49 / seat</h2>
-            <p className="text-xs text-gray-500 mt-1">Unlimited jobs, AI scoring, automations, interviewer workspace.</p>
+            <p className="text-xs text-gray-500 mt-1">For individual/freelancers. Expanded CV parsing limits, candidate synthesis, and AI scoring.</p>
             <button className="btn primary" style={{ marginTop: '16px', width: '100%', cursor: 'pointer' }}>
-              Manage Growth
+              Manage Plus
             </button>
           </div>
           <div className="card pad">

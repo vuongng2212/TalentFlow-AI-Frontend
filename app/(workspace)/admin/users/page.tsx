@@ -206,7 +206,7 @@ export default function UserManagementPage() {
           <div className="card pad">
             <h2>Seat Health</h2>
             <p style={{ marginTop: '8px', fontSize: '13px' }} className="text-gray-600">
-              24 active seats, 1 pending invite, 5 available on the Growth plan.
+              24 active seats, 1 pending invite, 5 available on the Plus plan.
             </p>
           </div>
         </div>

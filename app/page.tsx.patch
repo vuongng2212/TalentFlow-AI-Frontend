@@ -1,0 +1,15 @@
+--- app/page.tsx
++++ app/page.tsx
+@@ -113,9 +113,10 @@
+           </div>
+         </section>
+ 
+-        <section className="landing-section animate-fade-in-up" style={{ paddingTop: '24px' }}>
+-          <div className="landing-container logos animate-infinite-scroll overflow-hidden">
++        <section className="landing-section animate-fade-in-up overflow-hidden" style={{ paddingTop: '24px' }}>
++          <div className="landing-container flex overflow-hidden">
++            <div className="logos animate-infinite-scroll">
+             <div className="logo-tile">
+               <div className="brand-lockup">
+                 <span className="brand-mark">N</span>Novaware
+               </div>

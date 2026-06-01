@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jobs · TalentFlow AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head"><a class="logo" href="index.html"><span class="logo-mark">TF</span> TalentFlow AI</a></div>
+      <nav>
+        <div class="nav-section">Main</div>
+        <a class="nav-link" href="dashboard.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>Dashboard</a>
+        <a class="nav-link active" href="jobs.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M9 6V4h6v2M8 11h8M8 15h5"/></svg></span>Jobs</a>
+        <a class="nav-link" href="candidates.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2"/><path d="M15.5 17.5c.7-.9 1.8-1.5 3-1.5 1.4 0 2.6.8 3.2 2"/></svg></span>Candidates</a>
+        <a class="nav-link" href="interviews.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h4M8 17h8"/></svg></span>Interviews</a>
+        <div class="nav-section" data-role-only="Admin">Admin</div>
+        <a class="nav-link" data-role-only="Admin" href="admin-users.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>User Management</a>
+        <a class="nav-link" href="settings.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></span>Settings</a>
+      </nav>
+      <div class="role-switch">
+        <button class="role-option" data-role-option="Recruiter">Recruiter nav</button>
+        <button class="role-option" data-role-option="Interviewer">Interviewer nav</button>
+        <button class="role-option" data-role-option="Admin">Admin nav</button>
+      </div>
+      <div class="sidebar-foot"><div class="avatar">AS</div><div><strong>Avery Sloan</strong><p><span data-current-role>Recruiter</span></p></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div class="crumb">TalentFlow / <strong>Jobs</strong></div><a class="btn primary" href="job-detail.html">Create Job</a></header>
+      <section class="content">
+        <div class="page-head">
+          <div><h1>Jobs</h1><p>Manage active requisitions, stage velocity, and applicant volume.</p></div>
+        </div>
+        <div class="job-toolbar">
+          <input class="input" data-search placeholder="Search jobs, departments, locations">
+          <select class="select" data-status-filter><option value="all">All statuses</option><option value="open">Open</option><option value="draft">Draft</option><option value="closed">Closed</option></select>
+          <select class="select"><option>Newest first</option><option>Most applications</option><option>Oldest first</option></select>
+          <a class="btn secondary" href="job-detail.html">New requisition</a>
+        </div>
+        <div class="grid-3" data-filter-list>
+          <article class="card job-card interactive" data-filter-row data-status="open">
+            <div class="page-head" style="margin:0;"><h3>Senior Frontend Engineer</h3><span class="badge open">OPEN</span></div>
+            <div class="job-meta"><span class="chip">Remote US</span><span class="chip">Full-time</span><span class="chip">$165k–$210k</span></div>
+            <p>186 applicants · 29 in screening · owned by Avery Sloan</p>
+            <div class="pipeline-dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span></span><span></span></div>
+            <div class="page-head" style="margin:0;"><a style="color:var(--primary);font-weight:800;" href="job-detail.html">View</a><button class="btn ghost" aria-label="More job actions">⋯</button></div>
+          </article>
+          <article class="card job-card interactive" data-filter-row data-status="open">
+            <div class="page-head" style="margin:0;"><h3>ML Platform Engineer</h3><span class="badge open">OPEN</span></div>
+            <div class="job-meta"><span class="chip">Toronto</span><span class="chip">Hybrid</span><span class="chip">$150k–$190k</span></div>
+            <p>94 applicants · 11 technical screens · hiring manager: Nora Walsh</p>
+            <div class="pipeline-dots"><span class="filled"></span><span class="filled"></span><span></span><span></span><span></span></div>
+            <div class="page-head" style="margin:0;"><a style="color:var(--primary);font-weight:800;" href="job-detail.html">View</a><button class="btn ghost" aria-label="More job actions">⋯</button></div>
+          </article>
+          <article class="card job-card interactive" data-filter-row data-status="draft">
+            <div class="page-head" style="margin:0;"><h3>Product Design Lead</h3><span class="badge draft">DRAFT</span></div>
+            <div class="job-meta"><span class="chip">New York</span><span class="chip">Full-time</span><span class="chip">$155k–$205k</span></div>
+            <p>Draft waiting on compensation approval and interview panel.</p>
+            <div class="pipeline-dots"><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="page-head" style="margin:0;"><a style="color:var(--primary);font-weight:800;" href="job-detail.html">View</a><button class="btn ghost" aria-label="More job actions">⋯</button></div>
+          </article>
+          <article class="card job-card interactive" data-filter-row data-status="closed">
+            <div class="page-head" style="margin:0;"><h3>Recruiting Ops Analyst</h3><span class="badge closed">CLOSED</span></div>
+            <div class="job-meta"><span class="chip">Austin</span><span class="chip">Contract</span><span class="chip">$75/hr</span></div>
+            <p>43 applicants · closed after Sara Kim accepted offer.</p>
+            <div class="pipeline-dots"><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span><span class="filled"></span></div>
+            <div class="page-head" style="margin:0;"><a style="color:var(--primary);font-weight:800;" href="job-detail.html">View</a><button class="btn ghost" aria-label="More job actions">⋯</button></div>
+          </article>
+        </div>
+        <div class="card pad empty-state" data-empty-state>
+          <h3>No roles match these filters</h3>
+          <p style="margin:8px 0 16px;">Clear the search or create a new requisition with a calibrated AI score rubric.</p>
+          <a class="btn primary" href="job-detail.html">Create job</a>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

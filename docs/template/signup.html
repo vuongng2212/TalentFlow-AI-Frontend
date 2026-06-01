@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Signup · TalentFlow AI</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <main class="auth-page">
+    <section class="auth-brand">
+      <a class="logo" href="index.html"><span class="logo-mark">TF</span> TalentFlow AI</a>
+      <div><h1 style="font-size:42px;">Create a role-aware hiring workspace.</h1><p style="margin-top:14px;max-width:520px;">Invite recruiters, interviewers, and admins into a governed hiring operating system.</p></div>
+      <div class="quote-card">Growth plan teams typically start with jobs, CV upload, AI triage, and kanban automation enabled.</div>
+    </section>
+    <section class="auth-form">
+      <form class="form-card" data-auth-form>
+        <div><h1>Create account</h1><p>Start your TalentFlow AI workspace.</p></div>
+        <div class="field"><label>Full name</label><input class="input" required value="Avery Sloan"><span class="helper"></span></div>
+        <div class="field"><label>Work email</label><input class="input" type="email" required data-error="Use a valid work email." value="avery@novaware.dev"><span class="helper"></span></div>
+        <div class="field"><label>Password</label><input class="input" name="password" type="password" required data-error="Use at least 8 characters." value="talentflow"><span class="helper"></span></div>
+        <div class="field"><label>Confirm password</label><input class="input" name="confirm" type="password" required value="talentflow"><span class="helper"></span></div>
+        <div class="field"><label>Primary role</label><select class="select"><option>Recruiter</option><option>Interviewer</option><option>Admin</option></select></div>
+        <div data-check-field><label style="display:flex;gap:8px;align-items:flex-start;color:var(--text-2);"><input type="checkbox" required data-error="Accept terms to continue."> I agree to the workspace terms and AI-assisted screening policy.</label><span class="helper"></span></div>
+        <button class="btn primary" style="width:100%;">Create Account</button>
+        <p data-form-notice style="color:var(--success);font-weight:700;"></p>
+        <p style="text-align:center;">Already have an account? <a style="color:var(--primary);font-weight:800;" href="login.html">Login</a></p>
+      </form>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

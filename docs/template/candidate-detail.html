@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate Detail · TalentFlow AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-head"><a class="logo" href="index.html"><span class="logo-mark">TF</span> TalentFlow AI</a></div>
+      <nav>
+        <div class="nav-section">Main</div>
+        <a class="nav-link" href="dashboard.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>Dashboard</a>
+        <a class="nav-link" href="jobs.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M9 6V4h6v2M8 11h8M8 15h5"/></svg></span>Jobs</a>
+        <a class="nav-link active" href="candidates.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2"/><path d="M15.5 17.5c.7-.9 1.8-1.5 3-1.5 1.4 0 2.6.8 3.2 2"/></svg></span>Candidates</a>
+        <a class="nav-link" href="interviews.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 14h4M8 17h8"/></svg></span>Interviews</a>
+        <div class="nav-section" data-role-only="Admin">Admin</div>
+        <a class="nav-link" data-role-only="Admin" href="admin-users.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>User Management</a>
+        <a class="nav-link" href="settings.html"><span class="nav-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></span>Settings</a>
+      </nav>
+      <div class="role-switch">
+        <button class="role-option" data-role-option="Recruiter">Recruiter nav</button>
+        <button class="role-option" data-role-option="Interviewer">Interviewer nav</button>
+        <button class="role-option" data-role-option="Admin">Admin nav</button>
+      </div>
+      <div class="sidebar-foot"><div class="avatar">AS</div><div><strong>Avery Sloan</strong><p><span data-current-role>Recruiter</span></p></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">Candidates / <strong>Maya Chen</strong></div>
+        <div style="display:flex;gap:8px;"><button class="btn secondary">Add Note</button><button class="btn primary">Move Stage</button></div>
+      </header>
+      <section class="content">
+        <div class="decision-layout">
+          <section class="card pad" aria-label="Candidate overview">
+            <div class="candidate-hero">
+              <div class="avatar" style="width:64px;height:64px;font-size:22px;">MC</div>
+              <div>
+                <h1>Maya Chen</h1>
+                <p>maya.chen@example.dev · +1 415 555 0184 · San Francisco, CA</p>
+                <div class="job-meta" style="margin-top:10px;"><span class="badge screening">SCREENING</span><span class="chip">Senior Frontend Engineer</span><span class="chip">Applied May 29</span></div>
+              </div>
+              <span class="score high" style="width:64px;height:64px;font-size:18px;">94</span>
+            </div>
+            <div class="signal-grid">
+              <div class="signal-card"><strong>Primary fit</strong><p>Frontend platform and design-system ownership.</p></div>
+              <div class="signal-card"><strong>Decision need</strong><p>Validate enterprise security workflow depth.</p></div>
+              <div class="signal-card"><strong>Comp target</strong><p>$185k base · within approved range.</p></div>
+              <div class="signal-card"><strong>Next step</strong><p>Schedule system-design screen with Nora Walsh.</p></div>
+            </div>
+            <div class="card pad decision-summary" style="margin-top:16px;">
+              <span class="chip ai-chip">AI ✦ Decision summary</span>
+              <h2 style="margin-top:12px;">Advance to technical screen with one focused risk probe.</h2>
+              <p style="margin-top:8px;color:var(--text-2);">Maya shows five years of React infrastructure work, component API ownership, accessibility remediation, and measurable build-performance wins. The strongest evidence maps to the platform charter; the unresolved gap is explicit enterprise security workflow experience.</p>
+            </div>
+            <div class="card pad" style="margin-top:16px;" data-tabs>
+              <div class="tabs">
+                <button class="tab active" data-tab="overview">Overview</button>
+                <button class="tab" data-tab="resume">Resume facts</button>
+                <button class="tab" data-tab="notes">Notes</button>
+              </div>
+              <div class="tab-panel active" data-panel="overview">
+                <div class="scorecard">
+                  <div class="score-row"><span>Systems depth</span><div class="score-bar"><span style="width:94%;"></span></div><strong>94</strong></div>
+                  <div class="score-row"><span>Accessibility</span><div class="score-bar"><span style="width:90%;"></span></div><strong>90</strong></div>
+                  <div class="score-row"><span>Leadership</span><div class="score-bar"><span style="width:82%;"></span></div><strong>82</strong></div>
+                  <div class="score-row"><span>Security fit</span><div class="score-bar"><span style="width:58%;"></span></div><strong>58</strong></div>
+                </div>
+              </div>
+              <div class="tab-panel" data-panel="resume">
+                <div class="list">
+                  <p><strong>Current:</strong> Staff UI Engineer, Runway Ops</p>
+                  <p><strong>Previous:</strong> Frontend Platform Lead, Cloudkit</p>
+                  <p><strong>Education:</strong> BS Computer Science, UC Davis</p>
+                  <p><strong>Portfolio:</strong> Component API migrations, WCAG remediation, build performance.</p>
+                </div>
+              </div>
+              <div class="tab-panel" data-panel="notes">
+                <textarea class="textarea" placeholder="Add private note">Strong portfolio. Ask about migration strategy and design-system adoption metrics.</textarea>
+                <button class="btn primary" style="margin-top:10px;">Save note</button>
+              </div>
+            </div>
+          </section>
+          <section class="card pad" aria-label="AI evidence">
+            <div class="page-head" style="margin-bottom:12px;">
+              <div><h2>AI evidence</h2><p>Ranked proof behind the 94 score.</p></div>
+              <span class="chip ai-chip">AI ✦ audited</span>
+            </div>
+            <div class="evidence-list">
+              <div class="evidence-item"><span class="evidence-rank">1</span><div><strong>Reusable component systems</strong><p>Owned shared React primitives and component API migration across multiple product teams.</p></div></div>
+              <div class="evidence-item"><span class="evidence-rank">2</span><div><strong>Accessibility remediation</strong><p>Led WCAG-focused fixes and described rollout strategy, QA gates, and adoption metrics.</p></div></div>
+              <div class="evidence-item"><span class="evidence-rank">3</span><div><strong>Performance ownership</strong><p>Shows concrete build and interaction-performance work rather than only feature delivery.</p></div></div>
+              <div class="evidence-item"><span class="evidence-rank">4</span><div><strong>Risk flag</strong><p>Resume does not name SSO, audit, permissions, or regulated enterprise workflows directly.</p></div></div>
+            </div>
+            <div class="card pad" style="margin-top:16px;background:var(--surface-2);box-shadow:none;">
+              <h3>Interview prompt</h3>
+              <p style="margin-top:8px;">Ask Maya to walk through a component migration where permissions, auditability, or security review shaped the implementation plan.</p>
+            </div>
+          </section>
+          <aside class="card pad" aria-label="Timeline and actions">
+            <h2>Activity timeline</h2>
+            <div class="timeline" style="margin-top:16px;">
+              <div class="timeline-item"><span class="dot"></span><div><strong>AI triage completed</strong><p>94 score · May 29, 09:42</p></div></div>
+              <div class="timeline-item"><span class="dot"></span><div><strong>Moved to Screening</strong><p>Avery Sloan · May 29, 10:03</p></div></div>
+              <div class="timeline-item"><span class="dot"></span><div><strong>Hiring manager requested</strong><p>Nora Walsh review due Jun 1</p></div></div>
+            </div>
+            <hr style="border:0;border-top:1px solid var(--border);margin:18px 0;">
+            <div class="list">
+              <button class="btn primary" style="width:100%;">Schedule screen</button>
+              <button class="btn secondary" style="width:100%;">Download CV</button>
+              <button class="btn danger" style="width:100%;">Withdraw</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

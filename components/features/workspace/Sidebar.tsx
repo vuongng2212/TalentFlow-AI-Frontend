@@ -2,12 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useWorkspaceRole } from './RoleContext';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from './RoleContext';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { role, setRole, isMounted } = useWorkspaceRole();
+  const { user, isLoading, logout } = useAuth();
+  const router = useRouter();
 
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: (
@@ -28,7 +29,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   const adminLinks = [
-    { href: '/admin/users', label: 'User Management', icon: (
+    { href: '/team', label: 'Team Management', icon: (
       <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
     ) },
     { href: '/settings', label: 'Settings', icon: (
@@ -40,6 +41,17 @@ export const Sidebar: React.FC = () => {
     if (href === '/dashboard' && pathname === '/dashboard') return true;
     return pathname.startsWith(href) && href !== '/dashboard';
   };
+
+  const handleLogout = async () => {
+     try {
+       await logout();
+     } catch (e) {
+       console.error("Logout failed", e);
+     }
+  };
+
+  const role = user?.role || 'RECRUITER';
+  const isAdmin = role === 'ADMIN';
 
   return (
     <aside className="sidebar">
@@ -67,15 +79,15 @@ export const Sidebar: React.FC = () => {
           </Link>
         ))}
 
-        {/* Admin section — always rendered to keep DOM stable, hidden until applicable */}
-        <div style={{ display: isMounted && role === 'Admin' ? undefined : 'none' }}>
-          <div className="nav-section" data-role-only="Admin">Admin</div>
+        {/* Admin section */}
+        <div style={{ display: !isLoading && isAdmin ? undefined : 'none' }}>
+          <div className="nav-section" data-role-only="ADMIN">Admin</div>
           {adminLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={`nav-link ${isActive(link.href) ? 'active' : ''}`}
-              data-role-only="Admin"
+              data-role-only="ADMIN"
             >
               <span className="nav-ico">{link.icon}</span>
               {link.label}
@@ -84,34 +96,12 @@ export const Sidebar: React.FC = () => {
         </div>
       </nav>
 
-      {/* role-switch always rendered to keep DOM stable — hidden until mounted */}
-      <div className="role-switch mt-auto p-3 bg-surface-2 border-t border-border" style={{ display: isMounted ? undefined : 'none' }}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold text-text-4 uppercase tracking-wider">Role Perspective</span>
-          <span className={`role-badge ${role.toLowerCase()}`}>{role}</span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            className={`flex-1 py-1.5 px-2 rounded border text-xs font-bold transition-colors ${role === 'Recruiter' ? 'bg-primary text-white border-primary' : 'bg-surface border-border text-text-2 hover:bg-surface-2'}`}
-            onClick={() => setRole('Recruiter')}
-          >
-            Recruiter
-          </button>
-          <button
-            className={`flex-1 py-1.5 px-2 rounded border text-xs font-bold transition-colors ${role === 'Admin' ? 'bg-primary text-white border-primary' : 'bg-surface border-border text-text-2 hover:bg-surface-2'}`}
-            onClick={() => setRole('Admin')}
-          >
-            Admin
-          </button>
-        </div>
-      </div>
-
-      <div className="sidebar-foot">
-        <div className="avatar">AS</div>
+      <div className="sidebar-foot relative group cursor-pointer" onClick={handleLogout} title="Click to logout">
+        <div className="avatar uppercase">{user?.fullName?.charAt(0) || 'U'}</div>
         <div>
-          <strong>Avery Sloan</strong>
+          <strong className="truncate block max-w-[120px]">{user?.fullName || 'User'}</strong>
           <p>
-            <span data-current-role>{isMounted ? role : 'Recruiter'}</span>
+            <span data-current-role>{!isLoading ? role : '...'}</span>
           </p>
         </div>
       </div>

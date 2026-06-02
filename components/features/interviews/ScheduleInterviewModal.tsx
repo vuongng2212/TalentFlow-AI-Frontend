@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { interviewService } from '../../../services/api/interview.service';
 import { applicationService } from '../../../services/api/application.service';
+import { userService } from '../../../services/api/user.service';
 import { Application } from '../../../types';
-import { api } from '../../../lib/api-client';
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
       }).catch(console.error);
 
       // Load users/interviewers
-      api.get<any>('/users?limit=50').then(res => {
+      userService.getUsers({ limit: 50 }).then(res => {
          // Naive mapping, assuming backend paginated data structure
          setInterviewers(res.data || []);
       }).catch(console.error);

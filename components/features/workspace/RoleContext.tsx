@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, AuthContextProps } from '../../../types';
-import { api } from '../../../lib/api-client';
+import { authService } from '../../../services/api/auth.service';
 import { useRouter, usePathname } from 'next/navigation';
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -15,7 +15,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await api.get<{ user: User }>('/auth/me');
+      const response = await authService.getCurrentUser();
       setUser(response.user);
     } catch (error) {
       setUser(null);
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (credentials: any) => {
     try {
-      const response = await api.post<{ user: User }>('/auth/login', credentials);
+      const response = await authService.login(credentials);
       setUser(response.user);
       router.push('/dashboard');
     } catch (error) {
@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await authService.logout();
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {

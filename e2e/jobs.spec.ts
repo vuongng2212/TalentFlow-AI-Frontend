@@ -33,7 +33,7 @@ test.describe('Jobs Flow', () => {
     // Check Modal rendered
     const modal = page.locator('div[role="dialog"]:not([data-nextjs-dialog])');
     await expect(modal).toBeVisible();
-    await expect(modal.locator('h2:has-text("Edit Job")')).toBeVisible();
+    await expect(modal.locator('h2:has-text("Edit Requisition")')).toBeVisible();
     await expect(modal.locator('input[name="title"]')).toHaveValue('Senior Backend Engineer');
 
     // Close Modal

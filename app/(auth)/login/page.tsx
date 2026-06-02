@@ -4,16 +4,19 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginSchema } from '../../../services/schemas';
+import { useAuth } from '../../../components/features/workspace/RoleContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('recruiter@novaware.dev');
-  const [password, setPassword] = useState('talentflow');
+  const [email, setEmail] = useState('seed-admin@talentflow.invalid');
+  const [password, setPassword] = useState('SeedPassword123!');
   const [rememberMe, setRememberMe] = useState(true);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login, isLoading } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setSuccessMsg('');
@@ -29,10 +32,13 @@ export default function LoginPage() {
       return;
     }
 
-    setSuccessMsg('Login successful! Redirecting...');
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
+    try {
+      await login({ email, password });
+      setSuccessMsg('Login successful! Redirecting...');
+      // Navigation is handled inside the login function in AuthProvider
+    } catch (err: any) {
+       setErrors({ form: err?.message || 'Invalid credentials' });
+    }
   };
 
   return (
@@ -62,7 +68,20 @@ export default function LoginPage() {
           <div>
             <h1>Welcome back</h1>
             <p>Login to continue reviewing candidates.</p>
+            <div className="mt-2 text-xs text-text-3 p-2 bg-surface-2 rounded-md border border-border">
+              Default seeds:<br/>
+              Admin: seed-admin@talentflow.invalid<br/>
+              Recruiter: seed-recruiter@talentflow.invalid<br/>
+              Pass: SeedPassword123!
+            </div>
           </div>
+
+          {errors.form && (
+            <div className="bg-danger/10 text-danger p-3 rounded-md text-sm font-semibold border border-danger/20 mb-4">
+              {errors.form}
+            </div>
+          )}
+
           <div className="field">
             <label>Email</label>
             <input
@@ -98,8 +117,12 @@ export default function LoginPage() {
               Forgot password?
             </a>
           </div>
-          <button className="btn primary" style={{ width: '100%', cursor: 'pointer' }}>
-            Login
+          <button
+             className={`btn primary ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+             style={{ width: '100%', cursor: 'pointer' }}
+             disabled={isLoading}
+          >
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
           {successMsg && (
             <p style={{ color: 'var(--success)', fontWeight: 700, marginTop: '10px', textAlign: 'center' }}>

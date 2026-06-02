@@ -12,6 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import Providers from "./providers";
+
 export const metadata: Metadata = {
   title: "TalentFlow AI — Enterprise Recruiting Workspace",
   description: "AI-first ATS product surface for professional recruiting workspaces: role-aware navigation, AI triage, kanban pipeline, candidate dossier, billing, and admin controls.",
@@ -27,7 +29,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

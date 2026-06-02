@@ -1,11 +1,49 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getDashboardStats } from '../../../services/mockData';
 import Badge from '../../../components/ui/badge';
 import WelcomeHeader from './WelcomeHeader';
+import { analyticsService } from '../../../services/api/analytics.service';
+import { DashboardMetrics, TopJobData, PipelineStageCount, TrendData } from '../../../types';
 
-export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardMetrics | null>(null);
+  const [topJobs, setTopJobs] = useState<TopJobData[]>([]);
+  const [pipeline, setPipeline] = useState<PipelineStageCount[]>([]);
+  const [trends, setTrends] = useState<TrendData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [overviewRes, topJobsRes, pipelineRes, trendsRes] = await Promise.all([
+          analyticsService.getOverview(),
+          analyticsService.getTopJobs(),
+          analyticsService.getPipeline(),
+          analyticsService.getTrends()
+        ]);
+        setStats(overviewRes);
+        setTopJobs(topJobsRes);
+        setPipeline(pipelineRes);
+        setTrends(trendsRes);
+      } catch (error) {
+        console.error('Failed to load dashboard stats', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-12">
+        <div className="text-gray-500">Loading dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -14,8 +52,7 @@ export default async function DashboardPage() {
           TalentFlow / <strong>Dashboard</strong>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <span className="chip">3 alerts</span>
-          <div className="avatar">AS</div>
+          <span className="chip">System Online</span>
         </div>
       </header>
 
@@ -28,32 +65,32 @@ export default async function DashboardPage() {
               <span>Open Positions</span>
               <span className="stat-icon">▣</span>
             </div>
-            <div className="stat-number">{stats.activeJobs}</div>
-            <span className="trend">↑ 4 this week</span>
+            <div className="stat-number">{stats?.openJobs || 0}</div>
+            <span className="trend text-gray-500">Out of {stats?.totalJobs || 0} total</span>
           </div>
           <div className="card stat-card">
             <div className="stat-top">
               <span>Total Applications</span>
               <span className="stat-icon">◉</span>
             </div>
-            <div className="stat-number">{stats.totalCandidates * 12}</div>
-            <span className="trend">↑ 16% vs last month</span>
+            <div className="stat-number">{stats?.totalApplications || 0}</div>
+            <span className="trend">Across all roles</span>
           </div>
           <div className="card stat-card">
             <div className="stat-top">
-              <span>Active Candidates</span>
+              <span>Candidates Database</span>
               <span className="stat-icon">↗</span>
             </div>
-            <div className="stat-number">{stats.totalCandidates}</div>
-            <span className="trend">{stats.interviewsThisWeek} in interview</span>
+            <div className="stat-number">{stats?.totalCandidates || 0}</div>
+            <span className="trend text-gray-500">Profiles stored</span>
           </div>
           <div className="card stat-card">
             <div className="stat-top">
-              <span>Interviews Scheduled</span>
+              <span>Hired / Offer</span>
               <span className="stat-icon">◷</span>
             </div>
-            <div className="stat-number">{stats.interviewsThisWeek * 2}</div>
-            <span className="trend">9 need feedback</span>
+            <div className="stat-number">{stats?.hiredCount || 0}</div>
+            <span className="trend">Hire rate: {stats?.hireRate || 0}%</span>
           </div>
         </div>
 
@@ -61,11 +98,11 @@ export default async function DashboardPage() {
           <div className="card pad">
             <div className="page-head">
               <div>
-                <h2>Recent Job Postings</h2>
-                <p>Open roles with current application velocity.</p>
+                <h2>Top Performing Jobs</h2>
+                <p>Open roles with the highest application volume.</p>
               </div>
               <Link className="btn secondary" href="/jobs">
-                View jobs
+                View all jobs
               </Link>
             </div>
             <div className="table-wrap">
@@ -73,30 +110,25 @@ export default async function DashboardPage() {
                 <thead>
                   <tr>
                     <th>Title</th>
-                    <th>Location</th>
+                    <th>Department</th>
                     <th>Apps</th>
                     <th>Status</th>
-                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.recentJobs.map((job) => (
+                  {topJobs.length === 0 ? (
+                    <tr><td colSpan={4} className="text-center py-4 text-gray-500">No jobs found</td></tr>
+                  ) : topJobs.map((job) => (
                     <tr key={job.id}>
                       <td>
                         <Link href={`/jobs/${job.id}`} className="hover:underline font-semibold">
                           {job.title}
                         </Link>
                       </td>
-                      <td>{job.location}</td>
-                      <td>{job.applicantsCount || 72}</td>
+                      <td>{job.department}</td>
+                      <td>{job.applicationCount}</td>
                       <td>
-                        <Badge variant={job.status}>{job.status.toUpperCase()}</Badge>
-                      </td>
-                      <td>
-                        {new Date(job.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        <Badge variant={job.status.toLowerCase()}>{job.status.toUpperCase()}</Badge>
                       </td>
                     </tr>
                   ))}
@@ -108,23 +140,17 @@ export default async function DashboardPage() {
           <div className="card pad">
             <div className="page-head">
               <div>
-                <h2>Recent Candidates</h2>
-                <p>AI-ranked movement across active roles.</p>
+                <h2>Pipeline Breakdown</h2>
+                <p>Candidates by stage across the system.</p>
               </div>
             </div>
             <div className="list">
-              {stats.recentCandidates.map((cand) => (
-                <div key={cand.id} className="candidate-row py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="avatar">{cand.avatar}</div>
-                  <div>
-                    <Link href={`/candidates/${cand.id}`} className="hover:underline font-semibold block">
-                      {cand.name}
-                    </Link>
-                    <p className="text-xs text-gray-500">
-                      {cand.title} · <Badge variant={cand.stage}>{cand.stage.toUpperCase()}</Badge>
-                    </p>
+              {pipeline.map((stage) => (
+                <div key={stage.stage} className="candidate-row py-3 border-b border-gray-100 last:border-b-0 flex justify-between">
+                  <div className="flex items-center gap-3">
+                    <Badge variant={stage.stage.toLowerCase()}>{stage.stage}</Badge>
                   </div>
-                  <span className={`score sm ${cand.scoreCategory}`}>{cand.score}</span>
+                  <span className="font-semibold text-gray-700">{stage.count} candidate(s)</span>
                 </div>
               ))}
             </div>

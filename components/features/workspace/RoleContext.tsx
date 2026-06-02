@@ -1,40 +1,84 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { WorkspaceRole, RoleContextProps } from '../../../types';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { User, AuthContextProps } from '../../../types';
+import { api } from '../../../lib/api-client';
+import { useRouter, usePathname } from 'next/navigation';
 
-const RoleContext = createContext<RoleContextProps | undefined>(undefined);
+const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-export const RoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRoleState] = useState<WorkspaceRole>('Recruiter');
-  const [isMounted, setIsMounted] = useState(false);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Read localStorage after hydration — prevents SSR/CSR mismatch
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true);
-    const savedRole = localStorage.getItem('tf-role') as WorkspaceRole;
-    if (savedRole === 'Recruiter' || savedRole === 'Admin') {
-      setRoleState(savedRole);
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await api.get<{ user: User }>('/auth/me');
+      setUser(response.user);
+    } catch (error) {
+      setUser(null);
+      // Only redirect if trying to access a protected route (anything other than /login)
+      if (pathname !== '/login') {
+        router.push('/login');
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [pathname, router]);
 
-  const setRole = (newRole: WorkspaceRole) => {
-    setRoleState(newRole);
-    localStorage.setItem('tf-role', newRole);
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  const login = async (credentials: any) => {
+    try {
+      const response = await api.post<{ user: User }>('/auth/login', credentials);
+      setUser(response.user);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+      router.push('/login');
+    }
   };
 
   return (
-    <RoleContext.Provider value={{ role, setRole, isMounted }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
       {children}
-    </RoleContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
-export const useWorkspaceRole = () => {
-  const context = useContext(RoleContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useWorkspaceRole must be used within a RoleProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Vẫn giữ lại export useWorkspaceRole để không làm break code hiện tại ngay lập tức,
+// nhưng map nó qua useAuth thay vì RoleContext cũ.
+export const useWorkspaceRole = () => {
+  const { user, isLoading } = useAuth();
+
+  return {
+    role: user?.role || 'RECRUITER',
+    setRole: () => {
+      console.warn('setRole is deprecated. Role is now determined by backend authentication.');
+    },
+    isMounted: !isLoading
+  };
 };

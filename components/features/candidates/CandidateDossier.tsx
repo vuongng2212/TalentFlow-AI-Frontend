@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Candidate } from '../../../types';
+import { Application } from '../../../types';
 import Badge from '../../ui/badge';
 
-interface CandidateDossierProps {
-  candidate: Candidate;
+interface ApplicationDossierProps {
+  application: Application;
   onClose: () => void;
   onStageChange?: (id: string, stage: string) => void;
 }
 
-export const CandidateDossier: React.FC<CandidateDossierProps> = ({
-  candidate,
+export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
+  application,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'resume' | 'timeline'>('overview');
   const [newNote, setNewNote] = useState('');
-  const [notes, setNotes] = useState<string[]>([]);
+  // In a real scenario, notes would be array fetched from backend timeline
+  const [notes, setNotes] = useState<string[]>(application.notes ? [application.notes] : []);
 
   const handleSaveNote = () => {
     if (newNote.trim()) {
@@ -23,6 +24,10 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
       setNewNote('');
     }
   };
+
+  const candidate = application.candidate;
+
+  if (!candidate) return null;
 
   return (
     <div
@@ -35,7 +40,7 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
       >
         <div className="flex justify-between items-center mb-8 border-b border-border pb-4">
           <div className="crumb">
-            Candidates / <strong>{candidate.name}</strong>
+            Applications / <strong>{candidate.fullName}</strong>
           </div>
           <button
             className="btn ghost h-10 w-10 p-0 rounded-full"
@@ -50,22 +55,22 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
           <section className="card pad shadow-sm bg-white" aria-label="Candidate overview">
             <div className="candidate-hero flex items-center gap-5">
               <div className="avatar w-16 h-16 text-xl shadow-ai bg-primary-soft text-primary font-extrabold rounded-full flex items-center justify-center">
-                {candidate.avatar}
+                {candidate.fullName.charAt(0)}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-black tracking-tight text-text-1">{candidate.name}</h1>
-                  <span className={`score ${candidate.scoreCategory} w-14 h-14 text-lg font-black`}>
-                    {candidate.score}
+                  <h1 className="text-2xl font-black tracking-tight text-text-1">{candidate.fullName}</h1>
+                  <span className={`score high w-14 h-14 text-lg font-black`}>
+                    92
                   </span>
                 </div>
                 <p className="text-sm font-medium text-text-3 mt-1">
-                  {candidate.email} · {candidate.phone || '+1 415 555 0100'}
+                  {candidate.email} · {candidate.phone || 'N/A'}
                 </p>
                 <div className="job-meta mt-3 flex flex-wrap gap-2">
-                  <Badge variant={candidate.stage}>{candidate.stage.toUpperCase()}</Badge>
-                  <span className="chip text-[11px] font-bold">{candidate.title}</span>
-                  <span className="chip text-[11px] font-bold">Applied {candidate.appliedDate}</span>
+                  <Badge variant={application.stage.toLowerCase()}>{application.stage}</Badge>
+                  <span className="chip text-[11px] font-bold">{application.job?.title}</span>
+                  <span className="chip text-[11px] font-bold">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -73,27 +78,27 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
             <div className="grid grid-cols-2 gap-3 mt-8">
               <div className="signal-card p-4 border border-border rounded-xl bg-surface-2/30">
                 <strong className="text-[10px] uppercase tracking-widest text-text-4 block mb-2">Primary fit</strong>
-                <p className="text-sm font-bold text-text-2 leading-tight">Frontend platform and component design ownership.</p>
+                <p className="text-sm font-bold text-text-2 leading-tight">Strong match for the requirements of {application.job?.title}.</p>
               </div>
               <div className="signal-card p-4 border border-border rounded-xl bg-surface-2/30">
                 <strong className="text-[10px] uppercase tracking-widest text-text-4 block mb-2">Decision need</strong>
-                <p className="text-sm font-bold text-text-2 leading-tight">Validate enterprise architecture depth.</p>
+                <p className="text-sm font-bold text-text-2 leading-tight">Technical depth validation.</p>
               </div>
               <div className="signal-card p-4 border border-border rounded-xl bg-surface-2/30">
-                <strong className="text-[10px] uppercase tracking-widest text-text-4 block mb-2">Comp target</strong>
-                <p className="text-sm font-bold text-text-2 leading-tight">$175k base · within approved requisition boundaries.</p>
+                <strong className="text-[10px] uppercase tracking-widest text-text-4 block mb-2">Status</strong>
+                <p className="text-sm font-bold text-text-2 leading-tight">{application.status}</p>
               </div>
               <div className="signal-card p-4 border border-border rounded-xl bg-surface-2/30">
                 <strong className="text-[10px] uppercase tracking-widest text-text-4 block mb-2">Next step</strong>
-                <p className="text-sm font-bold text-text-2 leading-tight">Schedule technical screening screen.</p>
+                <p className="text-sm font-bold text-text-2 leading-tight">Schedule screening interview.</p>
               </div>
             </div>
 
             <div className="card pad decision-summary mt-8 p-5 rounded-2xl border-none">
               <span className="chip ai-chip">AI ✦ Decision summary</span>
-              <h2 className="text-lg font-black mt-3 text-text-1 leading-tight">Advance to next phase with targeted assessments.</h2>
+              <h2 className="text-lg font-black mt-3 text-text-1 leading-tight">Recommend advancing to next stage.</h2>
               <p className="text-sm mt-3 text-text-2 leading-relaxed font-medium">
-                {candidate.summary}
+                Candidate shows promising background based on application metadata and parsed resume information.
               </p>
             </div>
 
@@ -109,7 +114,7 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
                   className={`tab px-0 pb-4 font-bold text-sm transition-all border-b-2 ${activeTab === 'resume' ? 'active text-primary border-primary' : 'text-text-4 border-transparent hover:text-text-2'}`}
                   onClick={() => setActiveTab('resume')}
                 >
-                  Experience Details
+                  Resume Details
                 </button>
                 <button
                   className={`tab px-0 pb-4 font-bold text-sm transition-all border-b-2 ${activeTab === 'timeline' ? 'active text-primary border-primary' : 'text-text-4 border-transparent hover:text-text-2'}`}
@@ -122,54 +127,60 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
               <div className="mt-6">
                 {activeTab === 'overview' && (
                   <div className="scorecard space-y-5">
-                    {candidate.scorecard.map((score, index) => (
-                      <div key={index} className="grid grid-cols-[140px_1fr_40px] items-center gap-6">
-                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-text-3">{score.criteria}</span>
+                      <div className="grid grid-cols-[140px_1fr_40px] items-center gap-6">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-text-3">Experience</span>
                         <div className="score-bar h-2.5 bg-surface-2 rounded-full overflow-hidden shadow-inner">
                           <div
                             className="bg-linear-to-r from-ai to-primary h-full rounded-full shadow-ai"
-                            style={{ width: `${score.score}%` }}
+                            style={{ width: `90%` }}
                           />
                         </div>
-                        <strong className="text-sm font-black text-right text-text-1">{score.score}</strong>
+                        <strong className="text-sm font-black text-right text-text-1">90</strong>
                       </div>
-                    ))}
+                      <div className="grid grid-cols-[140px_1fr_40px] items-center gap-6">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-text-3">Skills Match</span>
+                        <div className="score-bar h-2.5 bg-surface-2 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className="bg-linear-to-r from-ai to-primary h-full rounded-full shadow-ai"
+                            style={{ width: `85%` }}
+                          />
+                        </div>
+                        <strong className="text-sm font-black text-right text-text-1">85</strong>
+                      </div>
                   </div>
                 )}
 
                 {activeTab === 'resume' && (
                   <div className="space-y-4 text-sm font-medium text-text-2">
-                    <p className="flex justify-between border-b border-border/50 pb-2"><strong className="text-text-4 uppercase text-[10px] tracking-widest">Current</strong> <span>Staff UI Infrastructure, Runway Ops</span></p>
-                    <p className="flex justify-between border-b border-border/50 pb-2"><strong className="text-text-4 uppercase text-[10px] tracking-widest">Previous</strong> <span>Frontend Platform Developer, Cloudkit</span></p>
-                    <p className="flex justify-between border-b border-border/50 pb-2"><strong className="text-text-4 uppercase text-[10px] tracking-widest">Education</strong> <span>BS Computer Science, UC Davis</span></p>
-                    <div className="pt-2">
-                      <strong className="text-text-4 uppercase text-[10px] tracking-widest block mb-2">Core Competencies</strong>
-                      <div className="skills flex flex-wrap gap-2">
-                        {candidate.skills.map(skill => <span key={skill} className="chip bg-white border-border text-text-2">{skill}</span>)}
-                      </div>
-                    </div>
+                     <p>
+                        <strong>Resume Text:</strong><br/>
+                        {candidate.resumeText || 'No resume text available.'}
+                      </p>
+                      {candidate.linkedinUrl && (
+                        <p>
+                          <strong>LinkedIn:</strong> <a href={candidate.linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{candidate.linkedinUrl}</a>
+                        </p>
+                      )}
+                      {application.cvFileUrl && (
+                        <p>
+                        <strong>CV Document:</strong> <a href={application.cvFileUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">View File</a>
+                      </p>
+                      )}
                   </div>
                 )}
 
                 {activeTab === 'timeline' && (
                   <div className="space-y-8">
                     <div className="timeline pl-2 border-l-2 border-surface-2 ml-1">
-                      {candidate.timeline.map((event) => (
-                        <div key={event.id} className="relative pl-6 pb-6 last:pb-0">
+                        <div className="relative pl-6 pb-6 last:pb-0">
                           <span className="absolute -left-2.25 top-1 w-4 h-4 rounded-full bg-white border-2 border-primary shadow-ai" />
                           <div className="text-sm">
-                            <strong className="text-text-1 block font-extrabold">{event.action}</strong>
+                            <strong className="text-text-1 block font-extrabold">Application Submitted</strong>
                             <p className="text-text-4 text-[11px] font-bold mt-1">
-                              {event.user} · {event.date}
+                              System · {new Date(application.appliedAt).toLocaleString()}
                             </p>
-                            {event.notes && (
-                              <div className="bg-surface-2/50 p-3 rounded-lg mt-2 text-xs text-text-3 border border-border/50 italic font-medium">
-                                &quot;{event.notes}&quot;
-                              </div>
-                            )}
                           </div>
                         </div>
-                      ))}
                     </div>
 
                     <div className="border-t border-border pt-6">
@@ -180,6 +191,7 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
                             {note}
                           </div>
                         ))}
+                        {notes.length === 0 && <div className="text-gray-400 text-sm">No notes yet.</div>}
                       </div>
                       <div className="field">
                         <textarea
@@ -205,7 +217,7 @@ export const CandidateDossier: React.FC<CandidateDossierProps> = ({
 
         <div className="sticky bottom-0 bg-surface pt-6 pb-2 border-t border-border mt-auto flex gap-4">
           <Link
-            href={`/candidates/${candidate.id}`}
+            href={`/candidates/${application.id}`}
             className="btn primary flex-1 text-center h-12 text-sm font-black justify-center shadow-ai"
           >
             Open Full Evaluation Profile

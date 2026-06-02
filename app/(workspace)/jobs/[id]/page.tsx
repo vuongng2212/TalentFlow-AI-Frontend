@@ -2,21 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getCandidates, getJobs } from '../../../../services/mockData';
-import { Candidate, Job } from '../../../../types';
+import { jobService } from '../../../../services/api/job.service';
+import { applicationService } from '../../../../services/api/application.service';
+import { Job, Application } from '../../../../types';
 import Badge from '../../../../components/ui/badge';
+import LoadingSkeleton from '../../../../components/ui/LoadingSkeleton';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+import EditJobModal from '../../../../components/features/jobs/EditJobModal';
+
 export default function JobDetailPage({ params }: PageProps) {
   const [job, setJob] = useState<Job | null>(null);
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'applicants' | 'pipeline'>('overview');
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('all');
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     params.then((p) => setUnwrappedParams(p));
@@ -24,47 +30,57 @@ export default function JobDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     if (!unwrappedParams) return;
+
     async function loadData() {
-      const allJobs = await getJobs();
-      const currentJob = allJobs.find((j) => j.id === unwrappedParams!.id) || allJobs[0];
-      setJob(currentJob);
+      setIsLoading(true);
+      try {
+        const fetchedJob = await jobService.getJobById(unwrappedParams!.id);
+        setJob(fetchedJob);
 
-      // Fetch candidates for this job (since all candidates in our mock are for engineering/design, we can display them accordingly)
-      const allCandidates = await getCandidates();
-      let jobCandidates = allCandidates;
-      if (currentJob.id === 'job-1') {
-        // Frontend
-        jobCandidates = allCandidates.filter((c) => c.title.toLowerCase().includes('frontend'));
-      } else if (currentJob.id === 'job-2') {
-        // ML Platform
-        jobCandidates = allCandidates.filter((c) => c.title.toLowerCase().includes('ml') || c.title.toLowerCase().includes('platform'));
-      } else if (currentJob.id === 'job-3') {
-        // Design Lead
-        jobCandidates = allCandidates.filter((c) => c.title.toLowerCase().includes('design') || c.title.toLowerCase().includes('visual'));
+        // Fetch applications for this specific job
+        const appsRes = await applicationService.getApplications({
+            jobId: unwrappedParams!.id,
+            limit: 100 // Load max for now since we don't have pagination UI in the applicants tab yet
+        });
+        setApplications(appsRes.data);
+
+      } catch (e) {
+          console.error("Failed to load job data", e);
+      } finally {
+          setIsLoading(false);
       }
-
-      setCandidates(jobCandidates);
     }
     loadData();
   }, [unwrappedParams]);
 
-  if (!job) {
+  if (isLoading || !job) {
     return (
       <div className="flex flex-1 items-center justify-center p-12 text-gray-500">
-        Loading requisition details...
+        <LoadingSkeleton type="card" count={1} />
       </div>
     );
   }
 
   // Filter applicants
-  const filteredCandidates = candidates.filter((cand) => {
-    if (stageFilter !== 'all' && cand.stage !== stageFilter) return false;
+  const filteredApplications = applications.filter((app) => {
+    if (stageFilter !== 'all' && app.stage !== stageFilter.toUpperCase()) return false;
     if (search.trim()) {
       const q = search.toLowerCase();
-      return cand.name.toLowerCase().includes(q) || cand.skills.some((s) => s.toLowerCase().includes(q));
+      return app.candidate?.fullName?.toLowerCase().includes(q) || app.candidate?.email?.toLowerCase().includes(q);
     }
     return true;
   });
+
+  const formatSalary = (min?: number, max?: number) => {
+    if (!min && !max) return 'Not specified';
+    if (min && !max) return `$${min.toLocaleString()}+`;
+    if (!min && max) return `Up to $${max.toLocaleString()}`;
+    return `$${min?.toLocaleString()} - $${max?.toLocaleString()}`;
+  };
+
+  const formatEmploymentType = (type: string) => {
+    return type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  };
 
   return (
     <>
@@ -73,10 +89,16 @@ export default function JobDetailPage({ params }: PageProps) {
           Jobs / <strong>{job.title}</strong>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn secondary" style={{ cursor: 'pointer' }}>
+          <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => setIsEditModalOpen(true)}>
             Edit
           </button>
-          <button className="btn danger" style={{ cursor: 'pointer' }}>
+          <button className="btn danger" style={{ cursor: 'pointer' }} onClick={async () => {
+             if (window.confirm('Are you sure you want to close this job?')) {
+               await jobService.updateJob(job.id, { status: 'CLOSED' });
+               const fetchedJob = await jobService.getJobById(job.id);
+               setJob(fetchedJob);
+             }
+          }}>
             Close Job
           </button>
         </div>
@@ -87,10 +109,10 @@ export default function JobDetailPage({ params }: PageProps) {
           <div className="page-head">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                {job.title} <Badge variant={job.status}>{job.status.toUpperCase()}</Badge>
+                {job.title} <Badge variant={job.status.toLowerCase()}>{job.status}</Badge>
               </h1>
               <p className="text-gray-500 mt-1">
-                {job.location} · {job.department} · {job.applicantsCount || 186} applicants
+                {job.location} · {job.department} · {job._count?.applications || 0} applicants
               </p>
             </div>
           </div>
@@ -109,7 +131,7 @@ export default function JobDetailPage({ params }: PageProps) {
                 onClick={() => setActiveTab('applicants')}
                 style={{ cursor: 'pointer' }}
               >
-                Applicants ({filteredCandidates.length})
+                Applicants ({filteredApplications.length})
               </button>
               <button
                 className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`}
@@ -126,25 +148,20 @@ export default function JobDetailPage({ params }: PageProps) {
                   <div>
                     <h3>Description</h3>
                     <p style={{ marginTop: '8px' }}>
-                      Own shared infrastructure for a design-system-heavy platform. The role needs solid software
-                      judgment, accessibility fluency, and a habit of shipping reusable primitives.
+                      {job.description || 'No description provided.'}
                     </p>
                   </div>
                   <div>
                     <h3>Requirements</h3>
-                    <p style={{ marginTop: '8px' }}>
-                      React, TypeScript, Next.js, component APIs, performance profiling, and evidence of mentoring
-                      engineering colleagues.
-                    </p>
+                    <ul style={{ marginTop: '8px', paddingLeft: '20px', listStyleType: 'disc' }}>
+                       {job.requirements && job.requirements.length > 0 ? (
+                           job.requirements.map((req, i) => <li key={i} className="mb-1">{req}</li>)
+                       ) : (
+                           <li>No specific requirements listed.</li>
+                       )}
+                    </ul>
                   </div>
-                  <div>
-                    <h3>Responsibilities</h3>
-                    <p style={{ marginTop: '8px' }}>
-                      Lead component architecture, partner with designers, improve accessibility baselines, and unblock
-                      teams building complex workspace flows.
-                    </p>
-                  </div>
-                  <div className="card pad" style={{ background: 'var(--primary-soft)' }}>
+                  <div className="card pad col-span-2" style={{ background: 'var(--primary-soft)' }}>
                     <span className="chip ai-chip">AI ✦ rubric</span>
                     <p style={{ marginTop: '10px', color: 'var(--text-2)' }}>
                       High-fit candidates should show reusable systems work, not only feature delivery. Penalize
@@ -174,6 +191,8 @@ export default function JobDetailPage({ params }: PageProps) {
                       <option value="screening">Screening</option>
                       <option value="interview">Interview</option>
                       <option value="offer">Offer</option>
+                      <option value="hired">Hired</option>
+                      <option value="rejected">Rejected</option>
                     </select>
                   </div>
                   <div className="table-wrap">
@@ -181,26 +200,26 @@ export default function JobDetailPage({ params }: PageProps) {
                       <thead>
                         <tr>
                           <th>Candidate</th>
-                          <th>AI Score</th>
+                          <th>Status</th>
                           <th>Stage</th>
                           <th>Applied</th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredCandidates.map((cand) => (
-                          <tr key={cand.id}>
-                            <td className="font-semibold">{cand.name}</td>
+                        {filteredApplications.map((app) => (
+                          <tr key={app.id}>
+                            <td className="font-semibold">{app.candidate?.fullName || 'Unknown'}</td>
                             <td>
-                              <span className={`score sm ${cand.scoreCategory}`}>{cand.score}</span>
+                              <span className="text-xs">{app.status}</span>
                             </td>
                             <td>
-                              <Badge variant={cand.stage}>{cand.stage.toUpperCase()}</Badge>
+                              <Badge variant={app.stage.toLowerCase()}>{app.stage}</Badge>
                             </td>
-                            <td>{cand.appliedDate}</td>
+                            <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
                             <td>
                               <Link
-                                href={`/candidates/${cand.id}`}
+                                href={`/candidates/${app.id}`}
                                 className="text-purple-600 hover:underline font-semibold"
                               >
                                 View
@@ -208,7 +227,7 @@ export default function JobDetailPage({ params }: PageProps) {
                             </td>
                           </tr>
                         ))}
-                        {filteredCandidates.length === 0 && (
+                        {filteredApplications.length === 0 && (
                           <tr>
                             <td colSpan={5} className="text-center py-8 text-gray-500">
                               No applicants match these filters.
@@ -224,10 +243,10 @@ export default function JobDetailPage({ params }: PageProps) {
               {activeTab === 'pipeline' && (
                 <div className="list">
                   <div className="card pad p-4 border rounded-xl text-center bg-gray-50 text-sm font-semibold">
-                    Applied → Screening → Technical Interview → Hiring Manager → Offer → Hired
+                    Applied → Screening → Interview → Offer → Hired
                   </div>
                   <button className="btn secondary mt-4" style={{ cursor: 'pointer' }}>
-                    Add Stage
+                    Configure Stages
                   </button>
                 </div>
               )}
@@ -242,31 +261,48 @@ export default function JobDetailPage({ params }: PageProps) {
               <strong>Location:</strong> {job.location}
             </p>
             <p>
-              <strong>Type:</strong> {job.type}
+              <strong>Type:</strong> {formatEmploymentType(job.employmentType)}
             </p>
             <p>
               <strong>Salary:</strong>{' '}
-              {job.id === 'job-1' ? '$165k–$210k' : job.id === 'job-2' ? '$150k–$190k' : job.id === 'job-3' ? '$155k–$205k' : '$75/hr'}
+              {formatSalary(job.salaryMin, job.salaryMax)}
             </p>
             <p>
               <strong>Department:</strong> {job.department}
             </p>
             <p>
-              <strong>Created by:</strong> Avery Sloan
+              <strong>Created by:</strong> {job.createdBy?.fullName || 'System'}
             </p>
             <p>
-              <strong>Created:</strong> May 24, 2026
+              <strong>Created:</strong> {new Date(job.createdAt).toLocaleDateString()}
             </p>
           </div>
           <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '18px 0' }} />
           <h3>Stage Mix</h3>
           <p style={{ marginTop: '8px', fontSize: '13px' }} className="text-gray-500">
-            Applied {job.applicantsCount > 0 ? 82 : 0} · Screening {job.applicantsCount > 0 ? 29 : 0} · Interview{' '}
-            {job.applicantsCount > 0 ? 11 : 0} · Offer {job.applicantsCount > 0 ? 3 : 0} · Rejected{' '}
-            {job.applicantsCount > 0 ? 61 : 0}
+            {/* Real distribution would require an aggregation API, using raw counts from our fetch for now */}
+            Applied {applications.filter(a => a.stage === 'APPLIED').length} ·
+            Screening {applications.filter(a => a.stage === 'SCREENING').length} ·
+            Interview {applications.filter(a => a.stage === 'INTERVIEW').length} ·
+            Offer {applications.filter(a => a.stage === 'OFFER').length} ·
+            Rejected {applications.filter(a => a.stage === 'REJECTED').length}
           </p>
         </aside>
       </section>
+
+      {job && (
+        <EditJobModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          job={job}
+          onJobUpdated={async () => {
+             setIsLoading(true);
+             const fetchedJob = await jobService.getJobById(job.id);
+             setJob(fetchedJob);
+             setIsLoading(false);
+          }}
+        />
+      )}
     </>
   );
 }

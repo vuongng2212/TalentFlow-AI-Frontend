@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { getCandidates, updateCandidateStage, createCandidate } from '../../../services/mockData';
-import { Candidate } from '../../../types';
+import { applicationService } from '../../../services/api/application.service';
+import { Application, ApplicationStage } from '../../../types';
 import FilterCenter from '../../../components/features/candidates/FilterCenter';
 import KanbanBoard from '../../../components/features/candidates/KanbanBoard';
 import CandidateDossier from '../../../components/features/candidates/CandidateDossier';
@@ -11,35 +11,61 @@ import FilterChips from '../../../components/ui/FilterChips';
 import BulkActionBar from '../../../components/ui/BulkActionBar';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import EmptyState from '../../../components/ui/EmptyState';
+import { useRouter } from 'next/navigation';
+import UploadCvModal from '../../../components/features/candidates/UploadCvModal';
 
-export default function CandidatesPage() {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
+export default function ApplicationsPage() {
+  const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [stage, setStage] = useState('all');
   const [minScore, setMinScore] = useState(0);
   const [activeTab, setActiveTab] = useState<'kanban' | 'list'>('list');
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const router = useRouter();
+
+  // Pagination (For list view)
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const loadData = async (ignoreFlag: boolean) => {
+    setLoading(true);
+    try {
+       // Need to fetch Applications, not Candidates for the Kanban board
+       const queryStage = stage === 'all' ? undefined : (stage.toUpperCase() as ApplicationStage);
+       const response = await applicationService.getApplications({
+         page,
+         limit: activeTab === 'kanban' ? 100 : 10, // Load more for kanban to show columns
+         stage: queryStage
+       });
+
+       if (!ignoreFlag) {
+          // Client-side search for now since backend might not support deep search on candidate name
+          let filtered = response.data;
+          if (search) {
+             const s = search.toLowerCase();
+             filtered = filtered.filter(app =>
+                app.candidate?.fullName.toLowerCase().includes(s) ||
+                app.job?.title?.toLowerCase().includes(s)
+             );
+          }
+          setApplications(filtered);
+          setTotalPages(response.meta.totalPages);
+       }
+    } catch (e) {
+       console.error("Failed to fetch applications", e);
+    } finally {
+       if (!ignoreFlag) setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
-
-    const loadData = async () => {
-      setLoading(true);
-      const data = await getCandidates({ search, stage, minScore });
-      if (!ignore) {
-        setCandidates(data);
-        setLoading(false);
-      }
-    };
-
-    loadData();
-
-    return () => {
-      ignore = true;
-    };
-  }, [search, stage, minScore]);
+    loadData(ignore);
+    return () => { ignore = true; };
+  }, [search, stage, minScore, page, activeTab]);
 
   const activeFilters = useMemo(() => {
     const filters = [];
@@ -53,12 +79,14 @@ export default function CandidatesPage() {
     if (id === 'search') setSearch('');
     if (id === 'stage') setStage('all');
     if (id === 'score') setMinScore(0);
+    setPage(1);
   };
 
   const handleClearFilters = () => {
     setSearch('');
     setStage('all');
     setMinScore(0);
+    setPage(1);
   };
 
   const toggleSelect = (id: string) => {
@@ -69,74 +97,61 @@ export default function CandidatesPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === candidates.length) {
+    if (selectedIds.size === applications.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(candidates.map(c => c.id)));
+      setSelectedIds(new Set(applications.map(a => a.id)));
     }
   };
 
-  const handleDropCandidate = async (id: string, newStage: string) => {
+  const handleDropCandidate = async (appId: string, newStage: string) => {
     try {
-      const updated = await updateCandidateStage(id, newStage);
-      const newList = await getCandidates({ search, stage, minScore });
-      setCandidates(newList);
+      const updated = await applicationService.updateApplicationStage(appId, newStage as ApplicationStage);
 
-      if (selectedCandidate && selectedCandidate.id === id) {
-        setSelectedCandidate(updated);
+      // Optimistic update
+      setApplications(prev => prev.map(a => a.id === appId ? { ...a, stage: updated.stage } : a));
+
+      if (selectedApplication && selectedApplication.id === appId) {
+        setSelectedApplication(prev => prev ? { ...prev, stage: updated.stage } : null);
       }
     } catch (err) {
       console.error(err);
+      loadData(false); // reload to revert on error
     }
   };
 
   const handleBulkStageChange = async (newStage: string) => {
     setLoading(true);
-    await Promise.all(Array.from(selectedIds).map(id => updateCandidateStage(id, newStage)));
-    const newList = await getCandidates({ search, stage, minScore });
-    setCandidates(newList);
+    await Promise.all(Array.from(selectedIds).map(id => applicationService.updateApplicationStage(id, newStage as ApplicationStage)));
+    await loadData(false);
     setSelectedIds(new Set());
-    setLoading(false);
   };
 
-  const handleUploadCv = async () => {
-    setLoading(true);
-    const names = ['Aria Vance', 'Devon Patel', 'Elena Rostova', 'Marcus Aurelius', 'Li Wei'];
-    const randomName = names[Math.floor(Math.random() * names.length)];
-    const initials = randomName.split(' ').map(n => n[0]).join('');
-    const score = Math.floor(Math.random() * 41) + 60; // 60-100
 
-    await createCandidate({
-      name: randomName,
-      title: 'Frontend Engineer Lead',
-      avatar: initials,
-      stage: 'applied',
-      score,
-      skills: ['React', 'TypeScript', 'Tailwind'],
-      appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      email: `${randomName.toLowerCase().replace(' ', '.')}@example.dev`,
-      summary: `${randomName} is an experienced frontend systems builder.`,
-      timeline: [
-        { id: `t-${Date.now()}`, date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), user: 'AI System', action: 'Uploaded CV & Triage Complete', notes: `Scored ${score} rating` }
-      ],
-      scorecard: [
-        { criteria: 'Systems depth', score },
-        { criteria: 'Communication', score: 80 }
-      ]
-    });
-
-    const newList = await getCandidates({ search, stage, minScore });
-    setCandidates(newList);
-    setLoading(false);
-  };
+  // UI Map Application to Legacy Candidate UI structure where needed
+  const mapToKanbanItem = (app: Application) => ({
+      id: app.id, // Using Application ID for drag/drop
+      name: app.candidate?.fullName || 'Unknown',
+      title: app.job?.title || 'Unknown Job',
+      avatar: app.candidate?.fullName?.charAt(0) || '?',
+      stage: app.stage.toLowerCase() as any,
+      score: 85, // Mock score for now
+      scoreCategory: 'high' as const,
+      skills: [],
+      appliedDate: new Date(app.appliedAt).toLocaleDateString(),
+      email: app.candidate?.email || '',
+      summary: app.notes || '',
+      timeline: [],
+      scorecard: []
+  });
 
   return (
     <>
       <header className="topbar">
         <div className="crumb">
-          TalentFlow / <strong>Candidates</strong>
+          TalentFlow / <strong>Applications Pipeline</strong>
         </div>
-        <button className="btn primary" onClick={handleUploadCv} style={{ cursor: 'pointer' }}>
+        <button className="btn primary" onClick={() => setIsUploadModalOpen(true)} style={{ cursor: 'pointer' }}>
           Upload CV
         </button>
       </header>
@@ -144,18 +159,18 @@ export default function CandidatesPage() {
       <section className="content">
         <div className="page-head">
           <div>
-            <h1 className="text-2xl font-bold">Candidates</h1>
-            <p>Filter, score, and move active candidates across role pipelines.</p>
+            <h1 className="text-2xl font-bold">Applications</h1>
+            <p>Filter and move active candidates across role pipelines.</p>
           </div>
           <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
             <button
-              onClick={() => setActiveTab('kanban')}
+              onClick={() => { setActiveTab('kanban'); setPage(1); }}
               className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeTab === 'kanban' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
             >
               Kanban
             </button>
             <button
-              onClick={() => setActiveTab('list')}
+              onClick={() => { setActiveTab('list'); setPage(1); }}
               className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeTab === 'list' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
             >
               List
@@ -180,29 +195,33 @@ export default function CandidatesPage() {
 
         {loading ? (
           <LoadingSkeleton type={activeTab === 'list' ? 'table' : 'card'} count={6} />
-        ) : candidates.length > 0 ? (
+        ) : applications.length > 0 ? (
           <>
             <div className="card pad" style={{ marginBottom: '16px' }}>
               <div className="flex justify-between items-center mb-2">
                 <strong className="text-sm">Pipeline Distribution</strong>
-                <span className="text-[10px] font-bold text-text-4 uppercase tracking-widest">{candidates.length} Total</span>
+                <span className="text-[10px] font-bold text-text-4 uppercase tracking-widest">{applications.length} Total</span>
               </div>
               <div className="job-meta">
-                <span className="badge applied">Applied {candidates.filter((c) => c.stage === 'applied').length}</span>
-                <span className="badge screening">Screening {candidates.filter((c) => c.stage === 'screening').length}</span>
-                <span className="badge interview">Interview {candidates.filter((c) => c.stage === 'interview').length}</span>
-                <span className="badge offer">Offer {candidates.filter((c) => c.stage === 'offer').length}</span>
-                <span className="badge hired">Hired {candidates.filter((c) => c.stage === 'hired').length}</span>
-                <span className="badge rejected">Rejected {candidates.filter((c) => c.stage === 'rejected').length}</span>
+                <span className="badge applied">Applied {applications.filter((a) => a.stage === 'APPLIED').length}</span>
+                <span className="badge screening">Screening {applications.filter((a) => a.stage === 'SCREENING').length}</span>
+                <span className="badge interview">Interview {applications.filter((a) => a.stage === 'INTERVIEW').length}</span>
+                <span className="badge offer">Offer {applications.filter((a) => a.stage === 'OFFER').length}</span>
+                <span className="badge hired">Hired {applications.filter((a) => a.stage === 'HIRED').length}</span>
+                <span className="badge rejected">Rejected {applications.filter((a) => a.stage === 'REJECTED').length}</span>
               </div>
             </div>
 
             <div className="card overflow-hidden">
               {activeTab === 'kanban' ? (
                 <KanbanBoard
-                  candidates={candidates}
-                  onSelect={setSelectedCandidate}
-                  onDropCandidate={handleDropCandidate}
+                  candidates={applications.map(mapToKanbanItem)} // Map Applications to the structure KanbanBoard expects
+                  onSelect={(c) => {
+                     // Since kanban clicks return mapped candidate, we find the real app
+                     const realApp = applications.find(a => a.id === c.id);
+                     if (realApp) router.push(`/candidates/${realApp.id}`);
+                  }}
+                  onDropCandidate={(id, stage) => handleDropCandidate(id, stage.toUpperCase())}
                 />
               ) : (
                 <div className="table-wrap">
@@ -213,70 +232,95 @@ export default function CandidatesPage() {
                           <input
                             type="checkbox"
                             className="rounded border-border text-primary focus:ring-primary"
-                            checked={selectedIds.size === candidates.length && candidates.length > 0}
+                            checked={selectedIds.size === applications.length && applications.length > 0}
                             onChange={toggleSelectAll}
                           />
                         </th>
                         <th>Candidate</th>
                         <th>Applied For</th>
-                        <th>AI Score</th>
+                        <th>Status</th>
                         <th>Stage</th>
                         <th className="pr-4 text-right">Applied</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {candidates.map((cand) => (
+                      {applications.map((app) => (
                         <tr
-                          key={cand.id}
-                          className={`group cursor-pointer ${selectedIds.has(cand.id) ? 'bg-primary-soft/30' : ''}`}
-                          onClick={() => setSelectedCandidate(cand)}
+                          key={app.id}
+                          className={`group cursor-pointer ${selectedIds.has(app.id) ? 'bg-primary-soft/30' : ''}`}
+                          onClick={() => router.push(`/candidates/${app.id}`)}
                         >
                           <td className="pl-4" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               className="rounded border-border text-primary focus:ring-primary"
-                              checked={selectedIds.has(cand.id)}
-                              onChange={() => toggleSelect(cand.id)}
+                              checked={selectedIds.has(app.id)}
+                              onChange={() => toggleSelect(app.id)}
                             />
                           </td>
                           <td>
                             <div className="flex items-center gap-2">
-                              <div className="avatar sm w-6 h-6 text-[10px]">{cand.avatar}</div>
-                              <span className="font-bold text-text-1 group-hover:text-primary transition-colors">{cand.name}</span>
+                              <div className="avatar sm w-6 h-6 text-[10px]">{app.candidate?.fullName?.charAt(0) || '?'}</div>
+                              <span className="font-bold text-text-1 group-hover:text-primary transition-colors">{app.candidate?.fullName || 'Unknown'}</span>
                             </div>
                           </td>
-                          <td className="text-text-2">{cand.title}</td>
+                          <td className="text-text-2">{app.job?.title || 'Unknown Role'}</td>
                           <td>
-                            <span className={`score sm ${cand.scoreCategory}`}>{cand.score}</span>
+                            <span className={`text-xs`}>{app.status}</span>
                           </td>
                           <td>
-                            <Badge variant={cand.stage}>{cand.stage.toUpperCase()}</Badge>
+                            <Badge variant={app.stage.toLowerCase()}>{app.stage}</Badge>
                           </td>
                           <td className="pr-4 text-right text-text-4 font-medium">
-                            {cand.appliedDate}
+                            {new Date(app.appliedAt).toLocaleDateString()}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-between items-center p-4 border-t border-border bg-surface">
+                      <div className="text-sm text-gray-500">
+                        Page {page} of {totalPages}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setPage(p => Math.max(1, p - 1))}
+                          disabled={page === 1}
+                          className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                          disabled={page === totalPages}
+                          className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               )}
             </div>
           </>
         ) : (
           <EmptyState
-            title="No candidates found"
-            description="Adjust your filters or upload more resumes to see AI-ranked matches."
+            title="No applications found"
+            description="Adjust your filters to see active candidates."
             action={{ label: 'Clear all filters', onClick: handleClearFilters }}
           />
         )}
       </section>
 
-      {selectedCandidate && (
+      {selectedApplication && (
         <CandidateDossier
-          candidate={selectedCandidate}
-          onClose={() => setSelectedCandidate(null)}
-          onStageChange={handleDropCandidate}
+          application={selectedApplication}
+          onClose={() => setSelectedApplication(null)}
         />
       )}
 
@@ -286,15 +330,26 @@ export default function CandidatesPage() {
         actions={[
           {
             label: 'Move to Interview',
-            onClick: () => handleBulkStageChange('interview'),
+            onClick: () => handleBulkStageChange('INTERVIEW'),
             variant: 'primary'
           },
           {
             label: 'Reject',
-            onClick: () => handleBulkStageChange('rejected'),
+            onClick: () => handleBulkStageChange('REJECTED'),
             variant: 'danger'
           }
         ]}
+      />
+
+      <UploadCvModal
+         isOpen={isUploadModalOpen}
+         onClose={() => setIsUploadModalOpen(false)}
+         onUploadSuccess={() => {
+            setPage(1);
+            setStage('all');
+            setSearch('');
+            // useEffect will re-fetch automatically
+         }}
       />
     </>
   );

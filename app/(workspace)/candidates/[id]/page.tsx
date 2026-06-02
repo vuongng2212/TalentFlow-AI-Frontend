@@ -1,20 +1,23 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getCandidateById, updateCandidateStage } from '../../../../services/mockData';
-import { Candidate } from '../../../../types';
+import { applicationService } from '../../../../services/api/application.service';
+import { Application, ApplicationStage } from '../../../../types';
 import Badge from '../../../../components/ui/badge';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function CandidateDetailPage({ params }: PageProps) {
-  const [candidate, setCandidate] = useState<Candidate | null>(null);
+import ScheduleInterviewModal from '../../../../components/features/interviews/ScheduleInterviewModal';
+
+export default function ApplicationDetailPage({ params }: PageProps) {
+  const [application, setApplication] = useState<Application | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'resume' | 'notes'>('overview');
   const [newNote, setNewNote] = useState('');
   const [notes, setNotes] = useState<string[]>([]);
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   // Unwrap params using React.use() equivalent in useEffect for client safety
   useEffect(() => {
@@ -24,26 +27,33 @@ export default function CandidateDetailPage({ params }: PageProps) {
   useEffect(() => {
     if (!unwrappedParams) return;
     async function load() {
-      const c = await getCandidateById(unwrappedParams!.id);
-      if (c) {
-        setCandidate(c);
+      try {
+        const app = await applicationService.getApplicationById(unwrappedParams!.id);
+        if (app) {
+          setApplication(app);
+          if (app.notes) {
+            setNotes([app.notes]); // Backend returns a string for notes, ui needs array. This is a naive adaptation
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load application", e);
       }
     }
     load();
   }, [unwrappedParams]);
 
-  if (!candidate) {
+  if (!application || !application.candidate) {
     return (
       <div className="flex flex-1 items-center justify-center p-12 text-gray-500">
-        Loading candidate dossier...
+        Loading application dossier...
       </div>
     );
   }
 
   const handleStageChange = async (newStage: string) => {
     try {
-      const updated = await updateCandidateStage(candidate.id, newStage);
-      setCandidate(updated);
+      const updated = await applicationService.updateApplicationStage(application.id, newStage as ApplicationStage);
+      setApplication(prev => prev ? { ...prev, stage: updated.stage } : null);
     } catch (err) {
       console.error(err);
     }
@@ -52,6 +62,7 @@ export default function CandidateDetailPage({ params }: PageProps) {
   const handleSaveNote = () => {
     if (newNote.trim()) {
       setNotes([...notes, newNote.trim()]);
+      // Should ideally hit an update application api here to persist the note
       setNewNote('');
     }
   };
@@ -60,7 +71,7 @@ export default function CandidateDetailPage({ params }: PageProps) {
     <>
       <header className="topbar">
         <div className="crumb">
-          Candidates / <strong>{candidate.name}</strong>
+          Applications / <strong>{application.candidate.fullName}</strong>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -71,16 +82,16 @@ export default function CandidateDetailPage({ params }: PageProps) {
             Add Note
           </button>
           <select
-            className="select max-w-[150px] animate-none"
-            value={candidate.stage}
+            className="select max-w-37.5 animate-none"
+            value={application.stage}
             onChange={(e) => handleStageChange(e.target.value)}
           >
-            <option value="applied">Applied</option>
-            <option value="screening">Screening</option>
-            <option value="interview">Interview</option>
-            <option value="offer">Offer</option>
-            <option value="hired">Hired</option>
-            <option value="rejected">Rejected</option>
+            <option value="APPLIED">Applied</option>
+            <option value="SCREENING">Screening</option>
+            <option value="INTERVIEW">Interview</option>
+            <option value="OFFER">Offer</option>
+            <option value="HIRED">Hired</option>
+            <option value="REJECTED">Rejected</option>
           </select>
         </div>
       </header>
@@ -90,48 +101,49 @@ export default function CandidateDetailPage({ params }: PageProps) {
           <section className="card pad" aria-label="Candidate overview">
             <div className="candidate-hero">
               <div className="avatar" style={{ width: '64px', height: '64px', fontSize: '22px' }}>
-                {candidate.avatar}
+                {application.candidate.fullName.charAt(0)}
               </div>
               <div>
-                <h1>{candidate.name}</h1>
+                <h1>{application.candidate.fullName}</h1>
                 <p>
-                  {candidate.email} · {candidate.phone || '+1 415 555 0184'} · San Francisco, CA
+                  {application.candidate.email} · {application.candidate.phone || 'N/A'}
                 </p>
-                <div className="job-meta mt-[10px] flex gap-2 flex-wrap">
-                  <Badge variant={candidate.stage}>{candidate.stage.toUpperCase()}</Badge>
-                  <span className="chip">{candidate.title}</span>
-                  <span className="chip">Applied {candidate.appliedDate}</span>
+                <div className="job-meta mt-2.5 flex gap-2 flex-wrap">
+                  <Badge variant={application.stage.toLowerCase()}>{application.stage}</Badge>
+                  <span className="chip">{application.job?.title || 'Unknown Job'}</span>
+                  <span className="chip">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <span className={`score ${candidate.scoreCategory}`} style={{ width: '64px', height: '64px', fontSize: '18px' }}>
-                {candidate.score}
+              {/* Fake AI Score since it's not currently in the DB model */}
+              <span className={`score high`} style={{ width: '64px', height: '64px', fontSize: '18px' }}>
+                92
               </span>
             </div>
 
             <div className="signal-grid">
               <div className="signal-card">
                 <strong>Primary fit</strong>
-                <p>Frontend platform and design-system ownership.</p>
+                <p>Strong match based on requirements for {application.job?.title || 'the role'}.</p>
               </div>
               <div className="signal-card">
                 <strong>Decision need</strong>
-                <p>Validate enterprise security workflow depth.</p>
+                <p>Validate technical depth.</p>
               </div>
               <div className="signal-card">
-                <strong>Comp target</strong>
-                <p>$185k base · within approved range.</p>
+                <strong>Status</strong>
+                <p>{application.status}</p>
               </div>
               <div className="signal-card">
                 <strong>Next step</strong>
-                <p>Schedule system-design screen with Nora Walsh.</p>
+                <p>Schedule screen.</p>
               </div>
             </div>
 
             <div className="card pad decision-summary" style={{ marginTop: '16px' }}>
               <span className="chip ai-chip">AI ✦ Decision summary</span>
-              <h2 style={{ marginTop: '12px' }}>Advance to technical screen with one focused risk probe.</h2>
+              <h2 style={{ marginTop: '12px' }}>Recommend advancing to next stage.</h2>
               <p style={{ marginTop: '8px', color: 'var(--text-2)' }}>
-                {candidate.summary}
+                {application.candidate.resumeText ? application.candidate.resumeText.substring(0, 150) + '...' : 'Candidate shows promising background based on application metadata.'}
               </p>
             </div>
 
@@ -163,32 +175,40 @@ export default function CandidateDetailPage({ params }: PageProps) {
               <div className="tab-panel active">
                 {activeTab === 'overview' && (
                   <div className="scorecard">
-                    {candidate.scorecard.map((score, index) => (
-                      <div key={index} className="score-row">
-                        <span>{score.criteria}</span>
-                        <div className="score-bar">
-                          <span style={{ width: `${score.score}%` }}></span>
-                        </div>
-                        <strong>{score.score}</strong>
+                    {/* Fake scorecard for UI */}
+                    <div className="score-row">
+                      <span>Experience</span>
+                      <div className="score-bar">
+                        <span style={{ width: '90%' }}></span>
                       </div>
-                    ))}
+                      <strong>90</strong>
+                    </div>
+                    <div className="score-row">
+                      <span>Skills match</span>
+                      <div className="score-bar">
+                        <span style={{ width: '85%' }}></span>
+                      </div>
+                      <strong>85</strong>
+                    </div>
                   </div>
                 )}
 
                 {activeTab === 'resume' && (
                   <div className="list">
-                    <p>
-                      <strong>Current:</strong> Staff UI Engineer, Runway Ops
+                     <p>
+                      <strong>Resume Text:</strong><br/>
+                      {application.candidate.resumeText || 'No resume text available.'}
                     </p>
-                    <p>
-                      <strong>Previous:</strong> Frontend Platform Lead, Cloudkit
-                    </p>
-                    <p>
-                      <strong>Education:</strong> BS Computer Science, UC Davis
-                    </p>
-                    <p>
-                      <strong>Portfolio:</strong> Component API migrations, WCAG remediation, build performance.
-                    </p>
+                    {application.candidate.linkedinUrl && (
+                      <p>
+                        <strong>LinkedIn:</strong> <a href={application.candidate.linkedinUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{application.candidate.linkedinUrl}</a>
+                      </p>
+                    )}
+                    {application.cvFileUrl && (
+                       <p>
+                       <strong>CV Document:</strong> <a href={application.cvFileUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">View File</a>
+                     </p>
+                    )}
                   </div>
                 )}
 
@@ -200,6 +220,7 @@ export default function CandidateDetailPage({ params }: PageProps) {
                           {note}
                         </div>
                       ))}
+                      {notes.length === 0 && <div className="text-gray-400 text-sm">No notes yet.</div>}
                     </div>
                     <textarea
                       className="textarea"
@@ -223,83 +244,48 @@ export default function CandidateDetailPage({ params }: PageProps) {
           <section className="card pad" aria-label="AI evidence">
             <div className="page-head" style={{ marginBottom: '12px' }}>
               <div>
-                <h2>AI evidence</h2>
-                <p>Ranked proof behind the {candidate.score} score.</p>
-              </div>
-              <span className="chip ai-chip">AI ✦ audited</span>
-            </div>
-            <div className="evidence-list">
-              <div className="evidence-item">
-                <span className="evidence-rank">1</span>
-                <div>
-                  <strong>Reusable component systems</strong>
-                  <p>Owned shared React primitives and component API migration across multiple product teams.</p>
-                </div>
-              </div>
-              <div className="evidence-item">
-                <span className="evidence-rank">2</span>
-                <div>
-                  <strong>Accessibility remediation</strong>
-                  <p>Led WCAG-focused fixes and described rollout strategy, QA gates, and adoption metrics.</p>
-                </div>
-              </div>
-              <div className="evidence-item">
-                <span className="evidence-rank">3</span>
-                <div>
-                  <strong>Performance ownership</strong>
-                  <p>Shows concrete build and interaction-performance work rather than only feature delivery.</p>
-                </div>
-              </div>
-              <div className="evidence-item">
-                <span className="evidence-rank">4</span>
-                <div>
-                  <strong>Risk flag</strong>
-                  <p>Resume does not name SSO, audit, permissions, or regulated enterprise workflows directly.</p>
-                </div>
+                <h2>Application Info</h2>
+                <p>Status: {application.status}</p>
               </div>
             </div>
-            <div className="card pad" style={{ marginTop: '16px', background: 'var(--surface-2)', boxShadow: 'none' }}>
-              <h3>Interview prompt</h3>
-              <p style={{ marginTop: '8px' }}>
-                Ask {candidate.name.split(' ')[0]} to walk through a component migration where permissions, auditability, or security review shaped the implementation plan.
-              </p>
-            </div>
+             <div className="list">
+                <p><strong>Job Applied For:</strong> {application.job?.title || 'Unknown'}</p>
+                <p><strong>Applied Date:</strong> {new Date(application.appliedAt).toLocaleString()}</p>
+                <p><strong>Last Updated:</strong> {new Date(application.updatedAt).toLocaleString()}</p>
+             </div>
           </section>
 
-          <aside className="card pad" aria-label="Timeline and actions">
-            <h2>Activity timeline</h2>
-            <div className="timeline" style={{ marginTop: '16px' }}>
-              {candidate.timeline.map((event) => (
-                <div key={event.id} className="timeline-item">
-                  <span className="dot"></span>
-                  <div>
-                    <strong>{event.action}</strong>
-                    <p>
-                      {event.user} · {event.date}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '18px 0' }} />
-            <div className="list">
-              <button className="btn primary" style={{ width: '100%', cursor: 'pointer' }}>
-                Schedule screen
+          <aside className="card pad" aria-label="Actions">
+            <h2>Actions</h2>
+
+            <div className="list mt-4">
+              <button className="btn primary" style={{ width: '100%', cursor: 'pointer' }} onClick={() => setIsScheduleModalOpen(true)}>
+                Schedule Interview
               </button>
-              <button className="btn secondary" style={{ width: '100%', cursor: 'pointer' }}>
-                Download CV
-              </button>
+              {application.cvFileUrl && (
+                <button className="btn secondary" style={{ width: '100%', cursor: 'pointer' }} onClick={() => window.open(application.cvFileUrl)}>
+                  View CV
+                </button>
+              )}
               <button
                 className="btn danger"
                 style={{ width: '100%', cursor: 'pointer' }}
-                onClick={() => handleStageChange('rejected')}
+                onClick={() => handleStageChange('REJECTED')}
               >
-                Withdraw
+                Reject Application
               </button>
             </div>
           </aside>
         </div>
       </section>
+
+      <ScheduleInterviewModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        onInterviewScheduled={() => {
+           // Optionally refetch application details or show success toast
+        }}
+      />
     </>
   );
 }

@@ -250,6 +250,31 @@ tr:hover td { background: var(--surface-2); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes kanban-card-move {
+  0%, 10% { transform: translate(0, 0); z-index: 30; opacity: 1; }
+  20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+  35% { transform: translate(calc(100% + 10px), -10px) rotate(2deg); z-index: 30; }
+  45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); }
+  65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+  80% { transform: translate(calc(200% + 20px), -10px) rotate(2deg); z-index: 30; }
+  85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); opacity: 1; }
+  100% { transform: translate(calc(200% + 20px), 0); z-index: 30; opacity: 0; }
+}
+@keyframes success-overlay-appear {
+  0%, 80% { opacity: 0; visibility: hidden; transform: scale(0.95); pointer-events: none; backdrop-filter: blur(0px); }
+  85%, 95% { opacity: 1; visibility: visible; transform: scale(1); pointer-events: auto; backdrop-filter: blur(4px); }
+  100% { opacity: 0; visibility: hidden; transform: scale(1.05); pointer-events: none; backdrop-filter: blur(0px); }
+}
+
+.animate-success-overlay {
+  animation: success-overlay-appear 12s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.animate-kanban-card {
+  animation: kanban-card-move 12s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  transform-origin: center center;
+}
+
 .animate-infinite-scroll {
   animation: infinite-scroll 15s linear infinite;
   display: flex;
@@ -308,6 +333,18 @@ tr:hover td { background: var(--surface-2); }
   .signal-grid { grid-template-columns: 1fr; }
   .score::after { top: -12px; font-size: 8px; padding: 1px 4px; }
   .toolbar .input, .toolbar .select { max-width: none; flex: 1 1 220px; }
+
+  /* Mobile Kanban Animations */
+  @keyframes kanban-card-move-mobile {
+    0%, 10% { transform: translate(0, 0); z-index: 30; opacity: 1; }
+    20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+    35% { transform: translate(calc(100% + 10px), -10px) rotate(2deg); z-index: 30; }
+    45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); }
+    65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+    80% { transform: translate(calc(200% + 20px), -10px) rotate(2deg); z-index: 30; }
+    85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); opacity: 1; }
+    100% { transform: translate(calc(200% + 20px), 0); z-index: 30; opacity: 0; }
+  }
 }
 
 /* --- Zustand State Integration Styles --- */

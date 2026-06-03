@@ -85,7 +85,7 @@ button { cursor: pointer; }
 .btn.primary { background: var(--primary); color: white; box-shadow: 0 0 0 transparent; }
 .btn.primary:hover { background: var(--primary-hover); box-shadow: var(--shadow-ai); }
 .btn.secondary { background: var(--surface); border-color: var(--border); color: var(--text-1); }
-.btn.secondary:hover { border-color: var(--border-hover); box-shadow: var(--shadow-card); }
+.btn.secondary:hover { border-color: var(--border-hover);  }
 .btn.ghost { background: transparent; color: var(--text-2); }
 .btn.ghost:hover { background: var(--surface-2); color: var(--text-1); }
 .btn.danger { background: var(--danger); color: white; }
@@ -106,7 +106,7 @@ button { cursor: pointer; }
 .score.high { background: linear-gradient(135deg, var(--ai), var(--ai-dark)); box-shadow: 0 0 12px rgba(16,185,129,.3); }
 .score.mid { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); box-shadow: 0 0 12px rgba(245,158,11,.3); }
 .score.low { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); box-shadow: 0 0 12px rgba(239,68,68,.25); }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-card); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;  }
 .card.pad { padding: 20px; }
 .card.interactive:hover { border-color: var(--border-hover); box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .field { display: grid; gap: 6px; }
@@ -177,7 +177,7 @@ tr:hover td { background: var(--surface-2); }
 .kanban-column { min-height: 500px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
 .kanban-column.drop { border: 2px dashed var(--primary); background: rgba(237,233,254,.55); }
 .kanban-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 800; }
-.candidate-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: grid; gap: 10px; box-shadow: var(--shadow-card); cursor: grab; }
+.candidate-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px; display: grid; gap: 10px;  cursor: grab; }
 .candidate-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-hover); }
 .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; opacity: 0; max-height: 0; overflow: hidden; transition: .15s ease; }
 .candidate-card:hover .quick-actions, .candidate-card:focus-within .quick-actions { opacity: 1; max-height: 40px; }
@@ -221,7 +221,7 @@ tr:hover td { background: var(--surface-2); }
 .mini-col { background: var(--surface-2); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .mini-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
 .logos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-.logo-tile { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: 16px; display: grid; gap: 10px; min-height: 132px; color: var(--text-2); box-shadow: var(--shadow-card); }
+.logo-tile { border: 1px solid var(--border); background: var(--surface); border-radius: 14px; padding: 16px; display: grid; gap: 10px; min-height: 132px; color: var(--text-2);  }
 .brand-lockup { display: flex; align-items: center; gap: 10px; font-weight: 850; color: var(--text-1); letter-spacing: -.02em; }
 .brand-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-weight: 900; }
 .logo-tile p { font-size: 12px; line-height: 1.45; }
@@ -252,12 +252,12 @@ tr:hover td { background: var(--surface-2); }
 
 @keyframes kanban-card-move {
   0%, 10% { transform: translate(0, 0); z-index: 30; opacity: 1; }
-  20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+  20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30;  }
   35% { transform: translate(calc(100% + 10px), -10px) rotate(2deg); z-index: 30; }
-  45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); }
-  65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+  45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30;  }
+  65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30;  }
   80% { transform: translate(calc(200% + 20px), -10px) rotate(2deg); z-index: 30; }
-  85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); opacity: 1; }
+  85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30;  opacity: 1; }
   100% { transform: translate(calc(200% + 20px), 0); z-index: 30; opacity: 0; }
 }
 @keyframes success-overlay-appear {
@@ -337,12 +337,12 @@ tr:hover td { background: var(--surface-2); }
   /* Mobile Kanban Animations */
   @keyframes kanban-card-move-mobile {
     0%, 10% { transform: translate(0, 0); z-index: 30; opacity: 1; }
-    20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+    20% { transform: translate(0, -10px) rotate(-2deg); z-index: 30;  }
     35% { transform: translate(calc(100% + 10px), -10px) rotate(2deg); z-index: 30; }
-    45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); }
-    65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30; box-shadow: var(--shadow-modal); }
+    45%, 55% { transform: translate(calc(100% + 10px), 0) rotate(0); z-index: 30;  }
+    65% { transform: translate(calc(100% + 10px), -10px) rotate(-2deg); z-index: 30;  }
     80% { transform: translate(calc(200% + 20px), -10px) rotate(2deg); z-index: 30; }
-    85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30; box-shadow: var(--shadow-card); opacity: 1; }
+    85%, 95% { transform: translate(calc(200% + 20px), 0) rotate(0); z-index: 30;  opacity: 1; }
     100% { transform: translate(calc(200% + 20px), 0); z-index: 30; opacity: 0; }
   }
 }

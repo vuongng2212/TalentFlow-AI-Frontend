@@ -144,13 +144,13 @@ export default function LandingPage() {
                   {/* Spacer for animated card to push Jon Bell down */}
                   <div className="h-[110px] invisible"></div>
                   {/* Animated Card */}
-                  <div className="absolute top-[42px] left-0 right-0 px-[10px] animate-kanban-card z-20">
-                    <div className="mini-card m-0 w-full shadow-md">
+                  <div className="absolute top-[42px] left-0 right-0 px-[10px] animate-kanban-card z-20 pointer-events-none">
+                    <div className="mini-card m-0 w-full shadow-xl bg-white border border-slate-200 pointer-events-auto">
                       <span className="chip ai-chip text-[10px] py-1 px-2 mb-1 w-[72px] justify-center">
                         AI ✦ 98
                       </span>
-                      <b>Sarah Connor</b>
-                      <p className="text-xs text-gray-500">
+                      <b className="text-slate-900">Sarah Connor</b>
+                      <p className="text-xs text-slate-500">
                         React, UX, Leadership
                       </p>
                     </div>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginSchema } from '../../../services/schemas';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
+import { useUIStore } from '../../../lib/store/useUIStore';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const { login, isLoading } = useAuth();
+  const { showLoading, hideLoading } = useUIStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +39,8 @@ export default function LoginPage() {
       setSuccessMsg('Login successful! Redirecting...');
       // Navigation is handled inside the login function in AuthProvider
     } catch (err: any) {
-       setErrors({ form: err?.message || 'Invalid credentials' });
+      hideLoading();
+      setErrors({ form: err?.message || 'Invalid credentials' });
     }
   };
 

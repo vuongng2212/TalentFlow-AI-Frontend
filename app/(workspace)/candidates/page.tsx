@@ -16,6 +16,8 @@ import UploadCvModal from '../../../components/features/candidates/UploadCvModal
 import { useModalStore } from '../../../lib/store/useModalStore';
 import { useApplicationsStore } from '../../../lib/store/useApplicationsStore';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
+import { useUIStore } from '../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../hooks/useMinDuration';
 
 export default function ApplicationsPage() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
@@ -39,12 +41,13 @@ export default function ApplicationsPage() {
   const toggleSelectId = useApplicationsStore((state) => state.toggleSelectId);
   const setSelectedIds = useApplicationsStore((state) => state.setSelectedIds);
   const clearSelection = useApplicationsStore((state) => state.clearSelection);
+  const minDur = useMinDuration();
 
   // Pagination (For list view)
   const [totalPages, setTotalPages] = useState(1);
 
   const loadData = async (isBackground = false) => {
-    if (!isBackground) setLoading(true);
+    if (!isBackground) { minDur.start(); setLoading(true); }
     else setIsFetching(true);
 
     try {
@@ -68,7 +71,7 @@ export default function ApplicationsPage() {
     } catch (e) {
        console.error("Failed to fetch applications", e);
     } finally {
-       if (!isBackground) setLoading(false);
+       if (!isBackground) minDur.end(() => setLoading(false));
        setIsFetching(false);
     }
   };

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { workspaceSettingsSchema } from '../../../services/schemas';
+import { useUIStore } from '../../../lib/store/useUIStore';
 
 interface AuditLog {
   event: string;
@@ -16,6 +17,8 @@ const INITIAL_AUDIT_LOGS: AuditLog[] = [
 ];
 
 export default function SettingsPage() {
+  const [isSaving, setIsSaving] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
   const [workspaceName, setWorkspaceName] = useState('Novaware');
   const [companyDomain, setCompanyDomain] = useState('novaware.dev');
   const [inboundEmail, setInboundEmail] = useState('apply@novaware.talentflow.ai');
@@ -53,8 +56,12 @@ export default function SettingsPage() {
       return;
     }
 
+    showLoading('Saving settings...');
+    setIsSaving(true);
     setSuccessMsg('Settings saved successfully!');
     setTimeout(() => {
+      hideLoading();
+      setIsSaving(false);
       setSuccessMsg('');
     }, 3000);
   };

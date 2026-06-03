@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { applicationService } from '../../../../services/api/application.service';
 import { Application, ApplicationStage } from '../../../../types';
 import Badge from '../../../../components/ui/badge';
+import { useUIStore } from '../../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../../hooks/useMinDuration';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,6 +17,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [application, setApplication] = useState<Application | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'resume' | 'notes'>('overview');
   const [newNote, setNewNote] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+  const [rejectingApp, setRejectingApp] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
+  const minDur = useMinDuration();
   const [notes, setNotes] = useState<string[]>([]);
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -26,7 +32,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     if (!unwrappedParams) return;
-    async function load() {
+    minDur.start();
+      async function load() {
       try {
         const app = await applicationService.getApplicationById(unwrappedParams!.id);
         if (app) {
@@ -35,6 +42,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
             setNotes([app.notes]); // Backend returns a string for notes, ui needs array. This is a naive adaptation
           }
         }
+              minDur.end(() => {});
       } catch (e) {
         console.error("Failed to load application", e);
       }
@@ -45,25 +53,30 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   if (!application || !application.candidate) {
     return (
       <div className="flex flex-1 items-center justify-center p-12 text-gray-500">
-        Loading application dossier...
+        <svg className="animate-spin h-8 w-8 text-primary mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Loading application dossier...
       </div>
     );
   }
 
   const handleStageChange = async (newStage: string) => {
+    setRejectingApp(true);
     try {
       const updated = await applicationService.updateApplicationStage(application.id, newStage as ApplicationStage);
       setApplication(prev => prev ? { ...prev, stage: updated.stage } : null);
     } catch (err) {
       console.error(err);
+    } finally {
+      setRejectingApp(false);
     }
   };
 
   const handleSaveNote = () => {
     if (newNote.trim()) {
+      setSavingNote(true);
       setNotes([...notes, newNote.trim()]);
       // Should ideally hit an update application api here to persist the note
       setNewNote('');
+      setSavingNote(false);
     }
   };
 
@@ -231,9 +244,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                     <button
                       className="btn primary"
                       style={{ marginTop: '10px', cursor: 'pointer' }}
+                      disabled={savingNote}
                       onClick={handleSaveNote}
                     >
-                      Save note
+                      {savingNote ? 'Saving...' : 'Save note'}
                     </button>
                   </div>
                 )}
@@ -270,9 +284,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               <button
                 className="btn danger"
                 style={{ width: '100%', cursor: 'pointer' }}
+                disabled={rejectingApp}
                 onClick={() => handleStageChange('REJECTED')}
               >
-                Reject Application
+                {rejectingApp ? 'Rejecting...' : 'Reject Application'}
               </button>
             </div>
           </aside>

@@ -7,6 +7,8 @@ import { applicationService } from '../../../../services/api/application.service
 import { Job, Application } from '../../../../types';
 import Badge from '../../../../components/ui/badge';
 import LoadingSkeleton from '../../../../components/ui/LoadingSkeleton';
+import { useUIStore } from '../../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../../hooks/useMinDuration';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,6 +25,9 @@ export default function JobDetailPage({ params }: PageProps) {
   const [stageFilter, setStageFilter] = useState('all');
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [closingJob, setClosingJob] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
+  const minDur = useMinDuration();
   const openModal = useModalStore((state) => state.openModal);
 
   useEffect(() => {
@@ -93,14 +98,21 @@ export default function JobDetailPage({ params }: PageProps) {
           <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => openModal('edit-job', job)}>
             Edit
           </button>
-          <button className="btn danger" style={{ cursor: 'pointer' }} onClick={async () => {
+          <button className="btn danger" style={{ cursor: 'pointer' }} disabled={closingJob} onClick={async () => {
              if (window.confirm('Are you sure you want to close this job?')) {
-               await jobService.updateJob(job.id, { status: 'CLOSED' });
-               const fetchedJob = await jobService.getJobById(job.id);
-               setJob(fetchedJob);
+               showLoading('Closing job...');
+               setClosingJob(true);
+               try {
+                 await jobService.updateJob(job.id, { status: 'CLOSED' });
+                 const fetchedJob = await jobService.getJobById(job.id);
+                 setJob(fetchedJob);
+               } finally {
+                 hideLoading();
+                 setClosingJob(false);
+               }
              }
           }}>
-            Close Job
+            {closingJob ? 'Closing...' : 'Close Job'}
           </button>
         </div>
       </header>

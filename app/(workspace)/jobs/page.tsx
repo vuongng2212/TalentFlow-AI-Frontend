@@ -13,6 +13,8 @@ import BulkActionBar from '../../../components/ui/BulkActionBar';
 import CreateJobModal from '../../../components/features/jobs/CreateJobModal';
 import { useModalStore } from '../../../lib/store/useModalStore';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
+import { useUIStore } from '../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../hooks/useMinDuration';
 
 export default function JobsPage() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
@@ -25,6 +27,7 @@ export default function JobsPage() {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const minDur = useMinDuration();
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -47,7 +50,7 @@ export default function JobsPage() {
     let ignore = false;
 
     const loadAndSort = async (isBackground = false) => {
-      if (!isBackground) setLoading(true);
+      if (!isBackground) { minDur.start(); setLoading(true); }
       else setIsFetching(true);
 
       try {
@@ -79,7 +82,7 @@ export default function JobsPage() {
         console.error("Failed to fetch jobs", error);
       } finally {
         if (!ignore) {
-          if (!isBackground) setLoading(false);
+          if (!isBackground) minDur.end(() => setLoading(false));
           setIsFetching(false);
         }
       }

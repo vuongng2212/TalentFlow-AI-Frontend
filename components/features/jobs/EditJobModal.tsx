@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
+import { useUIStore } from '../../../lib/store/useUIStore';
 import { jobService } from '../../../services/api/job.service';
 import { Job } from '../../../types';
 import { useModalStore } from '../../../lib/store/useModalStore';
@@ -22,6 +23,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showLoading, hideLoading } = useUIStore();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -62,7 +64,8 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
     setLoading(true);
     setError(null);
 
-    try {
+    showLoading('Saving changes...');
+      try {
       await jobService.updateJob(activeJob.id, {
         title: formData.title,
         department: formData.department,
@@ -78,8 +81,10 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
       if (onJobUpdated) onJobUpdated();
       handleClose();
     } catch (err) {
+      hideLoading();
       setError(err instanceof Error ? err.message : 'Failed to update job');
     } finally {
+      hideLoading();
       setLoading(false);
     }
   };

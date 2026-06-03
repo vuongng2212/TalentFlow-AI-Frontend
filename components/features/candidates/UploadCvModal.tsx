@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
+import { useUIStore } from '../../../lib/store/useUIStore';
 import { api } from '../../../lib/api-client';
 import { jobService } from '../../../services/api/job.service';
 import { Job } from '../../../types';
@@ -21,6 +22,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const { showLoading, hideLoading } = useUIStore();
 
   const [selectedJobId, setSelectedJobId] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -51,7 +53,8 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
     setLoading(true);
     setError(null);
 
-    try {
+    showLoading('Uploading CV...');
+      try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('jobId', selectedJobId);
@@ -62,8 +65,10 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
       if (onUploadSuccess) onUploadSuccess();
       handleClose();
     } catch (err) {
+      hideLoading();
       setError(err instanceof Error ? err.message : 'Failed to upload CV');
     } finally {
+      hideLoading();
       setLoading(false);
     }
   };

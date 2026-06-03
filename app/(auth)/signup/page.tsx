@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signupSchema } from '../../../services/schemas';
 import { WorkspaceRole } from '../../../types';
+import { useUIStore } from '../../../lib/store/useUIStore';
 
 export default function SignupPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
   const router = useRouter();
   const [name, setName] = useState('Avery Sloan');
   const [email, setEmail] = useState('avery@novaware.dev');
@@ -44,8 +47,11 @@ export default function SignupPage() {
       return;
     }
 
+    showLoading('Creating account...');
+    setIsLoading(true);
     setSuccessMsg('Account created successfully! Redirecting...');
     setTimeout(() => {
+      hideLoading();
       localStorage.setItem('tf-role', role);
       router.push('/dashboard');
     }, 1000);
@@ -143,8 +149,8 @@ export default function SignupPage() {
             </label>
             <span className="helper">{errors.agree || ''}</span>
           </div>
-          <button className="btn primary" style={{ width: '100%', cursor: 'pointer' }}>
-            Create Account
+          <button className="btn primary" style={{ width: '100%', cursor: 'pointer' }} disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
           {successMsg && (
             <p style={{ color: 'var(--success)', fontWeight: 700, marginTop: '10px', textAlign: 'center' }}>

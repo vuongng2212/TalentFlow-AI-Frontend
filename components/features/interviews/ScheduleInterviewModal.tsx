@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
+import { useUIStore } from '../../../lib/store/useUIStore';
 import { interviewService } from '../../../services/api/interview.service';
 import { applicationService } from '../../../services/api/application.service';
 import { userService } from '../../../services/api/user.service';
@@ -15,6 +16,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
+  const { showLoading, hideLoading } = useUIStore();
   const [interviewers, setInterviewers] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
@@ -52,7 +54,8 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
     setLoading(true);
     setError(null);
 
-    try {
+    showLoading('Scheduling interview...');
+      try {
       if (!formData.scheduledAt) {
          throw new Error('Please select a date and time');
       }
@@ -70,8 +73,10 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
       onInterviewScheduled();
       onClose();
     } catch (err: any) {
+      hideLoading();
       setError(err?.message || 'Failed to schedule interview');
     } finally {
+      hideLoading();
       setLoading(false);
     }
   };

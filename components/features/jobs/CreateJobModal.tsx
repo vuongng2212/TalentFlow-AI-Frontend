@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
+import { useUIStore } from '../../../lib/store/useUIStore';
 import { jobService } from '../../../services/api/job.service';
 import { useModalStore } from '../../../lib/store/useModalStore';
 
@@ -18,6 +19,7 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { showLoading, hideLoading } = useUIStore();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -56,7 +58,8 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
     setLoading(true);
     setError(null);
 
-    try {
+    showLoading('Creating job...');
+      try {
       await jobService.createJob({
         title: formData.title,
         department: formData.department,
@@ -73,8 +76,10 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
       if (onJobCreated) onJobCreated();
       handleClose();
     } catch (err) {
+      hideLoading();
       setError(err instanceof Error ? err.message : 'Failed to create job');
     } finally {
+      hideLoading();
       setLoading(false);
     }
   };

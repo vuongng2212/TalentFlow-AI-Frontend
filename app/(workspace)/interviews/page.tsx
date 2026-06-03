@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { interviewService } from '../../../services/api/interview.service';
 import { Interview } from '../../../types';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import { useUIStore } from '../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../hooks/useMinDuration';
 import EmptyState from '../../../components/ui/EmptyState';
 import Badge from '../../../components/ui/badge';
 import ScheduleInterviewModal from '../../../components/features/interviews/ScheduleInterviewModal';
@@ -19,9 +21,13 @@ export default function InterviewsPage() {
   const [evidence, setEvidence] = useState(
     'Candidate explained component migration tradeoffs and named rollout risks clearly.'
   );
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const { showLoading, hideLoading } = useUIStore();
+  const minDur = useMinDuration();
 
   const loadInterviews = async () => {
+    minDur.start();
     setLoading(true);
     try {
       const res = await interviewService.getInterviews({ limit: 20 });
@@ -29,7 +35,7 @@ export default function InterviewsPage() {
     } catch (e) {
       console.error('Failed to load interviews', e);
     } finally {
-      setLoading(false);
+      minDur.end(() => setLoading(false));
     }
   };
 
@@ -39,8 +45,12 @@ export default function InterviewsPage() {
 
   const handleSubmitFeedback = (e: React.FormEvent) => {
     e.preventDefault();
+    showLoading('Saving feedback...');
+    setFeedbackLoading(true);
     setSuccessMsg('Feedback submitted successfully!');
     setTimeout(() => {
+      hideLoading();
+      setFeedbackLoading(false);
       setSuccessMsg('');
     }, 3000);
   };
@@ -145,8 +155,8 @@ export default function InterviewsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-center gap-4">
-            <button className="btn primary" style={{ cursor: 'pointer' }}>
-              Save Feedback
+            <button className="btn primary" style={{ cursor: 'pointer' }} disabled={feedbackLoading}>
+              {feedbackLoading ? 'Saving...' : 'Save Feedback'}
             </button>
             {successMsg && <span className="text-green-600 font-bold text-sm">{successMsg}</span>}
           </div>

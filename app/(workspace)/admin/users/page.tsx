@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import RoleGuard from '../../../../components/features/workspace/RoleGuard';
 import Badge from '../../../../components/ui/badge';
 import { userInvitationSchema } from '../../../../services/schemas';
+import { useUIStore } from '../../../../lib/store/useUIStore';
 
 interface WorkspaceUser {
   id: string;
@@ -65,6 +66,8 @@ export default function UserManagementPage() {
   const [inviteRole, setInviteRole] = useState<'Recruiter' | 'Admin'>('Recruiter');
   const [inviteError, setInviteError] = useState('');
   const [inviteSuccess, setInviteSuccess] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
 
   const handleInviteUser = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,8 +93,12 @@ export default function UserManagementPage() {
 
     setUsers([...users, newUser]);
     setInviteEmail('');
+    showLoading('Sending invitation...');
+    setInviteLoading(true);
     setInviteSuccess('Invitation sent successfully!');
     setTimeout(() => {
+      hideLoading();
+      setInviteLoading(false);
       setShowInviteModal(false);
       setInviteSuccess('');
     }, 1000);
@@ -248,8 +255,8 @@ export default function UserManagementPage() {
               </div>
               {inviteSuccess && <p className="text-green-600 font-bold text-sm text-center">{inviteSuccess}</p>}
               <div className="flex gap-4 pt-2">
-                <button className="btn primary flex-1" style={{ cursor: 'pointer' }}>
-                  Send Invitation
+                <button className="btn primary flex-1" style={{ cursor: 'pointer' }} disabled={inviteLoading}>
+                  {inviteLoading ? 'Sending...' : 'Send Invitation'}
                 </button>
                 <button
                   type="button"

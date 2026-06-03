@@ -4,14 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '../../../services/api/user.service';
 import { User } from '../../../types';
 import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
+import { useUIStore } from '../../../lib/store/useUIStore';
+import { useMinDuration } from '../../../hooks/useMinDuration';
 import EmptyState from '../../../components/ui/EmptyState';
 import Badge from '../../../components/ui/badge';
 
 export default function TeamPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const { showLoading, hideLoading } = useUIStore();
+  const minDur = useMinDuration();
 
   const loadUsers = async () => {
+    minDur.start();
     setLoading(true);
     try {
       const res = await userService.getUsers({ limit: 50 });
@@ -19,7 +25,7 @@ export default function TeamPage() {
     } catch (e) {
       console.error('Failed to load team', e);
     } finally {
-      setLoading(false);
+      minDur.end(() => setLoading(false));
     }
   };
 
@@ -33,8 +39,8 @@ export default function TeamPage() {
         <div className="crumb">
           Workspace / <strong>Team Directory</strong>
         </div>
-        <button className="btn primary" onClick={() => alert('Invite flow to be implemented')} style={{ cursor: 'pointer' }}>
-          Invite Member
+        <button className="btn primary" onClick={() => { showLoading('Inviting member...'); setInviteLoading(true); alert('Invite flow not implemented'); hideLoading(); setInviteLoading(false); }} style={{ cursor: 'pointer' }} disabled={inviteLoading}>
+          {inviteLoading ? 'Inviting...' : 'Invite Member'}
         </button>
       </header>
 

@@ -71,10 +71,10 @@ export default function TeamPage() {
                       </td>
                       <td className="text-text-2">{user.email}</td>
                       <td>
-                        <Badge variant={user.role === 'ADMIN' ? 'offer' : 'interview'}>{user.role}</Badge>
+                        <Badge variant={user.role === 'ADMIN' ? 'offer' : 'interview' as any}>{user.role}</Badge>
                       </td>
                       <td className="text-text-4 font-medium">
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
                       </td>
                     </tr>
                   ))}

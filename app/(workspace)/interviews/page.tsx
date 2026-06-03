@@ -82,7 +82,7 @@ export default function InterviewsPage() {
                      <span className={`badge ${interview.status === 'COMPLETED' ? 'hired' : 'interview'}`}>
                        {new Date(interview.scheduledAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                      </span>
-                     <Badge variant={interview.status.toLowerCase()}>{interview.status}</Badge>
+                     <Badge variant={interview.status.toLowerCase() as any}>{interview.status}</Badge>
                   </div>
                   <h3 style={{ marginTop: '12px' }}>
                     {interview.application?.candidate?.fullName || 'Unknown Candidate'} · {interview.type.replace('_', ' ')}

@@ -2,13 +2,18 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from './RoleContext';
+import { useUIStore } from '@/lib/store/useUIStore';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
-  const router = useRouter();
+
+  const sidebarExpanded = useUIStore((state) => state.sidebarExpanded);
+  const theme = useUIStore((state) => state.theme);
+  const toggleTheme = useUIStore((state) => state.toggleTheme);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
 
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: (
@@ -57,7 +62,8 @@ export const Sidebar: React.FC = () => {
     <aside className="sidebar">
       <div className="sidebar-head">
         <Link className="logo" href="/">
-          <span className="logo-mark">TF</span> TalentFlow AI
+          <span className="logo-mark">TF</span>
+          <span className="sidebar-expanded-only"> TalentFlow AI</span>
         </Link>
       </div>
 
@@ -75,7 +81,7 @@ export const Sidebar: React.FC = () => {
             className={`nav-link ${isActive(link.href) ? 'active' : ''}`}
           >
             <span className="nav-ico">{link.icon}</span>
-            {link.label}
+            <span className="sidebar-expanded-only">{link.label}</span>
           </Link>
         ))}
 
@@ -90,15 +96,47 @@ export const Sidebar: React.FC = () => {
               data-role-only="ADMIN"
             >
               <span className="nav-ico">{link.icon}</span>
-              {link.label}
+              <span className="sidebar-expanded-only">{link.label}</span>
             </Link>
           ))}
         </div>
       </nav>
 
+      {/* Sidebar Controls */}
+      <div className="sidebar-controls px-4 py-2 border-t border-border flex items-center gap-2 justify-between">
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded hover:bg-surface-2 text-text-3 hover:text-text-1 flex items-center justify-center flex-1"
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+        >
+          {theme === 'light' ? (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+              <span className="sidebar-expanded-only ml-2 text-xs font-semibold">Dark Mode</span>
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
+              <span className="sidebar-expanded-only ml-2 text-xs font-semibold">Light Mode</span>
+            </>
+          )}
+        </button>
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded hover:bg-surface-2 text-text-3 hover:text-text-1 flex items-center justify-center"
+          title={sidebarExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
+        >
+          {sidebarExpanded ? (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+          ) : (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+          )}
+        </button>
+      </div>
+
       <div className="sidebar-foot relative group cursor-pointer" onClick={handleLogout} title="Click to logout">
         <div className="avatar uppercase">{user?.fullName?.charAt(0) || 'U'}</div>
-        <div>
+        <div className="sidebar-expanded-only">
           <strong className="truncate block max-w-[120px]">{user?.fullName || 'User'}</strong>
           <p>
             <span data-current-role>{!isLoading ? role : '...'}</span>

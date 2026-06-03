@@ -1,22 +1,36 @@
 import React from "react";
+import { useApplicationsStore } from "../../../lib/store/useApplicationsStore";
 
 interface FilterCenterProps {
-  search: string;
-  onSearchChange: (value: string) => void;
-  stage: string;
-  onStageChange: (value: string) => void;
-  minScore: number;
-  onMinScoreChange: (value: number) => void;
+  search?: string;
+  onSearchChange?: (value: string) => void;
+  stage?: string;
+  onStageChange?: (value: string) => void;
+  minScore?: number;
+  onMinScoreChange?: (value: number) => void;
 }
 
 export const FilterCenter: React.FC<FilterCenterProps> = ({
-  search,
-  onSearchChange,
-  stage,
-  onStageChange,
-  minScore,
-  onMinScoreChange,
+  search: propSearch,
+  onSearchChange: propOnSearchChange,
+  stage: propStage,
+  onStageChange: propOnStageChange,
+  minScore: propMinScore,
+  onMinScoreChange: propOnMinScoreChange,
 }) => {
+  const storeSearch = useApplicationsStore((state) => state.filters.search);
+  const storeStage = useApplicationsStore((state) => state.filters.stage);
+  const storeMinScore = useApplicationsStore((state) => state.filters.minScore);
+  const setFilters = useApplicationsStore((state) => state.setFilters);
+
+  const search = propSearch !== undefined ? propSearch : storeSearch;
+  const stage = propStage !== undefined ? propStage : storeStage;
+  const minScore = propMinScore !== undefined ? propMinScore : storeMinScore;
+
+  const handleSearchChange = propOnSearchChange || ((val: string) => setFilters({ search: val }));
+  const handleStageChange = propOnStageChange || ((val: string) => setFilters({ stage: val }));
+  const handleMinScoreChange = propOnMinScoreChange || ((val: number) => setFilters({ minScore: val }));
+
   return (
     <div className="job-toolbar">
       <input
@@ -24,12 +38,12 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
         type="text"
         placeholder="Search candidate, skill, role"
         value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
+        onChange={(e) => handleSearchChange(e.target.value)}
       />
       <select
         className="select animate-none"
         value={stage}
-        onChange={(e) => onStageChange(e.target.value)}
+        onChange={(e) => handleStageChange(e.target.value)}
       >
         <option value="all">All stages</option>
         <option value="applied">Applied</option>
@@ -42,7 +56,7 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
       <select
         className="select animate-none"
         value={minScore}
-        onChange={(e) => onMinScoreChange(Number(e.target.value))}
+        onChange={(e) => handleMinScoreChange(Number(e.target.value))}
       >
         <option value="0">Any score</option>
         <option value="80">AI Score: 80+</option>
@@ -51,9 +65,9 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
       <button
         className="btn secondary"
         onClick={() => {
-          onSearchChange('');
-          onStageChange('all');
-          onMinScoreChange(0);
+          handleSearchChange('');
+          handleStageChange('all');
+          handleMinScoreChange(0);
         }}
       >
         Clear

@@ -109,7 +109,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                   {application.candidate.email} · {application.candidate.phone || 'N/A'}
                 </p>
                 <div className="job-meta mt-2.5 flex gap-2 flex-wrap">
-                  <Badge variant={application.stage.toLowerCase()}>{application.stage}</Badge>
+                  <Badge variant={application.stage.toLowerCase() as any}>{application.stage}</Badge>
                   <span className="chip">{application.job?.title || 'Unknown Job'}</span>
                   <span className="chip">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
                 </div>

@@ -3,14 +3,21 @@ import Modal from '../../ui/dialog/Modal';
 import { api } from '../../../lib/api-client';
 import { jobService } from '../../../services/api/job.service';
 import { Job } from '../../../types';
+import { useModalStore } from '../../../lib/store/useModalStore';
 
 interface UploadCvModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUploadSuccess: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onUploadSuccess?: () => void;
 }
 
 export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: UploadCvModalProps) {
+  const activeModal = useModalStore((state) => state.activeModal);
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  const showModal = isOpen !== undefined ? isOpen : (activeModal === 'upload-cv');
+  const handleClose = onClose || closeModal;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -19,13 +26,17 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!showModal) return;
+    const timer = setTimeout(() => {
+      setError(null);
+      setFile(null);
       jobService.getJobs({ status: 'OPEN', limit: 50 }).then(res => {
          setJobs(res.data);
          if (res.data.length > 0) setSelectedJobId(res.data[0].id);
       }).catch(console.error);
-    }
-  }, [isOpen]);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [showModal]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -48,17 +59,17 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
       // Using raw axios via api object since we need to send FormData
       await api.post('/applications/upload', formData);
 
-      onUploadSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to upload CV');
+      if (onUploadSuccess) onUploadSuccess();
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload CV');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upload Candidate CV">
+    <Modal isOpen={showModal} onClose={handleClose} title="Upload Candidate CV">
       {error && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
           {error}
@@ -99,7 +110,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="btn secondary"
             disabled={loading}
           >

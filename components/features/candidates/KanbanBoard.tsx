@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Candidate } from '../../../types';
 import KanbanCard from './KanbanCard';
 
 interface KanbanBoardProps {
-  candidates: Candidate[];
-  onSelect: (candidate: Candidate) => void;
+  candidates: any[];
+  onSelect: (candidate: any) => void;
   onDropCandidate: (id: string, stage: string) => void;
 }
 

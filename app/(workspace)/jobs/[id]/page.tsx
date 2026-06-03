@@ -13,6 +13,7 @@ interface PageProps {
 }
 
 import EditJobModal from '../../../../components/features/jobs/EditJobModal';
+import { useModalStore } from '../../../../lib/store/useModalStore';
 
 export default function JobDetailPage({ params }: PageProps) {
   const [job, setJob] = useState<Job | null>(null);
@@ -22,7 +23,7 @@ export default function JobDetailPage({ params }: PageProps) {
   const [stageFilter, setStageFilter] = useState('all');
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const openModal = useModalStore((state) => state.openModal);
 
   useEffect(() => {
     params.then((p) => setUnwrappedParams(p));
@@ -89,7 +90,7 @@ export default function JobDetailPage({ params }: PageProps) {
           Jobs / <strong>{job.title}</strong>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => setIsEditModalOpen(true)}>
+          <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => openModal('edit-job', job)}>
             Edit
           </button>
           <button className="btn danger" style={{ cursor: 'pointer' }} onClick={async () => {
@@ -109,7 +110,7 @@ export default function JobDetailPage({ params }: PageProps) {
           <div className="page-head">
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                {job.title} <Badge variant={job.status.toLowerCase()}>{job.status}</Badge>
+                {job.title} <Badge variant={job.status.toLowerCase() as any}>{job.status}</Badge>
               </h1>
               <p className="text-gray-500 mt-1">
                 {job.location} · {job.department} · {job._count?.applications || 0} applicants
@@ -214,7 +215,7 @@ export default function JobDetailPage({ params }: PageProps) {
                               <span className="text-xs">{app.status}</span>
                             </td>
                             <td>
-                              <Badge variant={app.stage.toLowerCase()}>{app.stage}</Badge>
+                              <Badge variant={app.stage.toLowerCase() as any}>{app.stage}</Badge>
                             </td>
                             <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
                             <td>
@@ -292,9 +293,6 @@ export default function JobDetailPage({ params }: PageProps) {
 
       {job && (
         <EditJobModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          job={job}
           onJobUpdated={async () => {
              setIsLoading(true);
              const fetchedJob = await jobService.getJobById(job.id);

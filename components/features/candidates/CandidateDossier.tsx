@@ -68,7 +68,7 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
                   {candidate.email} · {candidate.phone || 'N/A'}
                 </p>
                 <div className="job-meta mt-3 flex flex-wrap gap-2">
-                  <Badge variant={application.stage.toLowerCase()}>{application.stage}</Badge>
+                  <Badge variant={application.stage.toLowerCase() as any}>{application.stage}</Badge>
                   <span className="chip text-[11px] font-bold">{application.job?.title}</span>
                   <span className="chip text-[11px] font-bold">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
                 </div>

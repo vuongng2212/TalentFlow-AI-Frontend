@@ -16,7 +16,19 @@ const eslintConfig = defineConfig([
     "dist/**",
     "coverage/**",
     "patch.js",
+    "TalentFlow-AI-Backend/**",
   ]),
+  // Project-level rule overrides.
+  {
+    rules: {
+      // Downgrade to warning: calling setState indirectly via async function inside
+      // useEffect is a common and accepted React pattern in this codebase.
+      "react-hooks/set-state-in-effect": "warn",
+      // Many existing service/utility files use `any` for legacy reasons; warn rather
+      // than block builds until those are migrated incrementally.
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

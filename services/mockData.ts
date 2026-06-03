@@ -1,6 +1,46 @@
-import { Candidate, Job, Invoice, CandidateFilters } from '../types';
+import { Invoice, CandidateFilters } from '../types';
 
-const INITIAL_CANDIDATES: Candidate[] = [
+// Local type for mock data that includes legacy UI fields
+interface MockCandidate {
+  id: string;
+  name: string;
+  fullName?: string;
+  title: string;
+  avatar: string;
+  stage: string;
+  score: number;
+  scoreCategory: 'high' | 'mid' | 'low';
+  skills: string[];
+  appliedDate: string;
+  email: string;
+  phone?: string;
+  summary: string;
+  timeline: { id: string; date: string; user: string; action: string; notes?: string }[];
+  scorecard: { criteria: string; score: number; notes: string }[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface MockJob {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  employmentType?: string;
+  status: string;
+  applicantsCount: number;
+  filledPipelines: number;
+  createdAt: string;
+  salaryRange: string;
+  owner: string;
+  description?: string;
+  requirements?: string[];
+  createdById?: string;
+  updatedAt?: string;
+}
+
+const INITIAL_CANDIDATES: MockCandidate[] = [
   {
     id: '1',
     name: 'Maya Chen',
@@ -123,7 +163,7 @@ const INITIAL_CANDIDATES: Candidate[] = [
   }
 ];
 
-const INITIAL_JOBS: Job[] = [
+const INITIAL_JOBS: MockJob[] = [
   {
     id: 'job-1',
     title: 'Senior Frontend Engineer',
@@ -179,16 +219,16 @@ const INITIAL_JOBS: Job[] = [
 ];
 
 const INITIAL_INVOICES: Invoice[] = [
-  { id: 'INV-2026-001', date: 'May 1, 2026', amount: '$1,176', status: 'paid' },
-  { id: 'INV-2026-002', date: 'Apr 1, 2026', amount: '$1,029', status: 'paid' },
-  { id: 'INV-2026-003', date: 'Mar 1, 2026', amount: '$882', status: 'paid' }
+  { id: 'INV-2026-001', date: 'May 1, 2026', amount: 1176, status: 'paid', description: 'TalentFlow Plus - May 2026' },
+  { id: 'INV-2026-002', date: 'Apr 1, 2026', amount: 1029, status: 'paid', description: 'TalentFlow Plus - Apr 2026' },
+  { id: 'INV-2026-003', date: 'Mar 1, 2026', amount: 882, status: 'paid', description: 'TalentFlow Plus - Mar 2026' }
 ];
 
 // Helper to check if running in browser
 const isBrowser = () => typeof window !== 'undefined';
 
 // Get candidates with state persistence
-export async function getCandidates(filters?: CandidateFilters): Promise<Candidate[]> {
+export async function getCandidates(filters?: CandidateFilters): Promise<MockCandidate[]> {
   let candidates = [...INITIAL_CANDIDATES];
 
   if (isBrowser()) {
@@ -223,12 +263,12 @@ export async function getCandidates(filters?: CandidateFilters): Promise<Candida
   return candidates;
 }
 
-export async function getCandidateById(id: string): Promise<Candidate | null> {
+export async function getCandidateById(id: string): Promise<MockCandidate | null> {
   const candidates = await getCandidates();
   return candidates.find(c => c.id === id) || null;
 }
 
-export async function updateCandidateStage(id: string, stage: string): Promise<Candidate> {
+export async function updateCandidateStage(id: string, stage: string): Promise<MockCandidate> {
   const allowedStages = ['applied', 'screening', 'interview', 'offer', 'hired', 'rejected'];
   if (!allowedStages.includes(stage)) {
     throw new Error(`Invalid stage transition: ${stage}`);
@@ -243,7 +283,7 @@ export async function updateCandidateStage(id: string, stage: string): Promise<C
   // Update candidate
   const updatedCandidate = {
     ...candidates[index],
-    stage: stage as Candidate['stage'],
+    stage: stage,
     // Add event to timeline
     timeline: [
       {
@@ -266,7 +306,7 @@ export async function updateCandidateStage(id: string, stage: string): Promise<C
 }
 
 // Get jobs
-export async function getJobs(search?: string, status?: string): Promise<Job[]> {
+export async function getJobs(search?: string, status?: string): Promise<MockJob[]> {
   let jobs = [...INITIAL_JOBS];
 
   if (search) {
@@ -307,11 +347,11 @@ export async function getDashboardStats() {
 }
 
 // Add candidate (helper for quickstart/upload cv simulation)
-export async function createCandidate(c: Omit<Candidate, 'id' | 'scoreCategory'>): Promise<Candidate> {
+export async function createCandidate(c: Omit<MockCandidate, 'id' | 'scoreCategory'>): Promise<MockCandidate> {
   const candidates = await getCandidates();
   const id = (candidates.length + 1).toString();
   const scoreCategory = c.score >= 80 ? 'high' : c.score >= 50 ? 'mid' : 'low';
-  const newCandidate: Candidate = {
+  const newCandidate: MockCandidate = {
     ...c,
     id,
     scoreCategory

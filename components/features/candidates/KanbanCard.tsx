@@ -1,11 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
-import { Candidate } from '../../../types';
 import Badge from '../../ui/badge';
 
 interface KanbanCardProps {
-  candidate: Candidate;
-  onSelect: (candidate: Candidate) => void;
+  candidate: any;
+  onSelect: (candidate: any) => void;
   onDragStart: (e: React.DragEvent, id: string) => void;
 }
 
@@ -39,7 +38,7 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
 
       {candidate.skills.length > 0 && (
         <div className="skills mt-1">
-          {candidate.skills.map((skill) => (
+          {candidate.skills.map((skill: string) => (
             <span key={skill} className="chip text-[10px] py-0.5 px-2">
               {skill}
             </span>

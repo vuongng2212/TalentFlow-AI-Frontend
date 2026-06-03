@@ -128,7 +128,7 @@ export default function DashboardPage() {
                       <td>{job.department}</td>
                       <td>{job.applicationCount}</td>
                       <td>
-                        <Badge variant={job.status.toLowerCase()}>{job.status.toUpperCase()}</Badge>
+                        <Badge variant={job.status.toLowerCase() as any}>{job.status.toUpperCase()}</Badge>
                       </td>
                     </tr>
                   ))}
@@ -148,7 +148,7 @@ export default function DashboardPage() {
               {pipeline.map((stage) => (
                 <div key={stage.stage} className="candidate-row py-3 border-b border-gray-100 last:border-b-0 flex justify-between">
                   <div className="flex items-center gap-3">
-                    <Badge variant={stage.stage.toLowerCase()}>{stage.stage}</Badge>
+                    <Badge variant={stage.stage.toLowerCase() as any}>{stage.stage}</Badge>
                   </div>
                   <span className="font-semibold text-gray-700">{stage.count} candidate(s)</span>
                 </div>

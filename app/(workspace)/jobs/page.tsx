@@ -11,11 +11,15 @@ import FilterChips from '../../../components/ui/FilterChips';
 import BulkActionBar from '../../../components/ui/BulkActionBar';
 
 import CreateJobModal from '../../../components/features/jobs/CreateJobModal';
+import { useModalStore } from '../../../lib/store/useModalStore';
+import { useAuth } from '../../../components/features/workspace/RoleContext';
 
 export default function JobsPage() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const openModal = useModalStore((state) => state.openModal);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
@@ -38,10 +42,14 @@ export default function JobsPage() {
   };
 
   useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) return;
+
     let ignore = false;
 
-    const loadAndSort = async () => {
-      setLoading(true);
+    const loadAndSort = async (isBackground = false) => {
+      if (!isBackground) setLoading(true);
+      else setIsFetching(true);
+
       try {
         const queryStatus = status === 'all' ? undefined : status.toUpperCase();
 
@@ -53,7 +61,7 @@ export default function JobsPage() {
         });
 
         if (!ignore) {
-          let list = [...response.data];
+          const list = [...response.data];
 
           // Sort locally if needed, though backend should handle this ideally
           if (sortBy === 'newest') {
@@ -71,17 +79,28 @@ export default function JobsPage() {
         console.error("Failed to fetch jobs", error);
       } finally {
         if (!ignore) {
-          setLoading(false);
+          if (!isBackground) setLoading(false);
+          setIsFetching(false);
         }
       }
     };
 
-    loadAndSort();
+    const timer = setTimeout(() => {
+      loadAndSort();
+    }, 0);
+
+    const onFocus = () => {
+      loadAndSort(true);
+    };
+
+    window.addEventListener('focus', onFocus);
 
     return () => {
       ignore = true;
+      clearTimeout(timer);
+      window.removeEventListener('focus', onFocus);
     };
-  }, [search, status, sortBy, page]);
+  }, [search, status, sortBy, page, isAuthLoading, isAuthenticated]);
 
   const activeFilters = useMemo(() => {
     const filters = [];
@@ -120,11 +139,17 @@ export default function JobsPage() {
 
   return (
     <>
-      <header className="topbar">
-        <div className="crumb">
-          TalentFlow / <strong>Jobs</strong>
+      <header className="topbar flex items-center justify-between">
+        <div className="crumb flex items-center gap-2">
+          <span>TalentFlow / <strong>Jobs</strong></span>
+          {isFetching && (
+            <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
         </div>
-        <button className="btn primary" onClick={() => setIsCreateModalOpen(true)}>
+        <button className="btn primary" onClick={() => openModal('create-job')}>
           Create Job
         </button>
       </header>
@@ -203,7 +228,7 @@ export default function JobsPage() {
                   <article key={job.id} className="card job-card interactive" onClick={() => window.location.href=`/jobs/${job.id}`}>
                     <div className="page-head" style={{ margin: 0 }}>
                       <h3 className="font-bold text-lg">{job.title}</h3>
-                      <Badge variant={job.status.toLowerCase()}>{job.status}</Badge>
+                      <Badge variant={job.status.toLowerCase() as any}>{job.status}</Badge>
                     </div>
                     <div className="job-meta">
                       <span className="chip">{job.location}</span>
@@ -279,7 +304,7 @@ export default function JobsPage() {
                           {job.title}
                         </td>
                         <td>
-                          <Badge variant={job.status.toLowerCase()}>{job.status}</Badge>
+                          <Badge variant={job.status.toLowerCase() as any}>{job.status}</Badge>
                         </td>
                         <td>{job.department}</td>
                         <td>{job.location}</td>
@@ -352,8 +377,6 @@ export default function JobsPage() {
       />
 
       <CreateJobModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
         onJobCreated={() => {
            // Reload logic
            setPage(1);

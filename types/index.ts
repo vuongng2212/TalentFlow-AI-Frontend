@@ -144,3 +144,12 @@ export interface UICandidate extends Candidate {
   timeline?: any[];
   scorecard?: any[];
 }
+
+// Billing
+export interface Invoice {
+  id: string;
+  date: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'overdue';
+  description: string;
+}

@@ -2,15 +2,24 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { jobService } from '../../../services/api/job.service';
 import { Job } from '../../../types';
+import { useModalStore } from '../../../lib/store/useModalStore';
 
 interface EditJobModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  job: Job;
-  onJobUpdated: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  job?: Job;
+  onJobUpdated?: () => void;
 }
 
 export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: EditJobModalProps) {
+  const activeModal = useModalStore((state) => state.activeModal);
+  const modalData = useModalStore((state) => state.modalData);
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  const showModal = isOpen !== undefined ? isOpen : (activeModal === 'edit-job');
+  const activeJob = job !== undefined ? job : (modalData as Job | null);
+  const handleClose = onClose || closeModal;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,20 +36,20 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
   });
 
   useEffect(() => {
-    if (job) {
+    if (activeJob) {
       setFormData({
-        title: job.title || '',
-        department: job.department || '',
-        location: job.location || '',
-        employmentType: job.employmentType || 'FULL_TIME',
-        description: job.description || '',
-        requirements: job.requirements ? job.requirements.join('\n') : '',
-        salaryMin: job.salaryMin ? String(job.salaryMin) : '',
-        salaryMax: job.salaryMax ? String(job.salaryMax) : '',
-        status: job.status || 'OPEN'
+        title: activeJob.title || '',
+        department: activeJob.department || '',
+        location: activeJob.location || '',
+        employmentType: activeJob.employmentType || 'FULL_TIME',
+        description: activeJob.description || '',
+        requirements: activeJob.requirements ? activeJob.requirements.join('\n') : '',
+        salaryMin: activeJob.salaryMin ? String(activeJob.salaryMin) : '',
+        salaryMax: activeJob.salaryMax ? String(activeJob.salaryMax) : '',
+        status: activeJob.status || 'OPEN'
       });
     }
-  }, [job]);
+  }, [activeJob]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -49,11 +58,12 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!activeJob) return;
     setLoading(true);
     setError(null);
 
     try {
-      await jobService.updateJob(job.id, {
+      await jobService.updateJob(activeJob.id, {
         title: formData.title,
         department: formData.department,
         location: formData.location,
@@ -65,17 +75,17 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
         status: formData.status as any,
       });
 
-      onJobUpdated();
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to update job');
+      if (onJobUpdated) onJobUpdated();
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update job');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Requisition">
+    <Modal isOpen={showModal} onClose={handleClose} title="Edit Requisition">
       {error && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
           {error}
@@ -198,7 +208,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="btn secondary"
             disabled={loading}
           >

@@ -12,7 +12,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('avery@novaware.dev');
   const [password, setPassword] = useState('talentflow');
   const [confirmPassword, setConfirmPassword] = useState('talentflow');
-  const [role, setRole] = useState<WorkspaceRole>('Recruiter');
+  const [role, setRole] = useState<WorkspaceRole>('RECRUITER');
   const [agree, setAgree] = useState(true);
   const [errors, setErrors] = useState<{
     name?: string;

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { applicationService } from '../../../services/api/application.service';
 import { Application, ApplicationStage } from '../../../types';
 import FilterCenter from '../../../components/features/candidates/FilterCenter';
@@ -13,94 +13,92 @@ import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import EmptyState from '../../../components/ui/EmptyState';
 import { useRouter } from 'next/navigation';
 import UploadCvModal from '../../../components/features/candidates/UploadCvModal';
+import { useModalStore } from '../../../lib/store/useModalStore';
+import { useApplicationsStore } from '../../../lib/store/useApplicationsStore';
+import { useAuth } from '../../../components/features/workspace/RoleContext';
 
 export default function ApplicationsPage() {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [stage, setStage] = useState('all');
-  const [minScore, setMinScore] = useState(0);
-  const [activeTab, setActiveTab] = useState<'kanban' | 'list'>('list');
+  const [isFetching, setIsFetching] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const openModal = useModalStore((state) => state.openModal);
   const router = useRouter();
 
+  // Zustand applications store variables
+  const filters = useApplicationsStore((state) => state.filters);
+  const pagination = useApplicationsStore((state) => state.pagination);
+  const viewMode = useApplicationsStore((state) => state.viewMode);
+  const selectedIds = useApplicationsStore((state) => state.selectedIds);
+
+  const setFilters = useApplicationsStore((state) => state.setFilters);
+  const setPage = useApplicationsStore((state) => state.setPage);
+  const setViewMode = useApplicationsStore((state) => state.setViewMode);
+  const toggleSelectId = useApplicationsStore((state) => state.toggleSelectId);
+  const setSelectedIds = useApplicationsStore((state) => state.setSelectedIds);
+  const clearSelection = useApplicationsStore((state) => state.clearSelection);
+
   // Pagination (For list view)
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadData = async (ignoreFlag: boolean) => {
-    setLoading(true);
+  const loadData = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
+    else setIsFetching(true);
+
     try {
-       // Need to fetch Applications, not Candidates for the Kanban board
-       const queryStage = stage === 'all' ? undefined : (stage.toUpperCase() as ApplicationStage);
+       const queryStage = filters.stage === 'all' ? undefined : (filters.stage.toUpperCase() as ApplicationStage);
        const response = await applicationService.getApplications({
-         page,
-         limit: activeTab === 'kanban' ? 100 : 10, // Load more for kanban to show columns
+         page: pagination.page,
+         limit: viewMode === 'kanban' ? 100 : 10,
          stage: queryStage
        });
 
-       if (!ignoreFlag) {
-          // Client-side search for now since backend might not support deep search on candidate name
-          let filtered = response.data;
-          if (search) {
-             const s = search.toLowerCase();
-             filtered = filtered.filter(app =>
-                app.candidate?.fullName.toLowerCase().includes(s) ||
-                app.job?.title?.toLowerCase().includes(s)
-             );
-          }
-          setApplications(filtered);
-          setTotalPages(response.meta.totalPages);
+       let filtered = response.data;
+       if (filters.search) {
+          const s = filters.search.toLowerCase();
+          filtered = filtered.filter(app =>
+             app.candidate?.fullName.toLowerCase().includes(s) ||
+             app.job?.title?.toLowerCase().includes(s)
+          );
        }
+       setApplications(filtered);
+       setTotalPages(response.meta.totalPages);
     } catch (e) {
        console.error("Failed to fetch applications", e);
     } finally {
-       if (!ignoreFlag) setLoading(false);
+       if (!isBackground) setLoading(false);
+       setIsFetching(false);
     }
   };
 
   useEffect(() => {
+    if (isAuthLoading || !isAuthenticated) return;
+
     let ignore = false;
-    loadData(ignore);
-    return () => { ignore = true; };
-  }, [search, stage, minScore, page, activeTab]);
+    const timer = setTimeout(() => {
+      if (!ignore) loadData(false);
+    }, 0);
 
-  const activeFilters = useMemo(() => {
-    const filters = [];
-    if (search) filters.push({ id: 'search', label: 'Search', value: search });
-    if (stage !== 'all') filters.push({ id: 'stage', label: 'Stage', value: stage.toUpperCase() });
-    if (minScore > 0) filters.push({ id: 'score', label: 'Min Score', value: minScore.toString() });
-    return filters;
-  }, [search, stage, minScore]);
+    const onFocus = () => {
+      if (!ignore) loadData(true);
+    };
 
-  const handleRemoveFilter = (id: string) => {
-    if (id === 'search') setSearch('');
-    if (id === 'stage') setStage('all');
-    if (id === 'score') setMinScore(0);
-    setPage(1);
-  };
+    window.addEventListener('focus', onFocus);
 
-  const handleClearFilters = () => {
-    setSearch('');
-    setStage('all');
-    setMinScore(0);
-    setPage(1);
-  };
-
-  const toggleSelect = (id: string) => {
-    const next = new Set(selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedIds(next);
-  };
+    return () => {
+      ignore = true;
+      clearTimeout(timer);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [filters.search, filters.stage, filters.minScore, pagination.page, viewMode, isAuthLoading, isAuthenticated]);
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === applications.length) {
-      setSelectedIds(new Set());
+    if (selectedIds.length === applications.length && applications.length > 0) {
+      setSelectedIds([]);
     } else {
-      setSelectedIds(new Set(applications.map(a => a.id)));
+      setSelectedIds(applications.map(a => a.id));
     }
   };
 
@@ -122,20 +120,19 @@ export default function ApplicationsPage() {
 
   const handleBulkStageChange = async (newStage: string) => {
     setLoading(true);
-    await Promise.all(Array.from(selectedIds).map(id => applicationService.updateApplicationStage(id, newStage as ApplicationStage)));
+    await Promise.all(selectedIds.map(id => applicationService.updateApplicationStage(id, newStage as ApplicationStage)));
     await loadData(false);
-    setSelectedIds(new Set());
+    clearSelection();
   };
-
 
   // UI Map Application to Legacy Candidate UI structure where needed
   const mapToKanbanItem = (app: Application) => ({
-      id: app.id, // Using Application ID for drag/drop
+      id: app.id,
       name: app.candidate?.fullName || 'Unknown',
       title: app.job?.title || 'Unknown Job',
       avatar: app.candidate?.fullName?.charAt(0) || '?',
-      stage: app.stage.toLowerCase() as any,
-      score: 85, // Mock score for now
+      stage: app.stage.toLowerCase() as 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected',
+      score: 85,
       scoreCategory: 'high' as const,
       skills: [],
       appliedDate: new Date(app.appliedAt).toLocaleDateString(),
@@ -147,11 +144,17 @@ export default function ApplicationsPage() {
 
   return (
     <>
-      <header className="topbar">
-        <div className="crumb">
-          TalentFlow / <strong>Applications Pipeline</strong>
+      <header className="topbar flex items-center justify-between">
+        <div className="crumb flex items-center gap-2">
+          <span>TalentFlow / <strong>Applications Pipeline</strong></span>
+          {isFetching && (
+            <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
         </div>
-        <button className="btn primary" onClick={() => setIsUploadModalOpen(true)} style={{ cursor: 'pointer' }}>
+        <button className="btn primary" onClick={() => openModal('upload-cv')} style={{ cursor: 'pointer' }}>
           Upload CV
         </button>
       </header>
@@ -164,37 +167,26 @@ export default function ApplicationsPage() {
           </div>
           <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
             <button
-              onClick={() => { setActiveTab('kanban'); setPage(1); }}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeTab === 'kanban' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
+              onClick={() => setViewMode('kanban')}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === 'kanban' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
             >
               Kanban
             </button>
             <button
-              onClick={() => { setActiveTab('list'); setPage(1); }}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${activeTab === 'list' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === 'list' ? 'bg-surface shadow-sm text-primary' : 'text-text-3 hover:text-text-1'}`}
             >
               List
             </button>
           </div>
         </div>
 
-        <FilterCenter
-          search={search}
-          onSearchChange={setSearch}
-          stage={stage}
-          onStageChange={setStage}
-          minScore={minScore}
-          onMinScoreChange={setMinScore}
-        />
+        <FilterCenter />
 
-        <FilterChips
-          filters={activeFilters}
-          onRemove={handleRemoveFilter}
-          onClearAll={handleClearFilters}
-        />
+        <FilterChips />
 
         {loading ? (
-          <LoadingSkeleton type={activeTab === 'list' ? 'table' : 'card'} count={6} />
+          <LoadingSkeleton type={viewMode === 'list' ? 'table' : 'card'} count={6} />
         ) : applications.length > 0 ? (
           <>
             <div className="card pad" style={{ marginBottom: '16px' }}>
@@ -213,11 +205,11 @@ export default function ApplicationsPage() {
             </div>
 
             <div className="card overflow-hidden">
-              {activeTab === 'kanban' ? (
+              {viewMode === 'kanban' ? (
                 <KanbanBoard
-                  candidates={applications.map(mapToKanbanItem)} // Map Applications to the structure KanbanBoard expects
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  candidates={applications.map(mapToKanbanItem) as any}
                   onSelect={(c) => {
-                     // Since kanban clicks return mapped candidate, we find the real app
                      const realApp = applications.find(a => a.id === c.id);
                      if (realApp) router.push(`/candidates/${realApp.id}`);
                   }}
@@ -232,7 +224,7 @@ export default function ApplicationsPage() {
                           <input
                             type="checkbox"
                             className="rounded border-border text-primary focus:ring-primary"
-                            checked={selectedIds.size === applications.length && applications.length > 0}
+                            checked={selectedIds.length === applications.length && applications.length > 0}
                             onChange={toggleSelectAll}
                           />
                         </th>
@@ -247,15 +239,15 @@ export default function ApplicationsPage() {
                       {applications.map((app) => (
                         <tr
                           key={app.id}
-                          className={`group cursor-pointer ${selectedIds.has(app.id) ? 'bg-primary-soft/30' : ''}`}
+                          className={`group cursor-pointer ${selectedIds.includes(app.id) ? 'bg-primary-soft/30' : ''}`}
                           onClick={() => router.push(`/candidates/${app.id}`)}
                         >
                           <td className="pl-4" onClick={(e) => e.stopPropagation()}>
                             <input
                               type="checkbox"
                               className="rounded border-border text-primary focus:ring-primary"
-                              checked={selectedIds.has(app.id)}
-                              onChange={() => toggleSelect(app.id)}
+                              checked={selectedIds.includes(app.id)}
+                              onChange={() => toggleSelectId(app.id)}
                             />
                           </td>
                           <td>
@@ -269,7 +261,7 @@ export default function ApplicationsPage() {
                             <span className={`text-xs`}>{app.status}</span>
                           </td>
                           <td>
-                            <Badge variant={app.stage.toLowerCase()}>{app.stage}</Badge>
+                            <Badge variant={app.stage.toLowerCase() as 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected'}>{app.stage}</Badge>
                           </td>
                           <td className="pr-4 text-right text-text-4 font-medium">
                             {new Date(app.appliedAt).toLocaleDateString()}
@@ -283,19 +275,19 @@ export default function ApplicationsPage() {
                   {totalPages > 1 && (
                     <div className="flex justify-between items-center p-4 border-t border-border bg-surface">
                       <div className="text-sm text-gray-500">
-                        Page {page} of {totalPages}
+                        Page {pagination.page} of {totalPages}
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => setPage(p => Math.max(1, p - 1))}
-                          disabled={page === 1}
+                          onClick={() => setPage(Math.max(1, pagination.page - 1))}
+                          disabled={pagination.page === 1}
                           className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Previous
                         </button>
                         <button
-                          onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
+                          onClick={() => setPage(Math.min(totalPages, pagination.page + 1))}
+                          disabled={pagination.page === totalPages}
                           className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           Next
@@ -312,7 +304,7 @@ export default function ApplicationsPage() {
           <EmptyState
             title="No applications found"
             description="Adjust your filters to see active candidates."
-            action={{ label: 'Clear all filters', onClick: handleClearFilters }}
+            action={{ label: 'Clear all filters', onClick: () => setFilters({ search: '', stage: 'all', minScore: 0 }) }}
           />
         )}
       </section>
@@ -325,8 +317,6 @@ export default function ApplicationsPage() {
       )}
 
       <BulkActionBar
-        selectedCount={selectedIds.size}
-        onClear={() => setSelectedIds(new Set())}
         actions={[
           {
             label: 'Move to Interview',
@@ -342,13 +332,9 @@ export default function ApplicationsPage() {
       />
 
       <UploadCvModal
-         isOpen={isUploadModalOpen}
-         onClose={() => setIsUploadModalOpen(false)}
          onUploadSuccess={() => {
             setPage(1);
-            setStage('all');
-            setSearch('');
-            // useEffect will re-fetch automatically
+            setFilters({ search: '', stage: 'all', minScore: 0 });
          }}
       />
     </>

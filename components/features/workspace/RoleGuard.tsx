@@ -18,7 +18,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ children }) => {
     );
   }
 
-  if (role !== 'Admin') {
+  if (role !== 'ADMIN') {
     return (
       <>
         <header className="topbar">
@@ -40,7 +40,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ children }) => {
           </p>
           <div className="flex gap-4">
             <button
-              onClick={() => setRole('Admin')}
+              onClick={() => setRole()}
               className="btn primary"
               style={{ cursor: 'pointer' }}
             >

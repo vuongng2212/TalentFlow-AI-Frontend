@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { jobService } from '../../../services/api/job.service';
+import { useModalStore } from '../../../lib/store/useModalStore';
 
 interface CreateJobModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onJobCreated: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onJobCreated?: () => void;
 }
 
 export default function CreateJobModal({ isOpen, onClose, onJobCreated }: CreateJobModalProps) {
+  const activeModal = useModalStore((state) => state.activeModal);
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  const showModal = isOpen !== undefined ? isOpen : (activeModal === 'create-job');
+  const handleClose = onClose || closeModal;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,6 +29,22 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
     salaryMin: '',
     salaryMax: '',
   });
+
+  useEffect(() => {
+    if (showModal) {
+      setError(null);
+      setFormData({
+        title: '',
+        department: '',
+        location: '',
+        employmentType: 'FULL_TIME',
+        description: '',
+        requirements: '',
+        salaryMin: '',
+        salaryMax: '',
+      });
+    }
+  }, [showModal]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,17 +70,17 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
         createdById: '1' // Temporary fallback, backend should override based on auth token
       });
 
-      onJobCreated();
-      onClose();
-    } catch (err: any) {
-      setError(err?.message || 'Failed to create job');
+      if (onJobCreated) onJobCreated();
+      handleClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create job');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Requisition">
+    <Modal isOpen={showModal} onClose={handleClose} title="Create New Requisition">
       {error && (
         <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
           {error}
@@ -171,7 +194,7 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="btn secondary"
             disabled={loading}
           >

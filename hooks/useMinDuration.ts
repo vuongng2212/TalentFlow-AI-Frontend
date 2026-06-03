@@ -1,5 +1,5 @@
-import { useRef, useCallback } from 'react';
-import { createMinDuration } from '../lib/minDuration';
+import { useCallback, useEffect, useRef } from "react";
+import { createMinDuration } from "../lib/minDuration";
 
 /**
  * React hook: ensures a loading state stays visible for at least `minDuration` ms.
@@ -13,24 +13,24 @@ import { createMinDuration } from '../lib/minDuration';
  */
 
 export function useMinDuration(minDuration = 600) {
-  const ref = useRef(createMinDuration(minDuration));
-  // Keep minDuration in sync if caller ever changes it (rare)
-  ref.current.start = useCallback(() => {
-    ref.current.cancel();
-    ref.current = createMinDuration(minDuration);
-    ref.current.start();
+  const minDurationRef = useRef(createMinDuration(minDuration));
+
+  useEffect(() => {
+    minDurationRef.current.cancel();
+    minDurationRef.current = createMinDuration(minDuration);
+
+    return () => {
+      minDurationRef.current.cancel();
+    };
   }, [minDuration]);
 
   const start = useCallback(() => {
-    ref.current.start();
+    minDurationRef.current.start();
   }, []);
 
-  const end = useCallback(
-    (onDone: () => void) => {
-      ref.current.end(onDone);
-    },
-    []
-  );
+  const end = useCallback((onDone: () => void) => {
+    minDurationRef.current.end(onDone);
+  }, []);
 
   return { start, end };
 }

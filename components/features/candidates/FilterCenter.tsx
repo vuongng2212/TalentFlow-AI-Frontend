@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useApplicationsStore } from "../../../lib/store/useApplicationsStore";
+import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
 
 interface FilterCenterProps {
   search?: string;
@@ -23,13 +24,38 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
   const storeMinScore = useApplicationsStore((state) => state.filters.minScore);
   const setFilters = useApplicationsStore((state) => state.setFilters);
 
-  const search = propSearch !== undefined ? propSearch : storeSearch;
+  const [searchInput, setSearchInput] = useState(storeSearch);
+  const debouncedSearch = useDebouncedValue(searchInput, 250);
+
+  useEffect(() => {
+    if (propSearch !== undefined) return;
+    queueMicrotask(() => {
+      setSearchInput(storeSearch);
+    });
+  }, [propSearch, storeSearch]);
+
+  useEffect(() => {
+    if (propOnSearchChange || propSearch !== undefined) return;
+    if (debouncedSearch === storeSearch) return;
+    setFilters({ search: debouncedSearch });
+  }, [
+    debouncedSearch,
+    propOnSearchChange,
+    propSearch,
+    setFilters,
+    storeSearch,
+  ]);
+
+  const search = propSearch !== undefined ? propSearch : searchInput;
   const stage = propStage !== undefined ? propStage : storeStage;
   const minScore = propMinScore !== undefined ? propMinScore : storeMinScore;
 
-  const handleSearchChange = propOnSearchChange || ((val: string) => setFilters({ search: val }));
-  const handleStageChange = propOnStageChange || ((val: string) => setFilters({ stage: val }));
-  const handleMinScoreChange = propOnMinScoreChange || ((val: number) => setFilters({ minScore: val }));
+  const handleSearchChange =
+    propOnSearchChange || ((val: string) => setSearchInput(val));
+  const handleStageChange =
+    propOnStageChange || ((val: string) => setFilters({ stage: val }));
+  const handleMinScoreChange =
+    propOnMinScoreChange || ((val: number) => setFilters({ minScore: val }));
 
   return (
     <div className="job-toolbar">
@@ -65,8 +91,8 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
       <button
         className="btn secondary"
         onClick={() => {
-          handleSearchChange('');
-          handleStageChange('all');
+          handleSearchChange("");
+          handleStageChange("all");
           handleMinScoreChange(0);
         }}
       >

@@ -1,6 +1,5 @@
 import React from "react";
 import { features } from "./data";
-import SectionHeader from "./SectionHeader";
 
 export default function FeaturesSection() {
   return (

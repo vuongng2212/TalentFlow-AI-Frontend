@@ -4,7 +4,6 @@ import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import TrustedLogos from "@/components/landing/TrustedLogos";
 import ChallengesSection from "@/components/landing/ChallengesSection";
-import SolutionsSection from "@/components/landing/SolutionsSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import WorkflowSection from "@/components/landing/WorkflowSection";
 import IntegrationsSection from "@/components/landing/IntegrationsSection";
@@ -25,7 +24,6 @@ export default function LandingPage() {
         <HeroSection />
         <TrustedLogos />
         <ChallengesSection />
-        <SolutionsSection />
         <FeaturesSection />
         <WorkflowSection />
         <IntegrationsSection />

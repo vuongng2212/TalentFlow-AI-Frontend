@@ -3,110 +3,32 @@ import React from 'react';
 export const TrustedLogos: React.FC = () => {
   return (
     <section
-      className="landing-section animate-fade-in-up overflow-hidden"
-      style={{ paddingTop: "24px" }}
+      className="py-12 border-b border-slate-200 bg-white overflow-hidden"
     >
       <div className="landing-container overflow-hidden">
-        <div className="logos animate-infinite-scroll">
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">N</span>Novaware
-            </div>
-            <span className="meta">B2B SaaS · People team</span>
-            <p>
-              Uses AI evidence summaries to align recruiters and hiring
-              managers before screen calls.
-            </p>
+        <p className="text-center text-sm font-semibold text-slate-500 uppercase tracking-widest mb-8">
+          Trusted by modern talent teams
+        </p>
+        <div className="flex gap-16 items-center justify-center flex-wrap opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+            <span className="w-8 h-8 rounded bg-slate-200 text-slate-600 flex items-center justify-center">N</span>
+            Novaware
           </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">C</span>Cloudkit
-            </div>
-            <span className="meta">Cloud infra · Global</span>
-            <p>
-              Runs high-volume engineering pipelines with structured
-              scorecards and audit history.
-            </p>
+          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+            <span className="w-8 h-8 rounded bg-slate-200 text-slate-600 flex items-center justify-center">C</span>
+            Cloudkit
           </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">A</span>Axiom Data
-            </div>
-            <span className="meta">Data platform · Enterprise</span>
-            <p>
-              Gives admins one place to review roles, exports, billing, and
-              override events.
-            </p>
+          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+            <span className="w-8 h-8 rounded bg-slate-200 text-slate-600 flex items-center justify-center">A</span>
+            Axiom Data
           </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">R</span>Runway Ops
-            </div>
-            <span className="meta">Operations · Hybrid</span>
-            <p>
-              Coordinates interviewer feedback from the same candidate
-              dossier recruiters use.
-            </p>
+          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+            <span className="w-8 h-8 rounded bg-slate-200 text-slate-600 flex items-center justify-center">R</span>
+            Runway Ops
           </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">H</span>Helios AI
-            </div>
-            <span className="meta">AI lab · Scale-up</span>
-            <p>
-              Shortlists senior technical talent without hiding the evidence
-              behind each score.
-            </p>
-          </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">N</span>Novaware
-            </div>
-            <span className="meta">B2B SaaS · People team</span>
-            <p>
-              Uses AI evidence summaries to align recruiters and hiring
-              managers before screen calls.
-            </p>
-          </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">C</span>Cloudkit
-            </div>
-            <span className="meta">Cloud infra · Global</span>
-            <p>
-              Runs high-volume engineering pipelines with structured
-              scorecards and audit history.
-            </p>
-          </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">A</span>Axiom Data
-            </div>
-            <span className="meta">Data platform · Enterprise</span>
-            <p>
-              Gives admins one place to review roles, exports, billing, and
-              override events.
-            </p>
-          </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">R</span>Runway Ops
-            </div>
-            <span className="meta">Operations · Hybrid</span>
-            <p>
-              Coordinates interviewer feedback from the same candidate
-              dossier recruiters use.
-            </p>
-          </div>
-          <div className="logo-tile">
-            <div className="brand-lockup">
-              <span className="brand-mark">H</span>Helios AI
-            </div>
-            <span className="meta">AI lab · Scale-up</span>
-            <p>
-              Shortlists senior technical talent without hiding the evidence
-              behind each score.
-            </p>
+          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
+            <span className="w-8 h-8 rounded bg-slate-200 text-slate-600 flex items-center justify-center">H</span>
+            Helios AI
           </div>
         </div>
       </div>

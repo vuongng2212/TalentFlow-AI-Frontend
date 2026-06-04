@@ -53,37 +53,37 @@ export const solutions: Solution[] = [
 
 export const features: Feature[] = [
   {
-    badgeStyle: 'screening',
+    badgeStyle: 'bg-emerald-100 text-emerald-800',
     badgeText: 'AI CV Parsing',
     title: 'Structured profiles in seconds',
     description: 'Extract experience, seniority, skills, education, compensation signals, and missing evidence from every uploaded resume.'
   },
   {
-    badgeStyle: 'offer',
+    badgeStyle: 'bg-emerald-100 text-emerald-800',
     badgeText: 'Semantic Scoring',
     title: 'Scores with visible reasoning',
     description: 'Each AI score includes matched skills, gaps, risk flags, and recruiter override history so teams can audit decisions.'
   },
   {
-    badgeStyle: 'applied',
+    badgeStyle: 'bg-indigo-100 text-indigo-800',
     badgeText: 'Kanban Pipeline',
     title: 'Move fast without losing context',
     description: 'Drag candidates through role-specific stages while notes, interview packs, and automation triggers follow the card.'
   },
   {
-    badgeStyle: 'interview',
+    badgeStyle: 'bg-indigo-100 text-indigo-800',
     badgeText: 'Automated Comms',
     title: 'Keep candidates warm',
     description: 'Send templated updates, interview reminders, rejection messages, and hiring-manager nudges from the same workspace.'
   },
   {
-    badgeStyle: 'open',
+    badgeStyle: 'bg-indigo-100 text-indigo-800',
     badgeText: 'Real-time Updates',
     title: 'Every stakeholder sees the latest state',
     description: 'Recruiters, interviewers, and admins get role-aware navigation and alerts for the work they own.'
   },
   {
-    badgeStyle: 'closed',
+    badgeStyle: 'bg-indigo-100 text-indigo-800',
     badgeText: 'Audit Trail',
     title: 'Govern the hiring process',
     description: 'Track scoring changes, stage moves, plan usage, data exports, and workspace permission changes.'
@@ -196,6 +196,18 @@ export const testimonials = [
     author: "Marcus Ito",
     role: "COO",
     company: "Axiom Data"
+  },
+  {
+    quote: "Coordinates interviewer feedback from the same candidate dossier recruiters use.",
+    author: "Sarah Jenkins",
+    role: "Operations Manager",
+    company: "Runway Ops"
+  },
+  {
+    quote: "Shortlists senior technical talent without hiding the evidence behind each score.",
+    author: "David Chen",
+    role: "Head of Talent",
+    company: "Helios AI"
   }
 ];
 

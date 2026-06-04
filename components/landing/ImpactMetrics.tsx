@@ -4,8 +4,8 @@ export const ImpactMetrics: React.FC = () => {
   return (
     <section className="landing-section animate-fade-in-up">
       <div className="landing-container grid-4">
-        <div className="card pad border-indigo-100 bg-indigo-50/30 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <div className="card pad border-slate-200 bg-white shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <svg
               width="48"
               height="48"
@@ -17,15 +17,15 @@ export const ImpactMetrics: React.FC = () => {
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           </div>
-          <div className="stat-number text-primary text-5xl">
+          <div className="stat-number text-ai text-6xl">
             50%
           </div>
-          <p className="mt-2 font-medium text-indigo-900/80">
+          <p className="mt-2 font-medium text-slate-700">
             Faster first-pass triage for high-volume roles.
           </p>
         </div>
-        <div className="card pad border-emerald-200 bg-emerald-50/40 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <div className="card pad border-slate-200 bg-white shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <svg
               width="48"
               height="48"
@@ -38,15 +38,15 @@ export const ImpactMetrics: React.FC = () => {
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
-          <div className="stat-number text-ai text-5xl">
+          <div className="stat-number text-ai text-6xl">
             85%
           </div>
-          <p className="mt-2 font-medium text-emerald-900/80">
+          <p className="mt-2 font-medium text-slate-700">
             Extraction accuracy target for structured candidate facts.
           </p>
         </div>
-        <div className="card pad border-blue-200 bg-blue-50/40 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <div className="card pad border-slate-200 bg-white shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <svg
               width="48"
               height="48"
@@ -59,15 +59,15 @@ export const ImpactMetrics: React.FC = () => {
               <polyline points="12 6 12 12 16 14" />
             </svg>
           </div>
-          <div className="stat-number bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent text-5xl">
+          <div className="stat-number text-ai text-6xl">
             4.7h
           </div>
-          <p className="mt-2 font-medium text-blue-900/80">
+          <p className="mt-2 font-medium text-slate-700">
             Average weekly recruiter admin time saved per open role.
           </p>
         </div>
-        <div className="card pad border-amber-200 bg-amber-50/40 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <div className="card pad border-slate-200 bg-white shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <svg
               width="48"
               height="48"
@@ -82,10 +82,10 @@ export const ImpactMetrics: React.FC = () => {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <div className="stat-number bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent text-5xl">
+          <div className="stat-number text-ai text-6xl">
             3
           </div>
-          <p className="mt-2 font-medium text-amber-900/80">
+          <p className="mt-2 font-medium text-slate-700">
             Role-specific workspaces for recruiters, interviewers, and
             admins.
           </p>

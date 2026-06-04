@@ -14,7 +14,7 @@ export const SecuritySection: React.FC = () => {
 
         <div className="grid-3" style={{ marginTop: "32px" }}>
           <div className="card pad">
-            <span className="badge closed">SOC 2 Type II</span>
+            <span className="badge bg-slate-800 text-slate-100">SOC 2 Type II</span>
             <h3 style={{ marginTop: "12px" }}>Enterprise Security</h3>
             <p>
               Our infrastructure is SOC 2 Type II certified. All candidate and
@@ -24,7 +24,7 @@ export const SecuritySection: React.FC = () => {
           </div>
 
           <div className="card pad">
-            <span className="badge applied">GDPR Ready</span>
+            <span className="badge bg-slate-800 text-slate-100">GDPR Ready</span>
             <h3 style={{ marginTop: "12px" }}>Data Privacy</h3>
             <p>
               Full compliance with GDPR and CCPA. Configure custom data
@@ -34,7 +34,7 @@ export const SecuritySection: React.FC = () => {
           </div>
 
           <div className="card pad">
-            <span className="badge open">Audit Trails</span>
+            <span className="badge bg-slate-800 text-slate-100">Audit Trails</span>
             <h3 style={{ marginTop: "12px" }}>Governance & Logs</h3>
             <p>
               Maintain a comprehensive audit history for role changes, candidate

@@ -7,7 +7,7 @@ const getIcon = (iconName: string) => {
     case 'time':
       return (
         <svg
-          className="w-10 h-10 text-red-500 mb-4"
+          className="w-10 h-10 text-primary mb-4"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -22,7 +22,7 @@ const getIcon = (iconName: string) => {
     case 'chat':
       return (
         <svg
-          className="w-10 h-10 text-red-500 mb-4"
+          className="w-10 h-10 text-primary mb-4"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -36,7 +36,7 @@ const getIcon = (iconName: string) => {
     case 'shield':
       return (
         <svg
-          className="w-10 h-10 text-red-500 mb-4"
+          className="w-10 h-10 text-primary mb-4"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -64,7 +64,7 @@ export const ChallengesSection: React.FC = () => {
         />
         <div className="grid-3 mt-8">
           {challenges.map((challenge) => (
-            <div key={challenge.id} className="card pad border-red-100 bg-white shadow-sm flex flex-col items-center text-center">
+            <div key={challenge.id} className="card pad border-slate-200 bg-white shadow-sm flex flex-col items-center text-center">
               {getIcon(challenge.icon)}
               <h3 className="text-lg font-bold text-slate-900 mt-2 mb-2">
                 {challenge.title}

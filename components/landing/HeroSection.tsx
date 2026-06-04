@@ -9,7 +9,7 @@ export const HeroSection: React.FC = () => {
           <span className="chip ai-chip">AI ✦ Candidate intelligence</span>
           <h1 className="hero-title mt-4">
             Hire Smarter with{" "}
-            <span className="gradient-text bg-gradient-to-r from-primary to-ai bg-clip-text text-transparent">
+            <span className="text-primary">
               AI-Powered Recruiting
             </span>
           </h1>

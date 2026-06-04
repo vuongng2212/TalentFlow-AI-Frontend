@@ -18,11 +18,14 @@ export const PricingSection: React.FC = () => {
                 candidate notes.
               </p>
             </div>
-            <Link className="btn secondary mt-[18px] w-full" href="/signup">
+            <Link className="btn secondary mt-4.5 w-full" href="/signup">
               Start Free
             </Link>
           </div>
-          <div className="card pad flex flex-col justify-between ring-2 ring-primary shadow-[var(--shadow-ai)]">
+          <div className="card pad flex flex-col justify-between ring-2 ring-primary relative">
+            <div className="absolute top-0 right-0 -mt-3 mr-4">
+              <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Popular</span>
+            </div>
             <div>
               <span className="badge screening">Plus</span>
               <h3 style={{ marginTop: "12px" }}>$49 / seat</h3>
@@ -31,7 +34,7 @@ export const PricingSection: React.FC = () => {
                 candidate synthesis, kanban automations, and AI scoring.
               </p>
             </div>
-            <Link className="btn primary mt-[18px] w-full" href="/signup">
+            <Link className="btn primary mt-4.5 w-full" href="/signup">
               Choose Plus
             </Link>
           </div>
@@ -45,7 +48,7 @@ export const PricingSection: React.FC = () => {
               </p>
             </div>
             <Link
-              className="btn secondary mt-[18px] w-full"
+              className="btn secondary mt-4.5 w-full"
               href="/billing"
             >
               Contact Sales

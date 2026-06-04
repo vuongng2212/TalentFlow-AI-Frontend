@@ -14,22 +14,22 @@ export const Accordion: React.FC<AccordionProps> = ({ items }) => {
   };
 
   return (
-    <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+    <div className="divide-y divide-slate-100">
       {items.map((item, index) => {
         const isOpen = openIndex === index;
         return (
           <div key={index} className="group py-2 first:pt-0 last:pb-0">
             <button
               type="button"
-              className="w-full py-4 text-left font-semibold text-slate-800 dark:text-zinc-200 hover:text-primary dark:hover:text-primary-400 transition-colors duration-200 flex justify-between items-center gap-4 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
+              className="w-full py-4 text-left font-semibold text-slate-900 hover:text-primary transition-colors duration-200 flex justify-between items-center gap-4 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
               onClick={() => toggle(index)}
               style={{ cursor: 'pointer' }}
               aria-expanded={isOpen}
             >
               <span className="text-[15px] sm:text-base leading-snug">{item.question}</span>
-              <span className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-slate-50 dark:bg-zinc-800/80 group-hover:bg-primary/5 transition-colors duration-200">
+              <span className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-slate-50 group-hover:bg-primary/5 transition-colors duration-200">
                 <svg
-                  className={`w-3 h-3 text-slate-400 group-hover:text-primary transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary dark:text-primary-400' : 'rotate-0'}`}
+                  className={`w-3 h-3 text-slate-400 group-hover:text-primary transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : 'rotate-0'}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -47,7 +47,7 @@ export const Accordion: React.FC<AccordionProps> = ({ items }) => {
               }`}
             >
               <div className="overflow-hidden">
-                <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                <p className="text-sm leading-relaxed text-slate-600">
                   {item.answer}
                 </p>
               </div>

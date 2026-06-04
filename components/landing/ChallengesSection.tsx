@@ -54,7 +54,7 @@ const getIcon = (iconName: string) => {
 
 export const ChallengesSection: React.FC = () => {
   return (
-    <section className="landing-section animate-fade-in-up bg-slate-50 dark:bg-zinc-950/20" id="challenges">
+    <section className="landing-section animate-fade-in-up bg-slate-50" id="challenges">
       <div className="landing-container">
         <SectionHeader
           chip="The Problem"
@@ -64,12 +64,12 @@ export const ChallengesSection: React.FC = () => {
         />
         <div className="grid-3 mt-8">
           {challenges.map((challenge) => (
-            <div key={challenge.id} className="card pad border-red-100 dark:border-red-950/30 bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col items-center text-center">
+            <div key={challenge.id} className="card pad border-red-100 bg-white shadow-sm flex flex-col items-center text-center">
               {getIcon(challenge.icon)}
-              <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100 mt-2 mb-2">
+              <h3 className="text-lg font-bold text-slate-900 mt-2 mb-2">
                 {challenge.title}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-slate-600">
                 {challenge.description}
               </p>
             </div>

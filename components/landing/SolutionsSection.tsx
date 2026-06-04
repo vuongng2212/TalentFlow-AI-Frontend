@@ -22,15 +22,15 @@ export const SolutionsSection = () => {
             Open dashboard preview
           </Link>
         </div>
-        <div className="card pad shadow-sm bg-white dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800">
+        <div className="card pad shadow-sm bg-white border border-slate-100">
           <div className="flex flex-col gap-6">
             <div className="flex gap-4 items-start">
               <span className="shrink-0 w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-sm flex items-center justify-center border border-primary/20">
                 1
               </span>
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-zinc-100 text-base mb-1">Intake</h4>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Upload resumes and normalize candidate facts automatically.</p>
+                <h4 className="font-bold text-slate-900 text-base mb-1">Intake</h4>
+                <p className="text-slate-600 text-sm">Upload resumes and normalize candidate facts automatically.</p>
               </div>
             </div>
             <div className="flex gap-4 items-start">
@@ -38,8 +38,8 @@ export const SolutionsSection = () => {
                 2
               </span>
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-zinc-100 text-base mb-1">Evidence</h4>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Review AI fit, skill matches, gaps, and confidence notes.</p>
+                <h4 className="font-bold text-slate-900 text-base mb-1">Evidence</h4>
+                <p className="text-slate-600 text-sm">Review AI fit, skill matches, gaps, and confidence notes.</p>
               </div>
             </div>
             <div className="flex gap-4 items-start">
@@ -47,8 +47,8 @@ export const SolutionsSection = () => {
                 3
               </span>
               <div>
-                <h4 className="font-bold text-slate-800 dark:text-zinc-100 text-base mb-1">Pipeline</h4>
-                <p className="text-slate-600 dark:text-slate-400 text-sm">Move candidates through screening, interviews, offer, or rejection with audit context intact.</p>
+                <h4 className="font-bold text-slate-900 text-base mb-1">Pipeline</h4>
+                <p className="text-slate-600 text-sm">Move candidates through screening, interviews, offer, or rejection with audit context intact.</p>
               </div>
             </div>
           </div>

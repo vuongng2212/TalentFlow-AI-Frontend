@@ -1,14 +1,12 @@
 import React from 'react';
-import { SectionHeader } from './SectionHeader';
 
 export default function WorkflowSection() {
   return (
     <section className="landing-section" id="how">
       <div className="landing-container">
-        <SectionHeader
-          title="From resume intake to decision-ready shortlist"
-          centered
-        />
+        <h2 className="text-center">
+          From resume intake to decision-ready shortlist
+        </h2>
         <div className="grid-3" style={{ marginTop: "20px" }}>
           <div className="card pad">
             <span className="step-dot">1</span>

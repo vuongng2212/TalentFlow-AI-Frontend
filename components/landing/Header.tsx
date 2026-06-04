@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import { navItems } from './data';
 
 export const Header: React.FC = () => {
   return (
@@ -10,15 +9,21 @@ export const Header: React.FC = () => {
           <span className="logo-mark">TF</span> TalentFlow AI
         </Link>
         <nav>
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="hover:text-purple-600 transition-colors"
-            >
-              {item.label}
-            </a>
-          ))}
+          <a
+            href="#features"
+            className="hover:text-purple-600 transition-colors"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="hover:text-purple-600 transition-colors"
+          >
+            Pricing
+          </a>
+          <a href="#how" className="hover:text-purple-600 transition-colors">
+            How it works
+          </a>
         </nav>
         <div style={{ display: "flex", gap: "10px" }}>
           <Link className="btn secondary" href="/login">

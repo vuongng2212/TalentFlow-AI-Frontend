@@ -1,40 +1,56 @@
 import React from 'react';
 import Link from 'next/link';
-import { SectionHeader } from './SectionHeader';
-import { pricingPlans } from './data';
 
 export const PricingSection: React.FC = () => {
   return (
     <section className="landing-section" id="pricing">
       <div className="landing-container">
-        <SectionHeader
-          title="Plans for recruiting teams at every stage"
-          centered
-        />
+        <h2 className="text-center" style={{ marginBottom: "20px" }}>
+          Plans for recruiting teams at every stage
+        </h2>
         <div className="grid-3">
-          {pricingPlans.map((plan, index) => (
-            <div
-              key={plan.name}
-              className={`card pad flex flex-col justify-between${
-                plan.isPopular ? ' ring-2 ring-primary shadow-[var(--shadow-ai)]' : ''
-              }`}
-            >
-              <div>
-                <span className={`badge ${plan.badge}`}>{plan.name}</span>
-                <h3 style={{ marginTop: '12px' }}>
-                  {plan.price}
-                  {plan.period !== 'free' && plan.period !== 'Custom' && ` ${plan.period}`}
-                </h3>
-                <p>{plan.description}</p>
-              </div>
-              <Link
-                className={`btn ${plan.isPopular ? 'primary' : 'secondary'} mt-[18px] w-full`}
-                href={plan.ctaHref}
-              >
-                {plan.ctaText}
-              </Link>
+          <div className="card pad flex flex-col justify-between">
+            <div>
+              <span className="badge closed">Personal</span>
+              <h3 style={{ marginTop: "12px" }}>Free</h3>
+              <p>
+                One recruiter, two active jobs, AI parsing preview, and
+                candidate notes.
+              </p>
             </div>
-          ))}
+            <Link className="btn secondary mt-[18px] w-full" href="/signup">
+              Start Free
+            </Link>
+          </div>
+          <div className="card pad flex flex-col justify-between ring-2 ring-primary shadow-[var(--shadow-ai)]">
+            <div>
+              <span className="badge screening">Plus</span>
+              <h3 style={{ marginTop: "12px" }}>$49 / seat</h3>
+              <p>
+                For individual/freelancers. Expanded CV parsing limits,
+                candidate synthesis, kanban automations, and AI scoring.
+              </p>
+            </div>
+            <Link className="btn primary mt-[18px] w-full" href="/signup">
+              Choose Plus
+            </Link>
+          </div>
+          <div className="card pad flex flex-col justify-between">
+            <div>
+              <span className="badge open">Business</span>
+              <h3 style={{ marginTop: "12px" }}>Custom</h3>
+              <p>
+                Enterprise features including ADMIN workspace creation,
+                inviting recruiters/interviewers, SSO, and audit exports.
+              </p>
+            </div>
+            <Link
+              className="btn secondary mt-[18px] w-full"
+              href="/billing"
+            >
+              Contact Sales
+            </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -17,8 +17,7 @@ Use `pnpm` as the primary package manager.
 - **Security & Validation**: Ensure sensitive environment variables stay server-side (no `NEXT_PUBLIC_` unless necessary). Validate Server Action payload bounds using schema validators (like Zod) and assert user authorization inside the action.
 
 <!-- SPECKIT START -->
-
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-
+shell commands, and other important information, read the current plan at:
+[specs/009-landing-page-refactor/plan.md](specs/009-landing-page-refactor/plan.md)
 <!-- SPECKIT END -->

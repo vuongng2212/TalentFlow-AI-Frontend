@@ -4,7 +4,7 @@ export const ImpactMetrics: React.FC = () => {
   return (
     <section className="landing-section animate-fade-in-up">
       <div className="landing-container grid-4">
-        <div className="card pad border-violet-200 bg-violet-50/40 shadow-sm relative overflow-hidden group">
+        <div className="card pad border-indigo-100 bg-indigo-50/30 shadow-sm relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <svg
               width="48"
@@ -17,10 +17,10 @@ export const ImpactMetrics: React.FC = () => {
               <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
           </div>
-          <div className="stat-number gradient-text bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent text-5xl">
+          <div className="stat-number text-primary text-5xl">
             50%
           </div>
-          <p className="mt-2 font-medium text-violet-900/80">
+          <p className="mt-2 font-medium text-indigo-900/80">
             Faster first-pass triage for high-volume roles.
           </p>
         </div>
@@ -38,7 +38,7 @@ export const ImpactMetrics: React.FC = () => {
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
-          <div className="stat-number bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent text-5xl">
+          <div className="stat-number text-ai text-5xl">
             85%
           </div>
           <p className="mt-2 font-medium text-emerald-900/80">

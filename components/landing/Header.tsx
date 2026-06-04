@@ -11,17 +11,17 @@ export const Header: React.FC = () => {
         <nav>
           <a
             href="#features"
-            className="hover:text-purple-600 transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Features
           </a>
           <a
             href="#pricing"
-            className="hover:text-purple-600 transition-colors"
+            className="hover:text-primary transition-colors"
           >
             Pricing
           </a>
-          <a href="#how" className="hover:text-purple-600 transition-colors">
+          <a href="#how" className="hover:text-primary transition-colors">
             How it works
           </a>
         </nav>

@@ -9,7 +9,7 @@ export const HeroSection: React.FC = () => {
           <span className="chip ai-chip">AI ✦ Candidate intelligence</span>
           <h1 className="hero-title mt-4">
             Hire Smarter with{" "}
-            <span className="gradient-text bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">
+            <span className="gradient-text bg-gradient-to-r from-primary to-ai bg-clip-text text-transparent">
               AI-Powered Recruiting
             </span>
           </h1>
@@ -97,8 +97,8 @@ export const HeroSection: React.FC = () => {
                 </p>
               </div>
             </div>
-            <div className="mini-col bg-violet-100 border border-violet-300 shadow-sm">
-              <strong className="text-violet-800">Interview</strong>
+            <div className="mini-col bg-indigo-50 border border-indigo-200 shadow-sm">
+              <strong className="text-indigo-800">Interview</strong>
             </div>
             <div className="mini-col bg-emerald-100 border border-emerald-300 shadow-sm">
               <strong className="text-emerald-800">Offer</strong>

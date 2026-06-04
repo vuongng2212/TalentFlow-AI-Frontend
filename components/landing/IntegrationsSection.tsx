@@ -15,7 +15,7 @@ export const IntegrationsSection: React.FC = () => {
 
         <div className="grid-4" style={{ marginTop: '32px' }}>
           {integrations.map((integration, index) => (
-            <div key={index} className="card pad flex flex-col h-full hover:border-violet-200 transition-colors">
+            <div key={index} className="card pad flex flex-col h-full hover:border-primary-soft transition-colors">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 text-slate-700 font-bold text-lg shadow-sm border border-slate-200">
                   {integration.logoMark}

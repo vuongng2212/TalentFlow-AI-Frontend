@@ -13,8 +13,8 @@
   --ai: #10B981;
   --ai-soft: #D1FAE5;
   --ai-glow: rgba(16,185,129,0.12);
-  --ai-accent: #0D9488;
-  --ai-accent-soft: #CCFBF1;
+  --ai-accent: #10B981;
+  --ai-accent-soft: #D1FAE5;
   --success: #22C55E;
   --warning: #F59E0B;
   --danger: #EF4444;
@@ -38,7 +38,7 @@
   --shadow-card: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
   --shadow-hover: 0 4px 12px rgba(0,0,0,0.10);
   --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
-  --shadow-ai: 0 0 16px rgba(13, 148, 136, 0.15);
+  --shadow-ai: 0 0 16px rgba(16, 185, 129, 0.15);
   --font: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --background: var(--bg);
@@ -83,7 +83,7 @@ a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; }
-.logo-mark { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--ai-accent)); color: white; display: grid; place-items: center; box-shadow: var(--shadow-ai); font-size: 15px; }
+.logo-mark { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), var(--ai)); color: white; display: grid; place-items: center; box-shadow: var(--shadow-ai); font-size: 15px; }
 .btn { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; border-radius: 6px; padding: 0 16px; font-weight: 600; transition: .15s ease; white-space: nowrap; }
 .btn:focus-visible, .nav-link:focus-visible, .tab:focus-visible, .faq-q:focus-visible, .role-option:focus-visible, .input:focus-visible, .select:focus-visible, .textarea:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .btn.primary { background: var(--primary); color: white; box-shadow: 0 0 0 transparent; }
@@ -95,7 +95,7 @@ button { cursor: pointer; }
 .btn.danger { background: var(--danger); color: white; }
 .chip, .badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .chip { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
-.ai-chip { background: linear-gradient(135deg, var(--ai-accent), #0F766E); color: white; font-size: 11px; letter-spacing: .04em; }
+.ai-chip { background: linear-gradient(135deg, var(--primary), var(--ai)); color: white; font-size: 11px; letter-spacing: .04em; }
 .open { background: var(--green-soft); color: var(--green-text); }
 .closed { background: var(--surface-2); color: var(--zinc-text); }
 .draft { background: var(--amber-soft); color: var(--amber-text); }
@@ -105,7 +105,7 @@ button { cursor: pointer; }
 .offer, .hired { background: var(--green-soft); color: var(--green-text); }
 .rejected { background: var(--red-soft); color: var(--red-text); }
 .score { width: 42px; height: 42px; border-radius: 50%; display: inline-grid; place-items: center; color: white; font-weight: 800; font-size: 13px; position: relative; flex: 0 0 auto; }
-.score::after { content: "AI ✦"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--ai-accent), #0F766E); color: white; border-radius: 999px; padding: 1px 5px; font-size: 9px; line-height: 1.25; letter-spacing: .04em; white-space: nowrap; box-shadow: var(--shadow-ai); }
+.score::after { content: "AI ✦"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), var(--ai)); color: white; border-radius: 999px; padding: 1px 5px; font-size: 9px; line-height: 1.25; letter-spacing: .04em; white-space: nowrap; box-shadow: var(--shadow-ai); }
 .score.sm { width: 32px; height: 32px; font-size: 12px; }
 .score.high { background: linear-gradient(135deg, var(--ai), var(--ai-dark)); box-shadow: 0 0 12px rgba(16,185,129,.3); }
 .score.mid { background: linear-gradient(135deg, var(--warning), var(--warning-dark)); box-shadow: 0 0 12px rgba(245,158,11,.3); }
@@ -366,9 +366,9 @@ tr:hover td { background: var(--surface-2); }
   --text-4: #52525b;
   --primary-soft: #1E1B4B;
   --primary-glow: rgba(79, 70, 229, 0.3);
-  --ai-soft: #115E59;
-  --ai-glow: rgba(13, 148, 136, 0.25);
-  --ai-accent-soft: #115E59;
+  --ai-soft: #064e3b;
+  --ai-glow: rgba(16, 185, 129, 0.25);
+  --ai-accent-soft: #064e3b;
 
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);

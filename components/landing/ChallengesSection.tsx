@@ -66,7 +66,7 @@ export const ChallengesSection: React.FC = () => {
           {challenges.map((challenge) => (
             <div key={challenge.id} className="card pad border-red-100 dark:border-red-950/30 bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col items-center text-center">
               {getIcon(challenge.icon)}
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-2 mb-2">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-zinc-100 mt-2 mb-2">
                 {challenge.title}
               </h3>
               <p className="text-slate-600 dark:text-slate-400">

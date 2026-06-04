@@ -14,27 +14,43 @@ export const Accordion: React.FC<AccordionProps> = ({ items }) => {
   };
 
   return (
-    <div className="space-y-0">
+    <div className="divide-y divide-slate-100 dark:divide-zinc-800">
       {items.map((item, index) => {
         const isOpen = openIndex === index;
         return (
-          <div key={index} className={`faq-item border-b border-gray-200 dark:border-gray-800 last:border-b-0 ${isOpen ? 'open' : ''}`}>
+          <div key={index} className="group py-2 first:pt-0 last:pb-0">
             <button
               type="button"
-              className={`faq-q w-full py-4 text-left font-bold transition-colors duration-200 flex justify-between items-center ${isOpen ? 'text-primary dark:text-primary-400' : 'text-gray-900 dark:text-white'}`}
+              className="w-full py-4 text-left font-semibold text-slate-800 dark:text-zinc-200 hover:text-primary dark:hover:text-primary-400 transition-colors duration-200 flex justify-between items-center gap-4 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 rounded"
               onClick={() => toggle(index)}
               style={{ cursor: 'pointer' }}
               aria-expanded={isOpen}
             >
-              <span>{item.question}</span>
-              <span className={`text-xl transform transition-transform duration-300 ${isOpen ? 'rotate-45 text-primary' : 'rotate-0 text-gray-400'}`}>+</span>
+              <span className="text-[15px] sm:text-base leading-snug">{item.question}</span>
+              <span className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-slate-50 dark:bg-zinc-800/80 group-hover:bg-primary/5 transition-colors duration-200">
+                <svg
+                  className={`w-3 h-3 text-slate-400 group-hover:text-primary transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary dark:text-primary-400' : 'rotate-0'}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
             </button>
             <div
-              className={`faq-a text-sm text-gray-600 dark:text-gray-400 transition-all duration-300 overflow-hidden ${
-                isOpen ? 'max-h-40 opacity-100 pb-4' : 'max-h-0 opacity-0 pb-0'
+              className={`grid transition-all duration-300 ease-in-out ${
+                isOpen ? 'grid-rows-[1fr] opacity-100 pb-4' : 'grid-rows-[0fr] opacity-0 pb-0'
               }`}
             >
-              {item.answer}
+              <div className="overflow-hidden">
+                <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                  {item.answer}
+                </p>
+              </div>
             </div>
           </div>
         );

@@ -8,7 +8,9 @@ import { useAuth } from '@/components/features/workspace/RoleContext';
 
 type PageState = 'loading' | 'success' | 'error' | 'needs-login';
 
-export default function AcceptInvitePage() {
+import { Suspense } from 'react';
+
+function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, isLoading, refreshWorkspaces } = useAuth();
@@ -117,9 +119,9 @@ export default function AcceptInvitePage() {
               </svg>
             </div>
             <div>
-              <h1 style={{ fontSize: 22, color: 'var(--green-text)' }}>You're in! 🎉</h1>
+              <h1 style={{ fontSize: 22, color: 'var(--green-text)' }}>You&apos;re in! 🎉</h1>
               <p style={{ marginTop: 8 }}>
-                You've successfully joined <strong>{workspaceName}</strong>.
+                You&apos;ve successfully joined <strong>{workspaceName}</strong>.
                 <br />Redirecting you to the dashboard…
               </p>
             </div>
@@ -188,5 +190,27 @@ export default function AcceptInvitePage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense fallback={
+      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', padding: '24px' }}>
+        <div className="card pad" style={{ width: 'min(440px, 100%)', display: 'grid', gap: 20, textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <svg className="animate-spin" style={{ width: 40, height: 40, color: 'var(--primary)' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 style={{ fontSize: 22 }}>Loading…</h1>
+          </div>
+        </div>
+      </main>
+    }>
+      <AcceptInviteContent />
+    </Suspense>
   );
 }

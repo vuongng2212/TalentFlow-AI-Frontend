@@ -29,7 +29,7 @@ test.describe('Interviews Flow', () => {
     await expect(modal).not.toBeVisible();
 
     // Test feedback form interaction
-    await page.selectOption('select', { hasText: 'Strong hire' });
+    await page.selectOption('select', { label: 'Strong hire' });
     await page.fill('textarea', 'Excellent system design skills.');
     await page.click('button:has-text("Save Feedback")');
 

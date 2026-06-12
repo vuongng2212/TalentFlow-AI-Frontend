@@ -18,6 +18,10 @@ export const userService = {
     return api.patch<User>(`/users/${id}`, data);
   },
 
+  switchActiveWorkspace: async (workspaceId: string) => {
+    return api.patch<User>('/users/active-workspace', { workspaceId });
+  },
+
   deleteUser: async (id: string) => {
     return api.delete<boolean>(`/users/${id}`);
   }

@@ -14,7 +14,7 @@ export interface Solution {
 }
 
 export interface Feature {
-  badgeStyle: 'applied' | 'screening' | 'interview' | 'offer' | 'open' | 'closed';
+  badgeStyle: string;
   badgeText: string;
   title: string;
   description: string;

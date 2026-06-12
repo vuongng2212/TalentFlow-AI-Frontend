@@ -1,21 +1,76 @@
 // Authentication & Users
-export type WorkspaceRole = 'ADMIN' | 'RECRUITER' | 'HIRING_MANAGER' | 'INTERVIEWER';
+export type SystemRole = 'ADMIN' | 'RECRUITER' | 'INTERVIEWER';
+
+/** @deprecated Use SystemRole. Kept for backwards compat. */
+export type WorkspaceRole = SystemRole;
 
 export interface User {
   id: string;
   email: string;
   fullName: string;
-  role: WorkspaceRole;
+  role: SystemRole;
+  activeWorkspaceId?: string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// Workspaces
+export type WorkspaceMemberRole = 'OWNER' | 'ADMIN' | 'RECRUITER' | 'VIEWER';
+export type WorkspaceMemberStatus = 'ACTIVE' | 'INVITED' | 'REMOVED' | 'EXPIRED';
+
+export interface Workspace {
+  id: string;
+  name: string;
+  isBusiness: boolean;
+  createdById?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** The role of the currently authenticated user in this workspace */
+  memberRole?: WorkspaceMemberRole | null;
+  memberCount?: number;
+}
+
+export interface WorkspaceMember {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  role: WorkspaceMemberRole;
+  status: WorkspaceMemberStatus;
+  invitedById?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    email: string;
+    fullName: string;
+    role: SystemRole;
+  };
+}
+
+export interface WorkspaceInvitation {
+  id: string;
+  email: string;
+  workspaceId: string;
+  token: string;
+  role: WorkspaceMemberRole;
+  expiresAt: string;
+  createdAt: string;
 }
 
 export interface AuthContextProps {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  /** The full detail of the currently active workspace */
+  activeWorkspace: Workspace | null;
+  /** All workspaces the user belongs to (for the switcher) */
+  workspaces: Workspace[];
   login: (credentials: any) => Promise<void>;
   logout: () => Promise<void>;
+  /** Switch the active workspace for the current user */
+  switchWorkspace: (workspaceId: string) => Promise<void>;
+  /** Refresh workspace list after creating / joining a new workspace */
+  refreshWorkspaces: () => Promise<void>;
 }
 
 // Analytics

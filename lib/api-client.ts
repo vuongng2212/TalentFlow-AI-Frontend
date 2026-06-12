@@ -31,12 +31,24 @@ export const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+// Module-level workspace ID store — set by AuthContext after login/switch.
+// Using a closure avoids circular imports with RoleContext.
+let _activeWorkspaceId: string | null = null;
+
+export function setActiveWorkspaceId(id: string | null) {
+  _activeWorkspaceId = id;
+}
+
+export function getActiveWorkspaceId(): string | null {
+  return _activeWorkspaceId;
+}
+
 // Interceptor cho Request
 apiClient.interceptors.request.use(
   (config) => {
-    // Nếu có logic đính kèm token vào header thì thêm ở đây
-    // Ví dụ: const token = localStorage.getItem('token');
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (_activeWorkspaceId) {
+      config.headers['x-workspace-id'] = _activeWorkspaceId;
+    }
     return config;
   },
   (error) => {

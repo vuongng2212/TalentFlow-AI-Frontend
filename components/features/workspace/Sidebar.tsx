@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from './RoleContext';
 import { useUIStore } from '@/lib/store/useUIStore';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -68,8 +69,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div className="sidebar-tenant">
-        <div className="label">Current Tenant</div>
-        <div className="name">Acme Corp HQ</div>
+        <WorkspaceSwitcher />
       </div>
 
       <nav className="flex-1 overflow-y-auto py-2">

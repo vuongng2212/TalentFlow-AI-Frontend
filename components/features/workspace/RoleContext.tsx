@@ -8,8 +8,11 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { User, AuthContextProps } from "../../../types";
+import { User, Workspace, AuthContextProps } from "../../../types";
 import { authService } from "../../../services/api/auth.service";
+import { workspaceService } from "../../../services/api/workspace.service";
+import { userService } from "../../../services/api/user.service";
+import { setActiveWorkspaceId } from "../../../lib/api-client";
 import { useRouter, usePathname } from "next/navigation";
 
 type LoginCredentials = {
@@ -24,21 +27,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const router = useRouter();
   const pathname = usePathname();
   const hasCheckedAuthRef = useRef(false);
 
+  const loadWorkspaces = useCallback(async () => {
+    try {
+      const list = await workspaceService.listMyWorkspaces();
+      setWorkspaces(list);
+      return list;
+    } catch {
+      setWorkspaces([]);
+      return [];
+    }
+  }, []);
+
+  const syncActiveWorkspace = useCallback(
+    async (currentUser: User, workspaceList: Workspace[]) => {
+      const targetId = currentUser.activeWorkspaceId;
+      if (!targetId) {
+        setActiveWorkspace(null);
+        setActiveWorkspaceId(null);
+        return;
+      }
+
+      // Try to find in the already-loaded list first (no extra round-trip)
+      let ws = workspaceList.find((w) => w.id === targetId) ?? null;
+
+      if (!ws) {
+        try {
+          ws = await workspaceService.getWorkspace(targetId);
+        } catch {
+          ws = null;
+        }
+      }
+
+      setActiveWorkspace(ws);
+      setActiveWorkspaceId(ws?.id ?? null);
+    },
+    [],
+  );
+
   const fetchUser = useCallback(async () => {
     try {
       const response = await authService.getCurrentUser();
-      setUser(response.user);
+      const currentUser = response.user;
+      setUser(currentUser);
+
+      // Load workspaces in parallel with active workspace sync
+      const list = await loadWorkspaces();
+      await syncActiveWorkspace(currentUser, list);
     } catch {
       setUser(null);
+      setActiveWorkspace(null);
+      setWorkspaces([]);
+      setActiveWorkspaceId(null);
     } finally {
       setIsLoading(false);
       hasCheckedAuthRef.current = true;
     }
-  }, []);
+  }, [loadWorkspaces, syncActiveWorkspace]);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -50,7 +100,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!hasCheckedAuthRef.current || isLoading) return;
 
     const isPublicRoute =
-      pathname === "/login" || pathname === "/signup" || pathname === "/";
+      pathname === "/login" ||
+      pathname === "/signup" ||
+      pathname === "/" ||
+      pathname.startsWith("/invite");
+
     if (!user && !isPublicRoute) {
       router.replace("/login");
     }
@@ -59,8 +113,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (credentials: LoginCredentials) => {
     try {
       const response = await authService.login(credentials);
-      setUser(response.user);
-      router.replace("/dashboard");
+      const loggedInUser = response.user;
+      setUser(loggedInUser);
+
+      const list = await loadWorkspaces();
+      await syncActiveWorkspace(loggedInUser, list);
+
+      // Check for a pending invitation token saved before auth redirect
+      const pendingToken = sessionStorage.getItem('pendingInviteToken');
+      if (pendingToken) {
+        sessionStorage.removeItem('pendingInviteToken');
+        router.replace(`/invite/accept?token=${encodeURIComponent(pendingToken)}`);
+      } else {
+        router.replace('/dashboard');
+      }
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -74,13 +140,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Logout failed:", error);
     } finally {
       setUser(null);
+      setActiveWorkspace(null);
+      setWorkspaces([]);
+      setActiveWorkspaceId(null);
       router.replace("/login");
     }
   };
 
+  const switchWorkspace = useCallback(
+    async (workspaceId: string) => {
+      // Optimistic update for instant UI feedback
+      const target = workspaces.find((w) => w.id === workspaceId) ?? null;
+      setActiveWorkspace(target);
+      setActiveWorkspaceId(workspaceId);
+
+      try {
+        // Persist to backend (PATCH /users/active-workspace)
+        await userService.switchActiveWorkspace(workspaceId);
+
+        // If we didn't have full workspace detail yet, fetch it now
+        if (!target) {
+          const ws = await workspaceService.getWorkspace(workspaceId);
+          setActiveWorkspace(ws);
+          setActiveWorkspaceId(ws.id);
+        }
+
+        // Update user state to reflect new activeWorkspaceId
+        setUser((prev) =>
+          prev ? { ...prev, activeWorkspaceId: workspaceId } : prev,
+        );
+      } catch (error) {
+        console.error("switchWorkspace failed:", error);
+        // Revert optimistic update on failure
+        await fetchUser();
+      }
+    },
+    [workspaces, fetchUser],
+  );
+
+  const refreshWorkspaces = useCallback(async () => {
+    if (!user) return;
+    const list = await loadWorkspaces();
+    await syncActiveWorkspace(user, list);
+  }, [user, loadWorkspaces, syncActiveWorkspace]);
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, logout }}
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        activeWorkspace,
+        workspaces,
+        login,
+        logout,
+        switchWorkspace,
+        refreshWorkspaces,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -95,8 +211,14 @@ export const useAuth = () => {
   return context;
 };
 
-// Vẫn giữ lại export useWorkspaceRole để không làm break code hiện tại ngay lập tức,
-// nhưng map nó qua useAuth thay vì RoleContext cũ.
+// Convenience hook for workspace-specific data
+export const useWorkspace = () => {
+  const { activeWorkspace, workspaces, switchWorkspace, refreshWorkspaces } =
+    useAuth();
+  return { activeWorkspace, workspaces, switchWorkspace, refreshWorkspaces };
+};
+
+// Backwards-compat shim — remove once all consumers are updated
 export const useWorkspaceRole = () => {
   const { user, isLoading } = useAuth();
 

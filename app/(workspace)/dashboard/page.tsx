@@ -8,6 +8,7 @@ import { analyticsService } from '../../../services/api/analytics.service';
 import { DashboardMetrics, TopJobData, PipelineStageCount, TrendData } from '../../../types';
 import { useUIStore } from '../../../lib/store/useUIStore';
 import { useMinDuration } from '../../../hooks/useMinDuration';
+import { useAuth } from '../../../components/features/workspace/RoleContext';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardMetrics | null>(null);
@@ -16,6 +17,7 @@ export default function DashboardPage() {
   const [trends, setTrends] = useState<TrendData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const minDur = useMinDuration();
+  const { activeWorkspace } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,7 +54,7 @@ export default function DashboardPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          TalentFlow / <strong>Dashboard</strong>
+          {activeWorkspace?.name ?? 'TalentFlow'} / <strong>Dashboard</strong>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <span className="chip">System Online</span>

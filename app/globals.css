@@ -136,6 +136,7 @@ button { cursor: pointer; }
 .avatar { width: 34px; height: 34px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-weight: 800; }
 .main { min-width: 0; }
 .topbar { height: 56px; background: rgba(255,255,255,.86); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+.dark .topbar { background: rgba(24,24,27,.86); }
 .crumb { color: var(--text-3); font-size: 13px; }
 .crumb strong { color: var(--text-1); }
 .content { padding: 24px; }

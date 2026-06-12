@@ -16,9 +16,11 @@ import { useModalStore } from "../../../lib/store/useModalStore";
 import { useAuth } from "../../../components/features/workspace/RoleContext";
 import { useMinDuration } from "../../../hooks/useMinDuration";
 import { useDebouncedValue } from "../../../hooks/useDebouncedValue";
+import { useRouter } from "next/navigation";
 
 export default function JobsPage() {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const { isLoading: isAuthLoading, isAuthenticated, activeWorkspace } = useAuth();
+  const router = useRouter();
   const openModal = useModalStore((state) => state.openModal);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +173,7 @@ export default function JobsPage() {
       <header className="topbar flex items-center justify-between">
         <div className="crumb flex items-center gap-2">
           <span>
-            TalentFlow / <strong>Jobs</strong>
+            {activeWorkspace?.name ?? 'Workspace'} / <strong>Jobs</strong>
           </span>
           {isFetching && (
             <svg
@@ -289,7 +291,7 @@ export default function JobsPage() {
                   <article
                     key={job.id}
                     className="card job-card interactive"
-                    onClick={() => (window.location.href = `/jobs/${job.id}`)}
+                    onClick={() => router.push(`/jobs/${job.id}`)}
                   >
                     <div className="page-head" style={{ margin: 0 }}>
                       <h3 className="font-bold text-lg">{job.title}</h3>
@@ -372,7 +374,7 @@ export default function JobsPage() {
                         key={job.id}
                         className={`group cursor-pointer ${selectedIds.has(job.id) ? "bg-primary-soft/30" : ""}`}
                         onClick={() =>
-                          (window.location.href = `/jobs/${job.id}`)
+                          router.push(`/jobs/${job.id}`)
                         }
                       >
                         <td

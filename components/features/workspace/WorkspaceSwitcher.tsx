@@ -3,16 +3,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "./RoleContext";
 import { workspaceService } from "@/services/api/workspace.service";
+import { useUIStore } from "@/lib/store/useUIStore";
 
 export const WorkspaceSwitcher: React.FC = () => {
-  const { activeWorkspace, workspaces, switchWorkspace, refreshWorkspaces, user } =
+  const { activeWorkspace, workspaces, switchWorkspace, refreshWorkspaces } =
     useAuth();
+  const { showLoading, hideLoading, globalLoading } = useUIStore();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [isBusiness, setIsBusiness] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [switching, setSwitching] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -32,12 +33,14 @@ export const WorkspaceSwitcher: React.FC = () => {
       setOpen(false);
       return;
     }
-    setSwitching(workspaceId);
+    setOpen(false);
+    showLoading("Switching workspace…");
     try {
       await switchWorkspace(workspaceId);
-      setOpen(false);
+    } catch (err) {
+      console.error("Failed to switch workspace", err);
     } finally {
-      setSwitching(null);
+      hideLoading();
     }
   };
 
@@ -67,8 +70,7 @@ export const WorkspaceSwitcher: React.FC = () => {
       .slice(0, 2)
       .toUpperCase();
 
-  const isOwnerOrAdmin = (ws: typeof activeWorkspace) =>
-    ws?.memberRole === "OWNER" || ws?.memberRole === "ADMIN";
+
 
   return (
     <div className="workspace-switcher" ref={dropdownRef}>
@@ -79,6 +81,7 @@ export const WorkspaceSwitcher: React.FC = () => {
         title="Switch workspace"
         aria-expanded={open}
         aria-haspopup="listbox"
+        disabled={globalLoading}
       >
         <div className="workspace-avatar">
           {activeWorkspace ? initials(activeWorkspace.name) : "?"}
@@ -112,7 +115,7 @@ export const WorkspaceSwitcher: React.FC = () => {
               key={ws.id}
               className={`workspace-option ${ws.id === activeWorkspace?.id ? "active" : ""}`}
               onClick={() => handleSwitch(ws.id)}
-              disabled={switching === ws.id}
+              disabled={globalLoading}
               role="option"
               aria-selected={ws.id === activeWorkspace?.id}
             >
@@ -128,12 +131,6 @@ export const WorkspaceSwitcher: React.FC = () => {
               {ws.id === activeWorkspace?.id && (
                 <svg className="workspace-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-              {switching === ws.id && (
-                <svg className="animate-spin w-4 h-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               )}
             </button>

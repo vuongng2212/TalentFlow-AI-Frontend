@@ -19,7 +19,7 @@ import { useAuth } from "../../../components/features/workspace/RoleContext";
 import { useMinDuration } from "../../../hooks/useMinDuration";
 
 export default function ApplicationsPage() {
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const { isLoading: isAuthLoading, isAuthenticated, activeWorkspace } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
@@ -189,7 +189,7 @@ export default function ApplicationsPage() {
       <header className="topbar flex items-center justify-between">
         <div className="crumb flex items-center gap-2">
           <span>
-            TalentFlow / <strong>Applications Pipeline</strong>
+            {activeWorkspace?.name ?? 'Workspace'} / <strong>Applications Pipeline</strong>
           </span>
           {isFetching && (
             <svg

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { useUIStore } from '../../../lib/store/useUIStore';
-import { api } from '../../../lib/api-client';
 import { jobService } from '../../../services/api/job.service';
+import { applicationService } from '../../../services/api/application.service';
 import { Job } from '../../../types';
 import { useModalStore } from '../../../lib/store/useModalStore';
 
@@ -59,8 +59,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
       formData.append('file', file);
       formData.append('jobId', selectedJobId);
 
-      // Using raw axios via api object since we need to send FormData
-      await api.post('/applications/upload', formData);
+      await applicationService.uploadApplicationCv(formData);
 
       if (onUploadSuccess) onUploadSuccess();
       handleClose();

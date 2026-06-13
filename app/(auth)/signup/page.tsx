@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { signupSchema } from '../../../services/schemas';
 import { WorkspaceRole } from '../../../types';
 import { useUIStore } from '../../../lib/store/useUIStore';
+import { authService } from '../../../services/api/auth.service';
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +27,7 @@ export default function SignupPage() {
   }>({});
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setSuccessMsg('');
@@ -49,12 +50,26 @@ export default function SignupPage() {
 
     showLoading('Creating account...');
     setIsLoading(true);
-    setSuccessMsg('Account created successfully! Redirecting...');
-    setTimeout(() => {
+    try {
+      await authService.signup({
+        fullName: name,
+        email,
+        password,
+        role,
+      });
+      setSuccessMsg('Account created successfully! Redirecting...');
+      setTimeout(() => {
+        hideLoading();
+        localStorage.setItem('tf-role', role);
+        router.push('/dashboard');
+      }, 1000);
+    } catch (err: any) {
       hideLoading();
-      localStorage.setItem('tf-role', role);
-      router.push('/dashboard');
-    }, 1000);
+      setIsLoading(false);
+      setErrors({
+        email: err?.message || 'Failed to create account. Email may already be in use.',
+      });
+    }
   };
 
   return (
@@ -132,8 +147,8 @@ export default function SignupPage() {
               value={role}
               onChange={(e) => setRole(e.target.value as WorkspaceRole)}
             >
-              <option value="Recruiter">Recruiter</option>
-              <option value="Admin">Admin</option>
+              <option value="RECRUITER">Recruiter</option>
+              <option value="ADMIN">Admin</option>
             </select>
             <span className="helper"></span>
           </div>

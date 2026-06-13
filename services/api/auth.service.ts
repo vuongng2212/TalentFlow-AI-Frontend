@@ -6,6 +6,10 @@ export const authService = {
     return api.post<{ user: User }>('/auth/login', credentials);
   },
 
+  signup: async (data: any) => {
+    return api.post<{ user: User }>('/auth/signup', data);
+  },
+
   getCurrentUser: async () => {
     return api.get<{ user: User }>('/auth/me');
   },

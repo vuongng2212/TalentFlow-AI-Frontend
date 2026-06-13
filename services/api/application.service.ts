@@ -1,4 +1,4 @@
-import { api, PaginatedData } from '@/lib/api-client';
+import { api, apiClient, ApiResponse, PaginatedData } from '@/lib/api-client';
 import { Application, ApplicationStage } from '@/types';
 
 export const applicationService = {
@@ -17,6 +17,14 @@ export const applicationService = {
 
   createApplication: async (data: any) => {
     return api.post<Application>('/applications', data);
+  },
+
+  uploadApplicationCv: async (formData: FormData) => {
+    return apiClient.post<any, ApiResponse<Application>>('/applications/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then((res) => res.data);
   },
 
   updateApplicationStage: async (id: string, stage: ApplicationStage) => {

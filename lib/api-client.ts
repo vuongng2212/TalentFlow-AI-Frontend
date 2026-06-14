@@ -34,6 +34,20 @@ export const apiClient: AxiosInstance = axios.create({
 // Module-level workspace ID store — set by AuthContext after login/switch.
 // Using a closure avoids circular imports with RoleContext.
 let _activeWorkspaceId: string | null = null;
+let _isRefreshing = false;
+let _failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  _failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+
+  _failedQueue = [];
+};
 
 export function setActiveWorkspaceId(id: string | null) {
   _activeWorkspaceId = id;
@@ -63,15 +77,53 @@ apiClient.interceptors.response.use(
     // Component chỉ cần quan tâm tới dữ liệu thực tế
     return response.data as any;
   },
-  (error: AxiosError<ApiResponse>) => {
+  async (error: AxiosError<ApiResponse>) => {
+    const originalRequest = error.config as any;
+
     // Xử lý lỗi chung toàn cục
     if (error.response) {
       const { status, data } = error.response;
 
+      if (status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/refresh')) {
+        if (_isRefreshing) {
+          return new Promise(function (resolve, reject) {
+            _failedQueue.push({ resolve, reject });
+          })
+            .then(() => {
+              return apiClient(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        }
+
+        originalRequest._retry = true;
+        _isRefreshing = true;
+
+        try {
+          // Import động để tránh circular dependency
+          const { authService } = await import('@/services/api/auth.service');
+          await authService.refreshToken();
+
+          _isRefreshing = false;
+          processQueue(null);
+
+          return apiClient(originalRequest);
+        } catch (refreshError) {
+          _isRefreshing = false;
+          processQueue(refreshError);
+
+          // Redirect về login nếu refresh thất bại
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+
+          return Promise.reject(refreshError);
+        }
+      }
+
       switch (status) {
         case 401:
-          // Xử lý logic khi hết hạn session (Logout user, redirect về login)
-          // window.location.href = '/login'; // Ví dụ
           console.error('Unauthorized: Please login again');
           break;
         case 403:

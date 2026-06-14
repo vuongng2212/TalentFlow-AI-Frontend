@@ -96,6 +96,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [fetchUser]);
 
+  // Proactive Token Refresh Logic
+  useEffect(() => {
+    if (!user) return;
+
+    // Refresh every 14 minutes (assuming 15m expiry)
+    const REFRESH_INTERVAL = 14 * 60 * 1000;
+    const intervalId = setInterval(async () => {
+      try {
+        console.log("Proactively refreshing session...");
+        await authService.refreshToken();
+      } catch (error) {
+        console.error("Proactive refresh failed:", error);
+      }
+    }, REFRESH_INTERVAL);
+
+    // Refresh when user returns to the tab
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "visible") {
+        try {
+          console.log("Tab focused, refreshing session...");
+          await authService.refreshToken();
+        } catch (error) {
+          console.error("Visibility refresh failed:", error);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [user]);
+
   useEffect(() => {
     if (!hasCheckedAuthRef.current || isLoading) return;
 

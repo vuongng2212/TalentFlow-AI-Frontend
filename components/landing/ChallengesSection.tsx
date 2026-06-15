@@ -1,5 +1,4 @@
 import React from 'react';
-import { SectionHeader } from './SectionHeader';
 import { challenges } from './data';
 
 const getIcon = (iconName: string) => {
@@ -7,7 +6,7 @@ const getIcon = (iconName: string) => {
     case 'time':
       return (
         <svg
-          className="w-10 h-10 text-primary mb-4"
+          className="w-5 h-5 text-indigo-600 dark:text-indigo-400"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -22,7 +21,7 @@ const getIcon = (iconName: string) => {
     case 'chat':
       return (
         <svg
-          className="w-10 h-10 text-primary mb-4"
+          className="w-5 h-5 text-indigo-600 dark:text-indigo-400"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -36,7 +35,7 @@ const getIcon = (iconName: string) => {
     case 'shield':
       return (
         <svg
-          className="w-10 h-10 text-primary mb-4"
+          className="w-5 h-5 text-indigo-600 dark:text-indigo-400"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -54,26 +53,50 @@ const getIcon = (iconName: string) => {
 
 export const ChallengesSection: React.FC = () => {
   return (
-    <section className="landing-section animate-fade-in-up bg-slate-50" id="challenges">
-      <div className="landing-container">
-        <SectionHeader
-          chip="The Problem"
-          title="Why recruiting breaks down at scale"
-          subtitle="Legacy ATS systems and manual operations hold your team back. TalentFlow removes the friction."
-          centered
-        />
-        <div className="grid-3 mt-8">
-          {challenges.map((challenge) => (
-            <div key={challenge.id} className="card pad border-slate-200 bg-white shadow-sm flex flex-col items-center text-center">
-              {getIcon(challenge.icon)}
-              <h3 className="text-lg font-bold text-slate-900 mt-2 mb-2">
-                {challenge.title}
-              </h3>
-              <p className="text-slate-600">
-                {challenge.description}
-              </p>
+    <section className="py-20 sm:py-28 bg-slate-50/50 dark:bg-zinc-950/20 border-b border-slate-100 dark:border-zinc-900" id="challenges">
+      <div className="mx-auto max-w-6xl px-6 sm:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 lg:items-start">
+
+          {/* Left Sticky Header Column */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-4">
+            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold tracking-wide text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
+              The Problem
+            </span>
+            <h2 className="font-jakarta text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-50 sm:text-4xl text-balance">
+              Why recruiting breaks down at scale
+            </h2>
+            <p className="text-slate-600 dark:text-zinc-400 max-w-[40ch] text-base leading-relaxed text-pretty">
+              Legacy ATS platforms and manual operations create friction at every step. TalentFlow automates triaging so your team can focus on relationships.
+            </p>
+          </div>
+
+          {/* Right Connected Timeline Column */}
+          <div className="lg:col-span-7 relative pl-4 sm:pl-6">
+            {/* Timeline Vertical Bar */}
+            <div className="absolute left-7 top-6 bottom-6 w-0.5 bg-slate-200/60 dark:bg-zinc-800/60" />
+
+            <div className="space-y-10">
+              {challenges.map((challenge) => (
+                <div key={challenge.id} className="relative flex items-start gap-5 group">
+                  {/* Timeline Circle with Icon */}
+                  <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900 group-hover:border-indigo-500 group-hover:shadow-indigo-500/10 transition-all duration-300">
+                    {getIcon(challenge.icon)}
+                  </div>
+
+                  {/* Challenge Text Content */}
+                  <div className="pt-1.5 space-y-1.5">
+                    <h3 className="font-jakarta text-lg font-bold text-slate-900 dark:text-zinc-50">
+                      {challenge.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-slate-600 dark:text-zinc-400 max-w-[58ch] text-pretty">
+                      {challenge.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
         </div>
       </div>
     </section>

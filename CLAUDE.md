@@ -20,6 +20,5 @@ Use `pnpm` as the primary package manager.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan at
-[specs/011-dashboard-enhancements/plan.md](specs/011-dashboard-enhancements/plan.md).
+shell commands, and other important information, read the current plan
 <!-- SPECKIT END -->

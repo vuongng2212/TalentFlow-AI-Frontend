@@ -36,17 +36,28 @@ export const FaqSection: React.FC = () => {
   ];
 
   return (
-    <section className="landing-section" data-faq>
-      <div className="landing-container grid-2">
-        <div>
-          <h2>FAQ</h2>
-          <p style={{ marginTop: "8px" }}>
-            Designed for recruiting teams that need speed, explainability,
-            and governance.
-          </p>
-        </div>
-        <div className="card pad">
-          <Accordion items={faqItems} />
+    <section className="py-20 sm:py-28 bg-slate-50/30 dark:bg-zinc-950/10 border-t border-slate-100 dark:border-zinc-900" id="faq" data-faq>
+      <div className="mx-auto max-w-6xl px-6 sm:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start">
+
+          {/* Left Column */}
+          <div className="lg:col-span-5 space-y-4">
+            <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold tracking-wide text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400">
+              Support
+            </span>
+            <h2 className="font-jakarta text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-50 sm:text-4xl">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed text-pretty max-w-[40ch]">
+              Designed for recruiting teams that need speed, explainability, and governance. Cannot find the answer you need? Feel free to contact our support team.
+            </p>
+          </div>
+
+          {/* Right Column */}
+          <div className="lg:col-span-7 rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-900/40">
+            <Accordion items={faqItems} />
+          </div>
+
         </div>
       </div>
     </section>

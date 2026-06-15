@@ -58,6 +58,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!activeWorkspace?.id) return;
+      setIsLoading(true);
+      minDur.start();
       try {
         const [overviewRes, topJobsRes, pipelineRes, trendsRes] = await Promise.all([
           analyticsService.getOverview(),
@@ -77,7 +80,7 @@ export default function DashboardPage() {
     };
 
     fetchData();
-  }, [minDur]);
+  }, [activeWorkspace?.id]); // Depend on workspace ID instead of minDur
 
   const totalCandidates = pipeline.reduce((sum, stage) => sum + stage.count, 0);
 
@@ -93,11 +96,11 @@ export default function DashboardPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          {activeWorkspace?.name ?? 'TalentFlow'} / <strong>Dashboard</strong>
+          {activeWorkspace?.name ?? 'TalentFlow'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Dashboard</strong>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button
-            className="chip cursor-pointer hover:bg-gray-100"
+            className="chip hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
             onClick={() => {
               setPipeline(pipeline.map(p => ({ ...p, count: 0 })));
               if (stats) {
@@ -107,7 +110,10 @@ export default function DashboardPage() {
           >
             Mock Zero Apps
           </button>
-          <span className="chip">System Online</span>
+          <span className="chip text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1" />
+            System Online
+          </span>
         </div>
       </header>
 

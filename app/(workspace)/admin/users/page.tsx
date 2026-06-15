@@ -123,7 +123,7 @@ export default function UserManagementPage() {
     <RoleGuard>
       <header className="topbar">
         <div className="crumb">
-          Admin / <strong>User Management</strong>
+          Admin <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>User Management</strong>
         </div>
         <button
           className="btn primary"

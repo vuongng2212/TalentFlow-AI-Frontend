@@ -84,7 +84,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     <>
       <header className="topbar">
         <div className="crumb">
-          Applications / <strong>{application.candidate.fullName}</strong>
+          Applications <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>{application.candidate.fullName}</strong>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button

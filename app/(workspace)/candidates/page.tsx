@@ -189,7 +189,7 @@ export default function ApplicationsPage() {
       <header className="topbar flex items-center justify-between">
         <div className="crumb flex items-center gap-2">
           <span>
-            {activeWorkspace?.name ?? 'Workspace'} / <strong>Applications Pipeline</strong>
+            {activeWorkspace?.name ?? 'Workspace'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Applications Pipeline</strong>
           </span>
           {isFetching && (
             <svg

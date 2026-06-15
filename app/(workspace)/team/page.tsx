@@ -66,7 +66,7 @@ export default function TeamPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          {activeWorkspace?.name ?? 'Workspace'} / <strong>Team Directory</strong>
+          {activeWorkspace?.name ?? 'Workspace'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Team Directory</strong>
         </div>
         {canManage && (
           <button

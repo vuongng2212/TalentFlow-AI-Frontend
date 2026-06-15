@@ -115,7 +115,10 @@ apiClient.interceptors.response.use(
 
           // Redirect về login nếu refresh thất bại
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const currentPath = window.location.pathname;
+            if (currentPath !== '/login' && currentPath !== '/signup') {
+              window.location.href = '/login';
+            }
           }
 
           return Promise.reject(refreshError);

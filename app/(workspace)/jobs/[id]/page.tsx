@@ -92,7 +92,7 @@ export default function JobDetailPage({ params }: PageProps) {
     <>
       <header className="topbar">
         <div className="crumb">
-          Jobs / <strong>{job.title}</strong>
+          Jobs <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>{job.title}</strong>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => openModal('edit-job', job)}>

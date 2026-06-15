@@ -71,6 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const fetchUser = useCallback(async () => {
+    if (isLoading && hasCheckedAuthRef.current) return;
+    setIsLoading(true);
     try {
       const response = await authService.getCurrentUser();
       const currentUser = response.user;
@@ -91,9 +93,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [loadWorkspaces, syncActiveWorkspace]);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      void fetchUser();
-    });
+    // Only fetch on mount or if explicitly requested (like after login)
+    if (!hasCheckedAuthRef.current) {
+      queueMicrotask(() => {
+        void fetchUser();
+      });
+    }
   }, [fetchUser]);
 
   // Proactive Token Refresh Logic
@@ -134,13 +139,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!hasCheckedAuthRef.current || isLoading) return;
 
+    // Skip protection logic on public routes
     const isPublicRoute =
       pathname === "/login" ||
       pathname === "/signup" ||
       pathname === "/" ||
       pathname.startsWith("/invite");
 
-    if (!user && !isPublicRoute) {
+    if (isPublicRoute) return;
+
+    if (!user) {
       router.replace("/login");
     }
   }, [isLoading, pathname, router, user]);

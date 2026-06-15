@@ -67,7 +67,7 @@ export default function InterviewsPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          TalentFlow / <strong>Interviews</strong>
+          TalentFlow <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Interviews</strong>
         </div>
         <button className="btn primary" onClick={() => setIsScheduleModalOpen(true)} style={{ cursor: 'pointer' }}>
           Schedule Interview

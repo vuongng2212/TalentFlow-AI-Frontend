@@ -76,7 +76,7 @@ export default function SettingsPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          {activeWorkspace?.name ?? 'Workspace'} / <strong>Settings</strong>
+          {activeWorkspace?.name ?? 'Workspace'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Settings</strong>
         </div>
         {canEdit && (
           <button

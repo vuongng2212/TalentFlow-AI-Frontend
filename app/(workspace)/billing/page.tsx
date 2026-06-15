@@ -23,7 +23,7 @@ export default function BillingPage() {
     <>
       <header className="topbar">
         <div className="crumb">
-          Workspace / <strong>Billing</strong>
+          Workspace <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Billing</strong>
         </div>
         <button className="btn primary" style={{ cursor: 'pointer' }} disabled={!!updatingPlan} onClick={() => setUpdatingPlan('update')}>
           {updatingPlan === 'update' ? 'Updating...' : 'Update plan'}

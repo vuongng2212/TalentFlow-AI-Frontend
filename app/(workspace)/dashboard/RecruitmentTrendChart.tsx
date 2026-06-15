@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendData } from '../../../types';
 
 interface RecruitmentTrendChartProps {
@@ -8,10 +8,12 @@ interface RecruitmentTrendChartProps {
 }
 
 export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendChartProps) {
+  const [hoveredPoint, setHoveredPoint] = useState<{x: number, y: number, date: string, count: number} | null>(null);
+
   if (!trends || trends.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[220px] bg-gray-50/50 rounded-lg border border-dashed border-gray-200">
-        <span className="text-gray-400 text-sm font-medium">No trend data available</span>
+      <div className="flex flex-col items-center justify-center h-[220px] bg-slate-50/50 dark:bg-zinc-800/50 rounded-xl border border-dashed border-slate-200 dark:border-zinc-700">
+        <span className="text-slate-400 dark:text-zinc-500 text-sm font-medium">No trend data available</span>
       </div>
     );
   }
@@ -78,18 +80,40 @@ export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendC
 
   return (
     <div className="w-full relative h-[220px]">
+      {/* Custom HTML Tooltip */}
+      {hoveredPoint && (
+        <div 
+          className="absolute z-10 pointer-events-none transition-all duration-200 ease-out"
+          style={{ 
+            left: `${(hoveredPoint.x / width) * 100}%`, 
+            top: `${(hoveredPoint.y / height) * 100}%`,
+            transform: 'translate(-50%, -120%)'
+          }}
+        >
+          <div className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs py-1.5 px-3 rounded-lg shadow-xl border border-slate-800 dark:border-white whitespace-nowrap flex flex-col items-center">
+            <span className="font-bold tabular-data">{hoveredPoint.count} apps</span>
+            <span className="text-[10px] text-slate-300 dark:text-slate-600">{hoveredPoint.date}</span>
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 border-[3px] border-transparent border-t-slate-900 dark:border-t-white" />
+          </div>
+        </div>
+      )}
+
       <svg
         viewBox={`0 0 ${width} ${height}`}
         width="100%"
         height="100%"
         className="overflow-visible"
         aria-label="Recruitment Activity Trend Chart"
+        onMouseLeave={() => setHoveredPoint(null)}
       >
         <defs>
           <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.00" />
+            <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.10" />
+            <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.0" />
           </linearGradient>
+          <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="rgba(79,70,229,0.25)" />
+          </filter>
         </defs>
 
         {/* Grid lines */}
@@ -102,7 +126,7 @@ export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendC
                 y1={y}
                 x2={width - paddingRight}
                 y2={y}
-                className="stroke-gray-100"
+                className="stroke-slate-200 dark:stroke-zinc-800"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -110,7 +134,7 @@ export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendC
                 x={paddingLeft - 8}
                 y={y + 4}
                 textAnchor="end"
-                className="fill-gray-400 text-[10px] font-medium"
+                className="fill-slate-400 dark:fill-zinc-500 text-[10px] font-medium tabular-data"
               >
                 {tick}
               </text>
@@ -133,33 +157,42 @@ export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendC
             d={linePath}
             fill="none"
             className="stroke-primary transition-all duration-300"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
+            filter="url(#drop-shadow)"
           />
         )}
 
         {/* Interactive Dots & Tooltips */}
-        {points.map((p, i) => (
-          <g key={i} className="group">
-            {/* Outer hover ring */}
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r="7"
-              className="fill-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-150 cursor-pointer"
-            />
-            {/* Inner dot */}
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r="3.5"
-              className="fill-primary stroke-white stroke-[1.5px] cursor-pointer"
+        {points.map((p, i) => {
+          const isHovered = hoveredPoint?.x === p.x;
+          return (
+            <g 
+              key={i} 
+              className="cursor-pointer"
+              onMouseEnter={() => setHoveredPoint({x: p.x, y: p.y, date: p.date, count: p.applications})}
             >
-              <title>{`${p.date}: ${p.applications} application(s)`}</title>
-            </circle>
-          </g>
-        ))}
+              {/* Invisible larger hit area for easier hovering */}
+              <circle cx={p.x} cy={p.y} r="16" fill="transparent" />
+              
+              {/* Outer hover ring */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r="7"
+                className={`fill-primary/20 transition-opacity duration-150 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+              />
+              {/* Inner dot */}
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={isHovered ? "5" : "3.5"}
+                className="fill-white dark:fill-zinc-900 stroke-primary stroke-[2.5px] transition-all duration-200 ease-out"
+              />
+            </g>
+          );
+        })}
 
         {/* X-axis labels */}
         {xTicksIndices.map((idx) => {
@@ -169,9 +202,9 @@ export default function RecruitmentTrendChart({ trends = [] }: RecruitmentTrendC
             <text
               key={idx}
               x={p.x}
-              y={height - 10}
+              y={height - 5}
               textAnchor="middle"
-              className="fill-gray-400 text-[10px] font-medium"
+              className="fill-slate-400 dark:fill-zinc-500 text-[10px] font-medium tabular-data"
             >
               {p.date}
             </text>

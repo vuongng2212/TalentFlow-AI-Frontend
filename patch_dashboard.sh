@@ -1,3 +1,6 @@
+#!/bin/bash
+
+cat << 'INNER_EOF' > app/\(workspace\)/dashboard/page.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -277,3 +280,4 @@ export default function DashboardPage() {
     </>
   );
 }
+INNER_EOF

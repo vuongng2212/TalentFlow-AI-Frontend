@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Modal from '../../ui/dialog/Modal';
 import { workspaceService } from '@/services/api/workspace.service';
 import { Workspace, WorkspaceMemberRole } from '@/types';
 
@@ -60,82 +61,39 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
     }
   };
 
-  return (
-    <div
-      className="modal-backdrop"
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
-        backdropFilter: 'blur(4px)', zIndex: 100,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '16px',
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="card"
-        style={{
-          width: 'min(460px, 100%)',
-          padding: '24px',
-          display: 'grid',
-          gap: '20px',
-          animation: 'fade-in-up 0.2s cubic-bezier(0.16,1,0.3,1) forwards',
-        }}
-      >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <h2 style={{ fontSize: 18 }}>
-              {workspace.isBusiness ? 'Invite Member' : 'Add Member'}
-            </h2>
-            <p style={{ marginTop: 4, fontSize: 13 }}>
-              {workspace.isBusiness
-                ? `Send an email invitation to join "${workspace.name}"`
-                : `Add an existing user to "${workspace.name}"`}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="btn ghost"
-            style={{ minHeight: 32, padding: '0 8px', color: 'var(--text-3)' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
+  const title = workspace.isBusiness ? 'Invite Member' : 'Add Member';
 
-        {/* Plan badge */}
+  return (
+    <Modal isOpen={true} onClose={onClose} title={title}>
+      <div className="flex flex-col gap-4">
+        {/* Description message */}
+        <p className="text-sm text-slate-500 dark:text-zinc-400">
+          {workspace.isBusiness
+            ? `Send an email invitation to join "${workspace.name}"`
+            : `Add an existing user to "${workspace.name}"`}
+        </p>
+
+        {/* Plan badge banner */}
         {workspace.isBusiness ? (
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 12px', background: 'var(--ai-soft)',
-              borderRadius: 8, border: '1px solid var(--ai-glow)',
-              fontSize: 13, color: 'var(--green-text)', fontWeight: 600,
-            }}
-          >
-            <span>✦</span>
+          <div className="flex items-center gap-2.5 p-3.5 bg-emerald-500/10 dark:bg-emerald-950/10 border border-emerald-500/20 dark:border-emerald-500/20 rounded-xl text-xs font-semibold text-emerald-800 dark:text-emerald-400">
+            <span className="text-base">✦</span>
             <span>Business workspace — invitation email will be sent automatically</span>
           </div>
         ) : (
-          <div
-            style={{
-              padding: '10px 12px', background: 'var(--surface-2)',
-              borderRadius: 8, border: '1px solid var(--border)',
-              fontSize: 12, color: 'var(--text-3)',
-            }}
-          >
+          <div className="p-3.5 bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-xl text-xs text-slate-500 dark:text-zinc-400">
             💡 Personal/Plus workspace: the user must already have a TalentFlow account.
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 16 }}>
-          {/* Email */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email input field */}
           <div className="field">
-            <label>Email address</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">
+              Email address
+            </label>
             <input
               type="email"
-              className="input"
+              className="input w-full"
               placeholder="colleague@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -145,20 +103,20 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
             />
           </div>
 
-          {/* Role selector */}
+          {/* Role selection section */}
           <div className="field">
-            <label>Workspace role</label>
-            <div style={{ display: 'grid', gap: 6 }}>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">
+              Workspace role
+            </label>
+            <div className="grid grid-cols-1 gap-2.5">
               {ROLES.map((r) => (
                 <label
                   key={r.value}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
-                    border: `1px solid ${role === r.value ? 'var(--primary)' : 'var(--border)'}`,
-                    background: role === r.value ? 'var(--primary-soft)' : 'var(--surface)',
-                    transition: 'all 0.12s',
-                  }}
+                  className={`flex items-center gap-3.5 p-3.5 rounded-xl cursor-pointer border transition-all duration-200 ${
+                    role === r.value
+                      ? 'border-indigo-500 bg-indigo-50/20 dark:bg-indigo-950/10'
+                      : 'border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-900/10 hover:border-slate-300 dark:hover:border-zinc-700/80'
+                  }`}
                 >
                   <input
                     type="radio"
@@ -166,53 +124,58 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
                     value={r.value}
                     checked={role === r.value}
                     onChange={() => setRole(r.value)}
-                    style={{ display: 'none' }}
+                    className="sr-only"
                   />
                   <div
-                    style={{
-                      width: 16, height: 16, borderRadius: '50%',
-                      border: `2px solid ${role === r.value ? 'var(--primary)' : 'var(--border)'}`,
-                      display: 'grid', placeItems: 'center',
-                    }}
+                    className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
+                      role === r.value
+                        ? 'border-indigo-600 dark:border-indigo-400'
+                        : 'border-slate-350 dark:border-zinc-700'
+                    }`}
                   >
                     {role === r.value && (
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)' }} />
+                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />
                     )}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: role === r.value ? 'var(--primary)' : 'var(--text-1)' }}>
+                    <div
+                      className={`font-bold text-sm leading-tight transition-colors ${
+                        role === r.value
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-slate-800 dark:text-zinc-200'
+                      }`}
+                    >
                       {r.label}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.description}</div>
+                    <div className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5 leading-normal">
+                      {r.description}
+                    </div>
                   </div>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Feedback */}
+          {/* Feedback alerts */}
           {error && (
-            <div style={{
-              padding: '10px 12px', background: 'var(--red-soft)',
-              border: '1px solid rgba(220,38,38,.2)', borderRadius: 8,
-              color: 'var(--red-text)', fontSize: 13, fontWeight: 600,
-            }}>
+            <div className="p-3.5 bg-red-50 dark:bg-red-950/25 border border-red-100 dark:border-red-900/35 text-red-700 dark:text-red-400 rounded-xl text-sm font-semibold">
               {error}
             </div>
           )}
           {success && (
-            <div style={{
-              padding: '10px 12px', background: 'var(--green-soft)',
-              border: '1px solid rgba(4,120,87,.2)', borderRadius: 8,
-              color: 'var(--green-text)', fontSize: 13, fontWeight: 600,
-            }}>
+            <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-100 dark:border-emerald-900/35 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-semibold">
               ✓ {success}
             </div>
           )}
 
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button type="button" className="btn secondary" onClick={onClose} disabled={loading}>
+          {/* Bottom aligned action CTA panel */}
+          <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-zinc-800/60 mt-6 bg-slate-50/50 dark:bg-zinc-900/10 -mx-6 -mb-6 p-6">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </button>
             <button
@@ -227,6 +190,6 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }

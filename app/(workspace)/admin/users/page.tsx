@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import RoleGuard from '../../../../components/features/workspace/RoleGuard';
 import Badge from '../../../../components/ui/badge';
+import Modal from '../../../../components/ui/dialog/Modal';
 import { userInvitationSchema } from '../../../../services/schemas';
 import { useUIStore } from '../../../../lib/store/useUIStore';
 
@@ -219,58 +220,51 @@ export default function UserManagementPage() {
         </div>
       </section>
 
-      {showInviteModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs"
-          onClick={() => setShowInviteModal(false)}
-        >
-          <div
-            className="w-full max-w-md bg-white dark:bg-zinc-900 border border-gray-200 rounded-xl p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-lg font-bold mb-4">Invite Workspace User</h2>
-            <form onSubmit={handleInviteUser} className="space-y-4" noValidate>
-              <div className="field">
-                <label>Work Email</label>
-                <input
-                  type="email"
-                  className={`input ${inviteError ? 'error' : ''}`}
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  required
-                />
-                {inviteError && <span className="helper">{inviteError}</span>}
-              </div>
-              <div className="field">
-                <label>Workspace Role</label>
-                <select
-                  className="select animate-none"
-                  value={inviteRole}
-                  onChange={(e) => setInviteRole(e.target.value as 'Recruiter' | 'Admin')}
-                >
-                  <option value="Recruiter">Recruiter</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-              {inviteSuccess && <p className="text-green-600 font-bold text-sm text-center">{inviteSuccess}</p>}
-              <div className="flex gap-4 pt-2">
-                <button className="btn primary flex-1" style={{ cursor: 'pointer' }} disabled={inviteLoading}>
-                  {inviteLoading ? 'Sending...' : 'Send Invitation'}
-                </button>
-                <button
-                  type="button"
-                  className="btn secondary"
-                  onClick={() => setShowInviteModal(false)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite Workspace User">
+        <form onSubmit={handleInviteUser} className="space-y-4" noValidate>
+          <div className="field">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Work Email</label>
+            <input
+              type="email"
+              className={`input ${inviteError ? 'error' : ''}`}
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="name@company.com"
+              required
+            />
+            {inviteError && <span className="helper">{inviteError}</span>}
           </div>
-        </div>
-      )}
+          <div className="field">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Workspace Role</label>
+            <select
+              className="select animate-none"
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as 'Recruiter' | 'Admin')}
+            >
+              <option value="Recruiter">Recruiter</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          {inviteSuccess && <p className="text-green-600 font-bold text-sm text-center">{inviteSuccess}</p>}
+          <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-zinc-800/60 mt-6 bg-slate-50/50 dark:bg-zinc-900/10 -mx-6 -mb-6 p-6">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => setShowInviteModal(false)}
+              disabled={inviteLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn primary"
+              disabled={inviteLoading}
+            >
+              {inviteLoading ? 'Sending...' : 'Send Invitation'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </RoleGuard>
   );
 }

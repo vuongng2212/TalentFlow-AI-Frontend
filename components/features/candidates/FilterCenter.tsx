@@ -58,16 +58,16 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
     propOnMinScoreChange || ((val: number) => setFilters({ minScore: val }));
 
   return (
-    <div className="job-toolbar">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 relative z-10">
       <input
-        className="input"
+        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 sm:col-span-2 text-sm"
         type="text"
         placeholder="Search candidate, skill, role"
         value={search}
         onChange={(e) => handleSearchChange(e.target.value)}
       />
       <select
-        className="select animate-none"
+        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-sm"
         value={stage}
         onChange={(e) => handleStageChange(e.target.value)}
       >
@@ -80,24 +80,14 @@ export const FilterCenter: React.FC<FilterCenterProps> = ({
         <option value="rejected">Rejected</option>
       </select>
       <select
-        className="select animate-none"
+        className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-sm"
         value={minScore}
         onChange={(e) => handleMinScoreChange(Number(e.target.value))}
       >
-        <option value="0">Any score</option>
+        <option value="0">Any AI Score</option>
         <option value="80">AI Score: 80+</option>
         <option value="60">AI Score: 60+</option>
       </select>
-      <button
-        className="btn secondary"
-        onClick={() => {
-          handleSearchChange("");
-          handleStageChange("all");
-          handleMinScoreChange(0);
-        }}
-      >
-        Clear
-      </button>
     </div>
   );
 };

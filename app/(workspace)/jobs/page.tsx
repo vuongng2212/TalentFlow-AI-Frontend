@@ -37,6 +37,9 @@ export default function JobsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Custom confirmation dialog state
+  const [confirmBulkAction, setConfirmBulkAction] = useState<string | null>(null);
+
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return "Not specified";
     if (min && !max) return `$${min.toLocaleString()}+`;
@@ -72,24 +75,13 @@ export default function JobsPage() {
         if (!ignore) {
           const list = [...response.data];
 
-          // Sort locally if needed, though backend should handle this ideally
+          // Sort locally
           if (sortBy === "newest") {
-            list.sort(
-              (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime(),
-            );
+            list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           } else if (sortBy === "oldest") {
-            list.sort(
-              (a, b) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime(),
-            );
+            list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
           } else if (sortBy === "apps") {
-            list.sort(
-              (a, b) =>
-                (b._count?.applications ?? 0) - (a._count?.applications ?? 0),
-            );
+            list.sort((a, b) => (b._count?.applications ?? 0) - (a._count?.applications ?? 0));
           }
 
           setJobs(list);
@@ -143,7 +135,7 @@ export default function JobsPage() {
   const handleRemoveFilter = (id: string) => {
     if (id === "search") setSearch("");
     if (id === "status") setStatus("all");
-    setPage(1); // Reset page on filter change
+    setPage(1);
   };
 
   const handleClearFilters = () => {
@@ -170,66 +162,55 @@ export default function JobsPage() {
 
   return (
     <>
-      <header className="topbar flex items-center justify-between">
-        <div className="crumb flex items-center gap-2">
+      <header className="topbar bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
+        <div className="crumb text-slate-500 dark:text-zinc-400">
           <span>
-            {activeWorkspace?.name ?? 'Workspace'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Jobs</strong>
+            {activeWorkspace?.name ?? 'Workspace'} <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">Jobs</strong>
           </span>
           {isFetching && (
             <svg
-              className="animate-spin h-4 w-4 text-primary"
+              className="animate-spin h-4 w-4 text-primary ml-2 inline"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
           )}
         </div>
-        <button className="btn primary" onClick={() => openModal("create-job")}>
+        <button className="btn primary text-xs h-8 px-3 cursor-pointer" onClick={() => openModal("create-job")}>
           Create Job
         </button>
       </header>
 
-      <section className="content">
-        <div className="page-head">
+      <section className="content bg-noise">
+        <div className="page-head mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Jobs</h1>
-            <p>
-              Manage active requisitions, stage velocity, and applicant volume.
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-50">Jobs</h1>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
+              Manage active requisitions, applicant volume, and pipeline stages.
             </p>
           </div>
-          <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+          <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-lg border border-slate-200/60 dark:border-zinc-700/60">
             <button
               onClick={() => setViewMode("table")}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "table" ? "bg-surface shadow-sm text-primary" : "text-text-3 hover:text-text-1"}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${viewMode === "table" ? "bg-white dark:bg-zinc-900 shadow-sm text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100"}`}
             >
-              Table
+              Table View
             </button>
             <button
               onClick={() => setViewMode("grid")}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "grid" ? "bg-surface shadow-sm text-primary" : "text-text-3 hover:text-text-1"}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${viewMode === "grid" ? "bg-white dark:bg-zinc-900 shadow-sm text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100"}`}
             >
-              Grid
+              Grid View
             </button>
           </div>
         </div>
 
-        <div className="job-toolbar">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 relative z-10">
           <input
-            className="input"
+            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 sm:col-span-2 text-sm"
             type="text"
             placeholder="Search jobs, departments, locations"
             value={search}
@@ -239,7 +220,7 @@ export default function JobsPage() {
             }}
           />
           <select
-            className="select animate-none"
+            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-sm"
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -252,7 +233,7 @@ export default function JobsPage() {
             <option value="closed">Closed</option>
           </select>
           <select
-            className="select animate-none"
+            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-sm"
             value={sortBy}
             onChange={(e) => {
               setSortBy(e.target.value);
@@ -263,13 +244,6 @@ export default function JobsPage() {
             <option value="apps">Most applications</option>
             <option value="oldest">Oldest first</option>
           </select>
-          <button
-            className="btn secondary"
-            onClick={handleClearFilters}
-            style={{ cursor: "pointer" }}
-          >
-            Clear
-          </button>
         </div>
 
         <FilterChips
@@ -286,57 +260,49 @@ export default function JobsPage() {
         ) : jobs.length > 0 ? (
           <>
             {viewMode === "grid" ? (
-              <div className="grid-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                 {jobs.map((job) => (
                   <article
                     key={job.id}
-                    className="card job-card interactive"
+                    className="card interactive p-6 bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none cursor-pointer flex flex-col justify-between"
                     onClick={() => router.push(`/jobs/${job.id}`)}
                   >
-                    <div className="page-head" style={{ margin: 0 }}>
-                      <h3 className="font-bold text-lg">{job.title}</h3>
-                      <Badge
-                        variant={
-                          job.status.toLowerCase() as BadgeProps["variant"]
-                        }
-                      >
-                        {job.status}
-                      </Badge>
+                    <div>
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="font-jakarta text-lg font-bold text-slate-900 dark:text-zinc-50 truncate max-w-[70%]" title={job.title}>
+                          {job.title}
+                        </h3>
+                        <Badge variant={job.status.toLowerCase() as BadgeProps["variant"]}>
+                          {job.status}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <span className="chip text-[10px] font-medium py-0.5 px-2 bg-slate-50 dark:bg-zinc-800">{job.location}</span>
+                        <span className="chip text-[10px] font-medium py-0.5 px-2 bg-slate-50 dark:bg-zinc-800">
+                          {formatEmploymentType(job.employmentType)}
+                        </span>
+                        <span className="chip text-[10px] font-medium py-0.5 px-2 bg-slate-50 dark:bg-zinc-800 tabular-data">
+                          {formatSalary(job.salaryMin, job.salaryMax)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-zinc-400 mt-2 leading-relaxed">
+                        {(job._count?.applications || 0) > 0
+                          ? `${job._count?.applications} applicant(s) · owned by ${job.createdBy?.fullName || "System"}`
+                          : "Draft waiting on compensation approval and interview panel."}
+                      </p>
                     </div>
-                    <div className="job-meta">
-                      <span className="chip">{job.location}</span>
-                      <span className="chip">
-                        {formatEmploymentType(job.employmentType)}
-                      </span>
-                      <span className="chip">
-                        {formatSalary(job.salaryMin, job.salaryMax)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-text-3">
-                      {(job._count?.applications || 0) > 0
-                        ? `${job._count?.applications} applicants · owned by ${job.createdBy?.fullName || "System"}`
-                        : "Draft waiting on compensation approval and interview panel."}
-                    </p>
-                    <div className="pipeline-dots">
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <span
-                          key={idx}
-                          className={idx < 2 ? "filled" : ""} // Mocking filled pipelines for UI sake
-                        />
-                      ))}
-                    </div>
-                    <div className="page-head mt-4" style={{ margin: 0 }}>
-                      <Link
-                        className="text-primary font-extrabold hover:underline"
-                        href={`/jobs/${job.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+
+                    <div className="mt-6 border-t border-slate-100 dark:border-zinc-800 pt-4 flex justify-between items-center">
+                      <span className="text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:underline">
                         View Details
-                      </Link>
+                      </span>
                       <button
-                        className="btn ghost h-8 w-8 p-0"
+                        className="btn ghost h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer text-slate-500"
                         aria-label="More job actions"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/jobs/${job.id}`);
+                        }}
                       >
                         ⋯
                       </button>
@@ -345,102 +311,99 @@ export default function JobsPage() {
                 ))}
               </div>
             ) : (
-              <div className="card table-wrap overflow-hidden">
-                <table className="density-tight">
-                  <thead>
-                    <tr className="bg-surface-2/50 border-b border-border">
-                      <th className="pl-4 w-10">
-                        <input
-                          type="checkbox"
-                          className="rounded border-border text-primary focus:ring-primary"
-                          checked={
-                            selectedIds.size === jobs.length && jobs.length > 0
-                          }
-                          onChange={toggleSelectAll}
-                        />
-                      </th>
-                      <th>Job Title</th>
-                      <th>Status</th>
-                      <th>Department</th>
-                      <th>Location</th>
-                      <th>Salary Range</th>
-                      <th>Apps</th>
-                      <th className="pr-4 text-right">Created</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {jobs.map((job) => (
-                      <tr
-                        key={job.id}
-                        className={`group cursor-pointer ${selectedIds.has(job.id) ? "bg-primary-soft/30" : ""}`}
-                        onClick={() =>
-                          router.push(`/jobs/${job.id}`)
-                        }
-                      >
-                        <td
-                          className="pl-4"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+              <div className="card bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden relative z-10">
+                <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-zinc-800">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-zinc-800/50">
+                        <th className="pl-4 w-10 py-3">
                           <input
                             type="checkbox"
-                            className="rounded border-border text-primary focus:ring-primary"
-                            checked={selectedIds.has(job.id)}
-                            onChange={() => toggleSelect(job.id)}
+                            className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                            checked={selectedIds.size === jobs.length && jobs.length > 0}
+                            onChange={toggleSelectAll}
                           />
-                        </td>
-                        <td className="font-bold text-text-1 group-hover:text-primary transition-colors">
-                          {job.title}
-                        </td>
-                        <td>
-                          <Badge
-                            variant={
-                              job.status.toLowerCase() as BadgeProps["variant"]
-                            }
-                          >
-                            {job.status}
-                          </Badge>
-                        </td>
-                        <td>{job.department}</td>
-                        <td>{job.location}</td>
-                        <td className="text-text-3">
-                          {formatSalary(job.salaryMin, job.salaryMax)}
-                        </td>
-                        <td>
-                          <span className="font-bold text-text-2">
-                            {job._count?.applications || 0}
-                          </span>
-                        </td>
-                        <td className="pr-4 text-right text-text-4 font-medium">
-                          {new Date(job.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </td>
+                        </th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Job Title</th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Status</th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Department</th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Location</th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Salary Range</th>
+                        <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 text-center">Apps</th>
+                        <th className="pr-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 text-right">Created</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                      {jobs.map((job) => (
+                        <tr
+                          key={job.id}
+                          className={`group cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors duration-150 ${selectedIds.has(job.id) ? "bg-indigo-50/20 dark:bg-indigo-950/10" : ""}`}
+                          onClick={() => router.push(`/jobs/${job.id}`)}
+                        >
+                          <td
+                            className="pl-4 py-3"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="checkbox"
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                              checked={selectedIds.has(job.id)}
+                              onChange={() => toggleSelect(job.id)}
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-bold text-slate-900 dark:text-zinc-100 group-hover:text-primary transition-colors">
+                            {job.title}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Badge
+                              variant={job.status.toLowerCase() as BadgeProps["variant"]}
+                            >
+                              {job.status}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-600 dark:text-zinc-400">{job.department}</td>
+                          <td className="px-4 py-3 text-sm text-slate-600 dark:text-zinc-400">{job.location}</td>
+                          <td className="px-4 py-3 text-sm text-slate-500 dark:text-zinc-400 tabular-data">
+                            {formatSalary(job.salaryMin, job.salaryMax)}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span className="inline-flex tabular-data items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-300">
+                              {job._count?.applications || 0}
+                            </span>
+                          </td>
+                          <td className="pr-4 py-3 text-right text-xs text-slate-400 dark:text-zinc-500 font-medium tabular-data">
+                            {new Date(job.createdAt).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric"
+                            })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex justify-between items-center mt-6">
-                <div className="text-sm text-gray-500">
-                  Page {page} of {totalPages}
+                <div className="text-xs text-slate-500 dark:text-zinc-400">
+                  Page <span className="font-bold tabular-data">{page}</span> of <span className="font-bold tabular-data">{totalPages}</span>
                 </div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn secondary text-xs h-8 px-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Previous
                   </button>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn secondary text-xs h-8 px-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     Next
                   </button>
@@ -451,7 +414,7 @@ export default function JobsPage() {
         ) : (
           <EmptyState
             title="No roles match these filters"
-            description="Clear the search or create a new requisition with a calibrated AI score rubric."
+            description="Clear the search or create a new job requisition."
             action={{ label: "Clear filters", onClick: handleClearFilters }}
           />
         )}
@@ -463,18 +426,12 @@ export default function JobsPage() {
         actions={[
           {
             label: "Close Positions",
-            onClick: () => {
-              alert(`Closing ${selectedIds.size} jobs`);
-              setSelectedIds(new Set());
-            },
+            onClick: () => setConfirmBulkAction('close'),
             variant: "danger",
           },
           {
             label: "Export Data",
-            onClick: () => {
-              alert(`Exporting ${selectedIds.size} jobs`);
-              setSelectedIds(new Set());
-            },
+            onClick: () => setConfirmBulkAction('export'),
             variant: "secondary",
           },
         ]}
@@ -482,13 +439,45 @@ export default function JobsPage() {
 
       <CreateJobModal
         onJobCreated={() => {
-          // Reload logic
           setPage(1);
           setSearch("");
           setStatus("all");
-          // the useEffect will trigger loadAndSort automatically
         }}
       />
+
+      {/* Bulk Action Confirmation Dialog */}
+      {confirmBulkAction && (
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl max-w-md w-full flex flex-col gap-4 animate-fade-in-up">
+            <h3 className="font-jakarta text-lg font-bold text-slate-900 dark:text-zinc-50">
+              {confirmBulkAction === 'close' ? 'Close Positions' : 'Export Job Data'}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+              {confirmBulkAction === 'close'
+                ? `Are you sure you want to close the ${selectedIds.size} selected positions? This will mark all candidates as closed-archive.`
+                : `Export metadata and applicant count for the ${selectedIds.size} selected jobs? This will download a CSV report.`}
+            </p>
+            <div className="flex gap-3 justify-end mt-2">
+              <button
+                className="btn secondary text-xs h-9 cursor-pointer"
+                onClick={() => setConfirmBulkAction(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className={`btn text-xs h-9 cursor-pointer ${confirmBulkAction === 'close' ? 'danger' : 'primary'}`}
+                onClick={() => {
+                  alert(confirmBulkAction === 'close' ? `Closed ${selectedIds.size} jobs` : `Exported data for ${selectedIds.size} jobs`);
+                  setSelectedIds(new Set());
+                  setConfirmBulkAction(null);
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

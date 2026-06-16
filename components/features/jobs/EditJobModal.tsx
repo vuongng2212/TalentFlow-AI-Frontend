@@ -92,14 +92,14 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
   return (
     <Modal isOpen={showModal} onClose={handleClose} title="Edit Requisition">
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30 rounded-lg text-sm font-semibold">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Status *</label>
             <select
               name="status"
               value={formData.status}
@@ -114,7 +114,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Job Title *</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Job Title *</label>
           <input
             type="text"
             name="title"
@@ -127,7 +127,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Department *</label>
             <input
               type="text"
               name="department"
@@ -138,7 +138,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Location *</label>
             <input
               type="text"
               name="location"
@@ -152,7 +152,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
         <div className="grid grid-cols-2 gap-4">
            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Type *</label>
             <select
               name="employmentType"
               value={formData.employmentType}
@@ -169,29 +169,29 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Min Salary (USD)</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Min Salary (USD)</label>
             <input
               type="number"
               name="salaryMin"
               value={formData.salaryMin}
               onChange={handleChange}
-              className="input w-full"
+              className="input w-full tabular-nums font-mono"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Max Salary (USD)</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Max Salary (USD)</label>
             <input
               type="number"
               name="salaryMax"
               value={formData.salaryMax}
               onChange={handleChange}
-              className="input w-full"
+              className="input w-full tabular-nums font-mono"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Description</label>
           <textarea
             name="description"
             value={formData.description}
@@ -201,7 +201,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Requirements (one per line)</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Requirements (one per line)</label>
           <textarea
             name="requirements"
             value={formData.requirements}
@@ -210,7 +210,7 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-zinc-800/60 mt-6 bg-slate-50/50 dark:bg-zinc-900/10 -mx-6 -mb-6 p-6">
           <button
             type="button"
             onClick={handleClose}

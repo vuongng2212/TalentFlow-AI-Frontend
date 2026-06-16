@@ -8,7 +8,6 @@ import { Job, Application } from '../../../../types';
 import Badge from '../../../../components/ui/badge';
 import LoadingSkeleton from '../../../../components/ui/LoadingSkeleton';
 import { useUIStore } from '../../../../lib/store/useUIStore';
-import { useMinDuration } from '../../../../hooks/useMinDuration';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,9 +24,9 @@ export default function JobDetailPage({ params }: PageProps) {
   const [stageFilter, setStageFilter] = useState('all');
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [closingJob, setClosingJob] = useState(false);
   const { showLoading, hideLoading } = useUIStore();
-  const minDur = useMinDuration();
   const openModal = useModalStore((state) => state.openModal);
 
   useEffect(() => {
@@ -43,10 +42,9 @@ export default function JobDetailPage({ params }: PageProps) {
         const fetchedJob = await jobService.getJobById(unwrappedParams!.id);
         setJob(fetchedJob);
 
-        // Fetch applications for this specific job
         const appsRes = await applicationService.getApplications({
             jobId: unwrappedParams!.id,
-            limit: 100 // Load max for now since we don't have pagination UI in the applicants tab yet
+            limit: 100
         });
         setApplications(appsRes.data);
 
@@ -61,13 +59,16 @@ export default function JobDetailPage({ params }: PageProps) {
 
   if (isLoading || !job) {
     return (
-      <div className="flex flex-1 items-center justify-center p-12 text-gray-500">
-        <LoadingSkeleton type="card" count={1} />
+      <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
+        <div className="h-32 rounded-2xl bg-slate-100 dark:bg-zinc-800 animate-pulse mb-8" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 h-96 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 animate-pulse" />
+          <div className="h-96 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 animate-pulse" />
+        </div>
       </div>
     );
   }
 
-  // Filter applicants
   const filteredApplications = applications.filter((app) => {
     if (stageFilter !== 'all' && app.stage !== stageFilter.toUpperCase()) return false;
     if (search.trim()) {
@@ -88,68 +89,73 @@ export default function JobDetailPage({ params }: PageProps) {
     return type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
   };
 
+  const handleCloseJob = async () => {
+    if (!job) return;
+    showLoading('Closing job...');
+    setClosingJob(true);
+    try {
+      await jobService.updateJob(job.id, { status: 'CLOSED' });
+      const fetchedJob = await jobService.getJobById(job.id);
+      setJob(fetchedJob);
+      setConfirmCloseOpen(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      hideLoading();
+      setClosingJob(false);
+    }
+  };
+
   return (
     <>
-      <header className="topbar">
-        <div className="crumb">
-          Jobs <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>{job.title}</strong>
+      <header className="topbar bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
+        <div className="crumb text-slate-500 dark:text-zinc-400">
+          Jobs <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">{job.title}</strong>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn secondary" style={{ cursor: 'pointer' }} onClick={() => openModal('edit-job', job)}>
-            Edit
+        <div className="flex gap-2">
+          <button className="btn secondary text-xs h-8 px-3 cursor-pointer" onClick={() => openModal('edit-job', job)}>
+            Edit Job
           </button>
-          <button className="btn danger" style={{ cursor: 'pointer' }} disabled={closingJob} onClick={async () => {
-             if (window.confirm('Are you sure you want to close this job?')) {
-               showLoading('Closing job...');
-               setClosingJob(true);
-               try {
-                 await jobService.updateJob(job.id, { status: 'CLOSED' });
-                 const fetchedJob = await jobService.getJobById(job.id);
-                 setJob(fetchedJob);
-               } finally {
-                 hideLoading();
-                 setClosingJob(false);
-               }
-             }
-          }}>
-            {closingJob ? 'Closing...' : 'Close Job'}
+          <button
+            className="btn danger text-xs h-8 px-3 cursor-pointer"
+            disabled={closingJob || job.status === 'CLOSED'}
+            onClick={() => setConfirmCloseOpen(true)}
+          >
+            {job.status === 'CLOSED' ? 'Closed' : 'Close Position'}
           </button>
         </div>
       </header>
 
-      <section className="content detail-layout">
-        <div>
-          <div className="page-head">
+      <section className="content grid grid-cols-1 lg:grid-cols-3 gap-8 bg-noise relative z-10">
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <div className="page-head mb-2">
             <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 flex items-center gap-3">
                 {job.title} <Badge variant={job.status.toLowerCase() as any}>{job.status}</Badge>
               </h1>
-              <p className="text-gray-500 mt-1">
-                {job.location} · {job.department} · {job._count?.applications || 0} applicants
+              <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1.5">
+                {job.location} · {job.department} · <span className="tabular-data font-bold">{job._count?.applications || 0}</span> applicants
               </p>
             </div>
           </div>
 
-          <div className="card pad">
-            <div className="tabs">
+          <div className="card bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none p-6">
+            <div className="tabs border-b border-slate-100 dark:border-zinc-800 pb-px mb-6 flex gap-4">
               <button
-                className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+                className={`tab pb-3 text-sm font-bold border-b-2 cursor-pointer transition-all ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
                 onClick={() => setActiveTab('overview')}
-                style={{ cursor: 'pointer' }}
               >
                 Overview
               </button>
               <button
-                className={`tab ${activeTab === 'applicants' ? 'active' : ''}`}
+                className={`tab pb-3 text-sm font-bold border-b-2 cursor-pointer transition-all ${activeTab === 'applicants' ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
                 onClick={() => setActiveTab('applicants')}
-                style={{ cursor: 'pointer' }}
               >
                 Applicants ({filteredApplications.length})
               </button>
               <button
-                className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`}
+                className={`tab pb-3 text-sm font-bold border-b-2 cursor-pointer transition-all ${activeTab === 'pipeline' ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
                 onClick={() => setActiveTab('pipeline')}
-                style={{ cursor: 'pointer' }}
               >
                 Pipeline Config
               </button>
@@ -157,45 +163,50 @@ export default function JobDetailPage({ params }: PageProps) {
 
             <div className="tab-panel active">
               {activeTab === 'overview' && (
-                <div className="grid-2">
+                <div className="flex flex-col gap-6">
                   <div>
-                    <h3>Description</h3>
-                    <p style={{ marginTop: '8px' }}>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Description</h3>
+                    <p className="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed text-pretty">
                       {job.description || 'No description provided.'}
                     </p>
                   </div>
                   <div>
-                    <h3>Requirements</h3>
-                    <ul style={{ marginTop: '8px', paddingLeft: '20px', listStyleType: 'disc' }}>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-2">Requirements</h3>
+                    <ul className="text-sm text-slate-600 dark:text-zinc-300 list-disc pl-5 flex flex-col gap-1.5">
                        {job.requirements && job.requirements.length > 0 ? (
-                           job.requirements.map((req, i) => <li key={i} className="mb-1">{req}</li>)
+                           job.requirements.map((req, i) => <li key={i} className="leading-relaxed">{req}</li>)
                        ) : (
-                           <li>No specific requirements listed.</li>
+                           <li className="list-none text-slate-400">No specific requirements listed.</li>
                        )}
                     </ul>
                   </div>
-                  <div className="card pad col-span-2" style={{ background: 'var(--primary-soft)' }}>
-                    <span className="chip ai-chip">AI ✦ rubric</span>
-                    <p style={{ marginTop: '10px', color: 'var(--text-2)' }}>
-                      High-fit candidates should show reusable systems work, not only feature delivery. Penalize
-                      portfolios without accessibility evidence.
+
+                  {/* Premium Enterprise AI Rubric section */}
+                  <div className="mt-4 rounded-xl border border-indigo-100 dark:border-indigo-950 bg-indigo-50/20 dark:bg-indigo-950/10 p-5 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200/50 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400">
+                        AI Rubric Config
+                      </span>
+                    </div>
+                    <p className="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed mt-1">
+                      Candidates must demonstrate experience delivering large-scale distributed architectures and reusable component libraries. Gaps in accessibility standards or test-driven methodologies should negatively affect structural scores.
                     </p>
                   </div>
                 </div>
               )}
 
               {activeTab === 'applicants' && (
-                <div>
-                  <div className="toolbar">
+                <div className="flex flex-col gap-5">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
-                      className="input"
+                      className="flex-1 px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-xs"
                       type="text"
                       placeholder="Search applicants"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
                     <select
-                      className="select animate-none"
+                      className="px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-xs w-full sm:w-44"
                       value={stageFilter}
                       onChange={(e) => setStageFilter(e.target.value)}
                     >
@@ -208,41 +219,44 @@ export default function JobDetailPage({ params }: PageProps) {
                       <option value="rejected">Rejected</option>
                     </select>
                   </div>
-                  <div className="table-wrap">
-                    <table>
+
+                  <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-zinc-800">
+                    <table className="w-full text-left">
                       <thead>
-                        <tr>
-                          <th>Candidate</th>
-                          <th>Status</th>
-                          <th>Stage</th>
-                          <th>Applied</th>
-                          <th>Action</th>
+                        <tr className="bg-slate-50 dark:bg-zinc-800/50">
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Candidate</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Status</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Stage</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Applied Date</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
                         {filteredApplications.map((app) => (
-                          <tr key={app.id}>
-                            <td className="font-semibold">{app.candidate?.fullName || 'Unknown'}</td>
-                            <td>
-                              <span className="text-xs">{app.status}</span>
+                          <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors duration-150">
+                            <td className="px-4 py-3 font-semibold text-slate-900 dark:text-zinc-100">{app.candidate?.fullName || 'Unknown'}</td>
+                            <td className="px-4 py-3">
+                              <span className="text-xs text-slate-500 dark:text-zinc-400">{app.status}</span>
                             </td>
-                            <td>
+                            <td className="px-4 py-3">
                               <Badge variant={app.stage.toLowerCase() as any}>{app.stage}</Badge>
                             </td>
-                            <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
-                            <td>
+                            <td className="px-4 py-3 text-sm text-slate-500 dark:text-zinc-400 tabular-data">
+                              {new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </td>
+                            <td className="px-4 py-3 text-right">
                               <Link
                                 href={`/candidates/${app.id}`}
-                                className="text-purple-600 hover:underline font-semibold"
+                                className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-xs"
                               >
-                                View
+                                View Folder
                               </Link>
                             </td>
                           </tr>
                         ))}
                         {filteredApplications.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="text-center py-8 text-gray-500">
+                            <td colSpan={5} className="text-center py-8 text-sm text-slate-400 dark:text-zinc-500">
                               No applicants match these filters.
                             </td>
                           </tr>
@@ -254,12 +268,20 @@ export default function JobDetailPage({ params }: PageProps) {
               )}
 
               {activeTab === 'pipeline' && (
-                <div className="list">
-                  <div className="card pad p-4 border rounded-xl text-center bg-gray-50 text-sm font-semibold">
-                    Applied → Screening → Interview → Offer → Hired
+                <div className="flex flex-col gap-4">
+                  <div className="p-5 border border-dashed border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-900/50 flex flex-wrap gap-2 items-center justify-center text-xs font-semibold text-slate-600 dark:text-zinc-300">
+                    <span className="px-2.5 py-1 bg-white dark:bg-zinc-800 rounded border border-slate-100 dark:border-zinc-700">Applied</span>
+                    <span className="text-slate-300 dark:text-zinc-700">→</span>
+                    <span className="px-2.5 py-1 bg-white dark:bg-zinc-800 rounded border border-slate-100 dark:border-zinc-700">Screening</span>
+                    <span className="text-slate-300 dark:text-zinc-700">→</span>
+                    <span className="px-2.5 py-1 bg-white dark:bg-zinc-800 rounded border border-slate-100 dark:border-zinc-700">Interview</span>
+                    <span className="text-slate-300 dark:text-zinc-700">→</span>
+                    <span className="px-2.5 py-1 bg-white dark:bg-zinc-800 rounded border border-slate-100 dark:border-zinc-700">Offer</span>
+                    <span className="text-slate-300 dark:text-zinc-700">→</span>
+                    <span className="px-2.5 py-1 bg-white dark:bg-zinc-800 rounded border border-slate-100 dark:border-zinc-700">Hired</span>
                   </div>
-                  <button className="btn secondary mt-4" style={{ cursor: 'pointer' }}>
-                    Configure Stages
+                  <button className="btn secondary text-xs w-full py-2 cursor-pointer">
+                    Configure Custom Stages
                   </button>
                 </div>
               )}
@@ -267,39 +289,59 @@ export default function JobDetailPage({ params }: PageProps) {
           </div>
         </div>
 
-        <aside className="card pad shadow-sm">
-          <h2>Job Metadata</h2>
-          <div className="list" style={{ marginTop: '16px' }}>
-            <p>
-              <strong>Location:</strong> {job.location}
-            </p>
-            <p>
-              <strong>Type:</strong> {formatEmploymentType(job.employmentType)}
-            </p>
-            <p>
-              <strong>Salary:</strong>{' '}
-              {formatSalary(job.salaryMin, job.salaryMax)}
-            </p>
-            <p>
-              <strong>Department:</strong> {job.department}
-            </p>
-            <p>
-              <strong>Created by:</strong> {job.createdBy?.fullName || 'System'}
-            </p>
-            <p>
-              <strong>Created:</strong> {new Date(job.createdAt).toLocaleDateString()}
-            </p>
+        {/* Sidebar Info */}
+        <aside className="flex flex-col gap-6">
+          <div className="card p-6 bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-50 border-b border-slate-100 dark:border-zinc-800 pb-3 mb-4">
+              Job Details
+            </h2>
+            <div className="flex flex-col gap-3.5 text-xs text-slate-600 dark:text-zinc-400">
+              <div className="flex justify-between border-b border-slate-50 dark:border-zinc-800/30 pb-2">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Location</span>
+                <span className="text-slate-900 dark:text-zinc-200">{job.location}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 dark:border-zinc-800/30 pb-2">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Type</span>
+                <span className="text-slate-900 dark:text-zinc-200">{formatEmploymentType(job.employmentType)}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 dark:border-zinc-800/30 pb-2">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Compensation</span>
+                <span className="text-slate-900 dark:text-zinc-200 tabular-data font-bold">{formatSalary(job.salaryMin, job.salaryMax)}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 dark:border-zinc-800/30 pb-2">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Department</span>
+                <span className="text-slate-900 dark:text-zinc-200">{job.department}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 dark:border-zinc-800/30 pb-2">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Hiring Owner</span>
+                <span className="text-slate-900 dark:text-zinc-200">{job.createdBy?.fullName || 'System'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-slate-500 dark:text-zinc-500">Opened Date</span>
+                <span className="text-slate-900 dark:text-zinc-200 tabular-data">
+                  {new Date(job.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
           </div>
-          <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '18px 0' }} />
-          <h3>Stage Mix</h3>
-          <p style={{ marginTop: '8px', fontSize: '13px' }} className="text-gray-500">
-            {/* Real distribution would require an aggregation API, using raw counts from our fetch for now */}
-            Applied {applications.filter(a => a.stage === 'APPLIED').length} ·
-            Screening {applications.filter(a => a.stage === 'SCREENING').length} ·
-            Interview {applications.filter(a => a.stage === 'INTERVIEW').length} ·
-            Offer {applications.filter(a => a.stage === 'OFFER').length} ·
-            Rejected {applications.filter(a => a.stage === 'REJECTED').length}
-          </p>
+
+          <div className="card p-6 bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-4">Stage Distribution</h2>
+            <div className="flex flex-col gap-3">
+              {[
+                { label: 'Applied', count: applications.filter(a => a.stage === 'APPLIED').length, variant: 'applied' },
+                { label: 'Screening', count: applications.filter(a => a.stage === 'SCREENING').length, variant: 'screening' },
+                { label: 'Interview', count: applications.filter(a => a.stage === 'INTERVIEW').length, variant: 'interview' },
+                { label: 'Offer', count: applications.filter(a => a.stage === 'OFFER').length, variant: 'offer' },
+                { label: 'Rejected', count: applications.filter(a => a.stage === 'REJECTED').length, variant: 'rejected' },
+              ].map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center text-xs">
+                  <Badge variant={item.variant as any}>{item.label}</Badge>
+                  <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </aside>
       </section>
 
@@ -312,6 +354,36 @@ export default function JobDetailPage({ params }: PageProps) {
              setIsLoading(false);
           }}
         />
+      )}
+
+      {/* Confirmation modal for closing the job (custom instead of window.confirm) */}
+      {confirmCloseOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl max-w-md w-full flex flex-col gap-4 animate-fade-in-up">
+            <h3 className="font-jakarta text-lg font-bold text-slate-900 dark:text-zinc-50">
+              Close Requisition
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">
+              Are you sure you want to close this job description? It will disable candidate self-application pipelines and place all active interview processes in archive status.
+            </p>
+            <div className="flex gap-3 justify-end mt-2">
+              <button
+                className="btn secondary text-xs h-9 cursor-pointer"
+                onClick={() => setConfirmCloseOpen(false)}
+                disabled={closingJob}
+              >
+                Keep Open
+              </button>
+              <button
+                className="btn danger text-xs h-9 cursor-pointer"
+                onClick={handleCloseJob}
+                disabled={closingJob}
+              >
+                {closingJob ? 'Closing...' : 'Close Requisition'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

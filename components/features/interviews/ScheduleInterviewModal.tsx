@@ -84,13 +84,13 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Schedule Interview">
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-900/30 rounded-lg text-sm font-semibold">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Application / Candidate *</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Application / Candidate *</label>
           <select
             name="applicationId"
             required
@@ -108,7 +108,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Interviewer *</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Interviewer *</label>
           <select
             name="interviewerId"
             required
@@ -127,7 +127,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
 
         <div className="grid grid-cols-2 gap-4">
            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Type *</label>
             <select
               name="type"
               value={formData.type}
@@ -141,7 +141,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Duration (mins) *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Duration (mins) *</label>
             <input
               type="number"
               name="duration"
@@ -150,13 +150,13 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
               required
               value={formData.duration}
               onChange={handleChange}
-              className="input w-full"
+              className="input w-full tabular-nums font-mono"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Date & Time *</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Date & Time *</label>
           <input
             type="datetime-local"
             name="scheduledAt"
@@ -168,7 +168,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Location / Meeting Link</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Location / Meeting Link</label>
           <input
             type="text"
             name="location"
@@ -180,7 +180,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Notes</label>
           <textarea
             name="notes"
             value={formData.notes}
@@ -190,7 +190,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-zinc-800/60 mt-6 bg-slate-50/50 dark:bg-zinc-900/10 -mx-6 -mb-6 p-6">
           <button
             type="button"
             onClick={onClose}

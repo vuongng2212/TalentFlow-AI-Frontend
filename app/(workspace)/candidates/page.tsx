@@ -143,7 +143,7 @@ export default function ApplicationsPage() {
       }
     } catch (err) {
       console.error(err);
-      loadData(false); // reload to revert on error
+      loadData(false);
     }
   };
 
@@ -161,7 +161,7 @@ export default function ApplicationsPage() {
     clearSelection();
   };
 
-  // UI Map Application to Legacy Candidate UI structure where needed
+  // UI Map Application
   const mapToKanbanItem = (app: Application) => ({
     id: app.id,
     name: app.candidate?.fullName || "Unknown",
@@ -174,10 +174,10 @@ export default function ApplicationsPage() {
       | "offer"
       | "hired"
       | "rejected",
-    score: 85,
+    score: 85, // Standard mock AI score
     scoreCategory: "high" as const,
     skills: [],
-    appliedDate: new Date(app.appliedAt).toLocaleDateString(),
+    appliedDate: new Date(app.appliedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     email: app.candidate?.email || "",
     summary: app.notes || "",
     timeline: [],
@@ -186,61 +186,49 @@ export default function ApplicationsPage() {
 
   return (
     <>
-      <header className="topbar flex items-center justify-between">
-        <div className="crumb flex items-center gap-2">
+      <header className="topbar bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
+        <div className="crumb text-slate-500 dark:text-zinc-400">
           <span>
-            {activeWorkspace?.name ?? 'Workspace'} <span className="text-slate-300 dark:text-zinc-600 mx-1">/</span> <strong>Applications Pipeline</strong>
+            {activeWorkspace?.name ?? 'Workspace'} <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">Applications Pipeline</strong>
           </span>
           {isFetching && (
             <svg
-              className="animate-spin h-4 w-4 text-primary"
+              className="animate-spin h-4 w-4 text-primary ml-2 inline"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
           )}
         </div>
         <button
-          className="btn primary"
+          className="btn primary text-xs h-8 px-3 cursor-pointer"
           onClick={() => openModal("upload-cv")}
-          style={{ cursor: "pointer" }}
         >
           Upload CV
         </button>
       </header>
 
-      <section className="content">
-        <div className="page-head">
+      <section className="content bg-noise">
+        <div className="page-head mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Applications</h1>
-            <p>Filter and move active candidates across role pipelines.</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-50">Applications</h1>
+            <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">Move active candidates across role pipeline stages.</p>
           </div>
-          <div className="flex bg-surface-2 p-1 rounded-lg border border-border">
+          <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-lg border border-slate-200/60 dark:border-zinc-700/60">
             <button
               onClick={() => setViewMode("kanban")}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "kanban" ? "bg-surface shadow-sm text-primary" : "text-text-3 hover:text-text-1"}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${viewMode === "kanban" ? "bg-white dark:bg-zinc-900 shadow-sm text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100"}`}
             >
-              Kanban
+              Kanban View
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === "list" ? "bg-surface shadow-sm text-primary" : "text-text-3 hover:text-text-1"}`}
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer ${viewMode === "list" ? "bg-white dark:bg-zinc-900 shadow-sm text-indigo-600 dark:text-indigo-400" : "text-slate-500 hover:text-slate-900 dark:hover:text-zinc-100"}`}
             >
-              List
+              List View
             </button>
           </div>
         </div>
@@ -256,43 +244,38 @@ export default function ApplicationsPage() {
           />
         ) : applications.length > 0 ? (
           <>
-            <div className="card pad" style={{ marginBottom: "16px" }}>
-              <div className="flex justify-between items-center mb-2">
-                <strong className="text-sm">Pipeline Distribution</strong>
-                <span className="text-[10px] font-bold text-text-4 uppercase tracking-widest">
+            <div className="card p-5 bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none mb-6 relative z-10">
+              <div className="flex justify-between items-center mb-4">
+                <strong className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Pipeline Distribution</strong>
+                <span className="text-[10px] font-extrabold text-slate-400 dark:text-zinc-500 uppercase tracking-widest tabular-data">
                   {applications.length} Total
                 </span>
               </div>
-              <div className="job-meta">
-                <span className="badge applied">
-                  Applied{" "}
-                  {applications.filter((a) => a.stage === "APPLIED").length}
+              <div className="flex flex-wrap gap-2.5">
+                <span className="badge applied text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Applied <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "APPLIED").length}</span>
                 </span>
-                <span className="badge screening">
-                  Screening{" "}
-                  {applications.filter((a) => a.stage === "SCREENING").length}
+                <span className="badge screening text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Screening <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "SCREENING").length}</span>
                 </span>
-                <span className="badge interview">
-                  Interview{" "}
-                  {applications.filter((a) => a.stage === "INTERVIEW").length}
+                <span className="badge interview text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Interview <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "INTERVIEW").length}</span>
                 </span>
-                <span className="badge offer">
-                  Offer {applications.filter((a) => a.stage === "OFFER").length}
+                <span className="badge offer text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Offer <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "OFFER").length}</span>
                 </span>
-                <span className="badge hired">
-                  Hired {applications.filter((a) => a.stage === "HIRED").length}
+                <span className="badge hired text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Hired <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "HIRED").length}</span>
                 </span>
-                <span className="badge rejected">
-                  Rejected{" "}
-                  {applications.filter((a) => a.stage === "REJECTED").length}
+                <span className="badge rejected text-[10px] font-bold uppercase tracking-wider py-1 px-2.5 bg-slate-50 dark:bg-zinc-800">
+                  Rejected <span className="ml-1 font-extrabold tabular-data text-slate-800 dark:text-zinc-300">{applications.filter((a) => a.stage === "REJECTED").length}</span>
                 </span>
               </div>
             </div>
 
-            <div className="card overflow-hidden">
+            <div className="relative z-10">
               {viewMode === "kanban" ? (
                 <KanbanBoard
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   candidates={applications.map(mapToKanbanItem) as any}
                   onSelect={(c) => {
                     const realApp = applications.find((a) => a.id === c.id);
@@ -303,113 +286,119 @@ export default function ApplicationsPage() {
                   }
                 />
               ) : (
-                <div className="table-wrap">
-                  <table className="density-tight">
-                    <thead>
-                      <tr className="bg-surface-2/50 border-b border-border">
-                        <th className="pl-4 w-10">
-                          <input
-                            type="checkbox"
-                            className="rounded border-border text-primary focus:ring-primary"
-                            checked={
-                              selectedIds.length === applications.length &&
-                              applications.length > 0
-                            }
-                            onChange={toggleSelectAll}
-                          />
-                        </th>
-                        <th>Candidate</th>
-                        <th>Applied For</th>
-                        <th>Status</th>
-                        <th>Stage</th>
-                        <th className="pr-4 text-right">Applied</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {applications.map((app) => (
-                        <tr
-                          key={app.id}
-                          className={`group cursor-pointer ${selectedIds.includes(app.id) ? "bg-primary-soft/30" : ""}`}
-                          onClick={() => router.push(`/candidates/${app.id}`)}
-                        >
-                          <td
-                            className="pl-4"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                <div className="card bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden">
+                  <div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-zinc-800">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-zinc-800/50">
+                          <th className="pl-4 w-10 py-3">
                             <input
                               type="checkbox"
-                              className="rounded border-border text-primary focus:ring-primary"
-                              checked={selectedIds.includes(app.id)}
-                              onChange={() => toggleSelectId(app.id)}
-                            />
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-2">
-                              <div className="avatar sm w-6 h-6 text-[10px]">
-                                {app.candidate?.fullName?.charAt(0) || "?"}
-                              </div>
-                              <span className="font-bold text-text-1 group-hover:text-primary transition-colors">
-                                {app.candidate?.fullName || "Unknown"}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="text-text-2">
-                            {app.job?.title || "Unknown Role"}
-                          </td>
-                          <td>
-                            <span className={`text-xs`}>{app.status}</span>
-                          </td>
-                          <td>
-                            <Badge
-                              variant={
-                                app.stage.toLowerCase() as
-                                  | "applied"
-                                  | "screening"
-                                  | "interview"
-                                  | "offer"
-                                  | "hired"
-                                  | "rejected"
+                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                              checked={
+                                selectedIds.length === applications.length &&
+                                applications.length > 0
                               }
-                            >
-                              {app.stage}
-                            </Badge>
-                          </td>
-                          <td className="pr-4 text-right text-text-4 font-medium">
-                            {new Date(app.appliedAt).toLocaleDateString()}
-                          </td>
+                              onChange={toggleSelectAll}
+                            />
+                          </th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Candidate</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Applied For</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Status</th>
+                          <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400">Stage</th>
+                          <th className="pr-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 text-right">Applied Date</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                        {applications.map((app) => (
+                          <tr
+                            key={app.id}
+                            className={`group cursor-pointer hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors duration-150 ${selectedIds.includes(app.id) ? "bg-indigo-50/20 dark:bg-indigo-950/10" : ""}`}
+                            onClick={() => router.push(`/candidates/${app.id}`)}
+                          >
+                            <td
+                              className="pl-4 py-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <input
+                                type="checkbox"
+                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                                checked={selectedIds.includes(app.id)}
+                                onChange={() => toggleSelectId(app.id)}
+                              />
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 font-bold flex items-center justify-center text-xs">
+                                  {app.candidate?.fullName?.charAt(0) || "?"}
+                                </div>
+                                <span className="font-bold text-slate-900 dark:text-zinc-100 group-hover:text-primary transition-colors">
+                                  {app.candidate?.fullName || "Unknown"}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-slate-600 dark:text-zinc-400">
+                              {app.job?.title || "Unknown Role"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-xs text-slate-500 dark:text-zinc-400">{app.status}</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <Badge
+                                variant={
+                                  app.stage.toLowerCase() as
+                                    | "applied"
+                                    | "screening"
+                                    | "interview"
+                                    | "offer"
+                                    | "hired"
+                                    | "rejected"
+                                }
+                              >
+                                {app.stage}
+                              </Badge>
+                            </td>
+                            <td className="pr-4 py-3 text-right text-xs text-slate-400 dark:text-zinc-500 font-medium tabular-data">
+                              {new Date(app.appliedAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric"
+                              })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
 
-                  {/* Pagination Controls */}
-                  {totalPages > 1 && (
-                    <div className="flex justify-between items-center p-4 border-t border-border bg-surface">
-                      <div className="text-sm text-gray-500">
-                        Page {pagination.page} of {totalPages}
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex justify-between items-center p-4 border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                        <div className="text-xs text-slate-500 dark:text-zinc-400">
+                          Page <span className="font-bold tabular-data">{pagination.page}</span> of <span className="font-bold tabular-data">{totalPages}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              setPage(Math.max(1, pagination.page - 1))
+                            }
+                            disabled={pagination.page === 1}
+                            className="btn secondary text-xs h-8 px-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            Previous
+                          </button>
+                          <button
+                            onClick={() =>
+                              setPage(Math.min(totalPages, pagination.page + 1))
+                            }
+                            disabled={pagination.page === totalPages}
+                            className="btn secondary text-xs h-8 px-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            Next
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() =>
-                            setPage(Math.max(1, pagination.page - 1))
-                          }
-                          disabled={pagination.page === 1}
-                          className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={() =>
-                            setPage(Math.min(totalPages, pagination.page + 1))
-                          }
-                          disabled={pagination.page === totalPages}
-                          className="btn secondary disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
             </div>

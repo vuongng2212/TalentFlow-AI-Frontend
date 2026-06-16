@@ -69,8 +69,7 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
         requirements: formData.requirements.split('\n').filter(r => r.trim() !== ''),
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
-        status: 'DRAFT', // Always create as draft first
-        createdById: '1' // Temporary fallback, backend should override based on auth token
+        status: 'DRAFT' // Always create as draft first
       });
 
       if (onJobCreated) onJobCreated();

@@ -36,6 +36,7 @@ export default function JobsPage() {
   // Pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Custom confirmation dialog state
   const [confirmBulkAction, setConfirmBulkAction] = useState<string | null>(null);
@@ -118,6 +119,7 @@ export default function JobsPage() {
     isAuthenticated,
     startMinDuration,
     endMinDuration,
+    refreshKey,
   ]);
 
   const activeFilters = useMemo(() => {
@@ -442,6 +444,7 @@ export default function JobsPage() {
           setPage(1);
           setSearch("");
           setStatus("all");
+          setRefreshKey(prev => prev + 1);
         }}
       />
 

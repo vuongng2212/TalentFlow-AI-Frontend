@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { workspaceService } from '../../../services/api/workspace.service';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
 import { useUIStore } from '../../../lib/store/useUIStore';
+import { Workspace } from '../../../types';
 
 interface AuditLog {
   event: string;
@@ -21,8 +22,30 @@ export default function SettingsPage() {
   const { activeWorkspace, refreshWorkspaces } = useAuth();
   const { showLoading, hideLoading } = useUIStore();
 
-  const [workspaceName, setWorkspaceName] = useState('');
-  const [isBusiness, setIsBusiness] = useState(false);
+  return (
+    <SettingsForm
+      key={activeWorkspace?.id}
+      activeWorkspace={activeWorkspace}
+      refreshWorkspaces={refreshWorkspaces}
+      showLoading={showLoading}
+      hideLoading={hideLoading}
+    />
+  );
+}
+
+function SettingsForm({
+  activeWorkspace,
+  refreshWorkspaces,
+  showLoading,
+  hideLoading
+}: {
+  activeWorkspace: Workspace | null;
+  refreshWorkspaces: () => Promise<void>;
+  showLoading: (m: string) => void;
+  hideLoading: () => void;
+}) {
+  const [workspaceName, setWorkspaceName] = useState(activeWorkspace?.name || '');
+  const [isBusiness, setIsBusiness] = useState(activeWorkspace?.isBusiness || false);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -34,14 +57,6 @@ export default function SettingsPage() {
   const canEdit =
     activeWorkspace?.memberRole === 'OWNER' ||
     activeWorkspace?.memberRole === 'ADMIN';
-
-  // Sync form fields whenever active workspace changes
-  useEffect(() => {
-    if (activeWorkspace) {
-      setWorkspaceName(activeWorkspace.name);
-      setIsBusiness(activeWorkspace.isBusiness);
-    }
-  }, [activeWorkspace?.id, activeWorkspace?.name, activeWorkspace?.isBusiness]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

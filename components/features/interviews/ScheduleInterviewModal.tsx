@@ -4,7 +4,7 @@ import { useUIStore } from '../../../lib/store/useUIStore';
 import { interviewService } from '../../../services/api/interview.service';
 import { applicationService } from '../../../services/api/application.service';
 import { userService } from '../../../services/api/user.service';
-import { Application } from '../../../types';
+import { Application, User, InterviewType } from '../../../types';
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
   const [error, setError] = useState<string | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const { showLoading, hideLoading } = useUIStore();
-  const [interviewers, setInterviewers] = useState<any[]>([]);
+  const [interviewers, setInterviewers] = useState<User[]>([]);
 
   const [formData, setFormData] = useState({
     applicationId: '',
@@ -63,7 +63,7 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
       await interviewService.createInterview({
         applicationId: formData.applicationId,
         interviewerId: formData.interviewerId,
-        type: formData.type as any,
+        type: formData.type as InterviewType,
         scheduledAt: new Date(formData.scheduledAt).toISOString(),
         duration: Number(formData.duration),
         location: formData.location,

@@ -25,6 +25,7 @@ function AcceptInviteContent() {
     if (isLoading) return; // Wait for auth check to complete
 
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPageState('error');
       setErrorMessage('No invitation token provided. The link may be invalid.');
       return;

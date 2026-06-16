@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { applicationService } from "../../../services/api/application.service";
-import { Application, ApplicationStage } from "../../../types";
+import { Application, ApplicationStage, UICandidate } from "../../../types";
 import FilterCenter from "../../../components/features/candidates/FilterCenter";
 import KanbanBoard from "../../../components/features/candidates/KanbanBoard";
 import CandidateDossier from "../../../components/features/candidates/CandidateDossier";
-import Badge from "../../../components/ui/badge";
+import Badge, { BadgeProps } from "../../../components/ui/badge";
 import FilterChips from "../../../components/ui/FilterChips";
 import BulkActionBar from "../../../components/ui/BulkActionBar";
 import LoadingSkeleton from "../../../components/ui/LoadingSkeleton";
@@ -100,6 +100,7 @@ export default function ApplicationsPage() {
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated || !activeWorkspace?.id) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData(false);
 
     const onFocus = () => {
@@ -159,23 +160,20 @@ export default function ApplicationsPage() {
   };
 
   // UI Map Application
-  const mapToKanbanItem = (app: Application) => ({
+  const mapToKanbanItem = (app: Application): UICandidate & { name: string; title: string; appliedDate: string; stage: string } => ({
     id: app.id,
+    fullName: app.candidate?.fullName || "Unknown",
+    email: app.candidate?.email || "",
+    createdAt: app.candidate?.createdAt || "",
+    updatedAt: app.candidate?.updatedAt || "",
     name: app.candidate?.fullName || "Unknown",
     title: app.job?.title || "Unknown Job",
     avatar: app.candidate?.fullName?.charAt(0) || "?",
-    stage: app.stage.toLowerCase() as
-      | "applied"
-      | "screening"
-      | "interview"
-      | "offer"
-      | "hired"
-      | "rejected",
+    stage: app.stage.toLowerCase(),
     score: 85, // Standard mock AI score
-    scoreCategory: "high" as const,
+    scoreCategory: "high",
     skills: [],
     appliedDate: new Date(app.appliedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    email: app.candidate?.email || "",
     summary: app.notes || "",
     timeline: [],
     scorecard: [],
@@ -273,7 +271,7 @@ export default function ApplicationsPage() {
             <div className="relative z-10">
               {viewMode === "kanban" ? (
                 <KanbanBoard
-                  candidates={applications.map(mapToKanbanItem) as any}
+                  candidates={applications.map(mapToKanbanItem)}
                   onSelect={(c) => {
                     const realApp = applications.find((a) => a.id === c.id);
                     if (realApp) router.push(`/candidates/${realApp.id}`);
@@ -343,13 +341,7 @@ export default function ApplicationsPage() {
                             <td className="px-4 py-3">
                               <Badge
                                 variant={
-                                  app.stage.toLowerCase() as
-                                    | "applied"
-                                    | "screening"
-                                    | "interview"
-                                    | "offer"
-                                    | "hired"
-                                    | "rejected"
+                                  app.stage.toLowerCase() as BadgeProps['variant']
                                 }
                               >
                                 {app.stage}

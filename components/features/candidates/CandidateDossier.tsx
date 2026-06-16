@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Application } from '../../../types';
-import Badge from '../../ui/badge';
+import Badge, { BadgeProps } from '../../ui/badge';
 
 interface ApplicationDossierProps {
   application: Application;
@@ -68,7 +68,7 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
                   {candidate.email} · {candidate.phone || 'N/A'}
                 </p>
                 <div className="job-meta mt-3 flex flex-wrap gap-2">
-                  <Badge variant={application.stage.toLowerCase() as any}>{application.stage}</Badge>
+                  <Badge variant={application.stage.toLowerCase() as BadgeProps['variant']}>{application.stage}</Badge>
                   <span className="chip text-[11px] font-bold">{application.job?.title}</span>
                   <span className="chip text-[11px] font-bold">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
                 </div>

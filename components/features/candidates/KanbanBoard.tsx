@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import { UICandidate } from '../../../types';
 import KanbanCard from './KanbanCard';
+import React, { useState } from 'react';
 
 interface KanbanBoardProps {
-  candidates: any[];
-  onSelect: (candidate: any) => void;
+  candidates: (UICandidate & {
+    name: string;
+    title: string;
+    appliedDate: string;
+    stage: string;
+  })[];
+  onSelect: (candidate: UICandidate) => void;
   onDropCandidate: (id: string, stage: string) => void;
 }
 
@@ -114,11 +120,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         return (
           <div
             key={column.key}
-            className={`shrink-0 w-72 min-h-137.5 bg-slate-50/40 dark:bg-zinc-900/30 border-x border-b border-t-2 rounded-2xl p-4 flex flex-col gap-4 snap-start transition-all duration-200 ${
-              isActiveCol
+            className={`shrink-0 w-72 min-h-137.5 bg-slate-50/40 dark:bg-zinc-900/30 border-x border-b border-t-2 rounded-2xl p-4 flex flex-col gap-4 snap-start transition-all duration-200 ${isActiveCol
                 ? `${theme.activeBorder} ${theme.activeBg} ${theme.borderTop}`
                 : `border-slate-100 dark:border-zinc-800/80 ${theme.borderTop}`
-            }`}
+              }`}
             onDragOver={(e) => handleDragOver(e, column.key)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, column.key)}

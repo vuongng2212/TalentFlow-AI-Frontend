@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
       hasCheckedAuthRef.current = true;
     }
-  }, [loadWorkspaces, syncActiveWorkspace]);
+  }, [isLoading, loadWorkspaces, syncActiveWorkspace]);
 
   useEffect(() => {
     // Only fetch on mount or if explicitly requested (like after login)
@@ -99,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         void fetchUser();
       });
     }
-  }, [fetchUser]);
+  }, [fetchUser, isLoading]);
 
   // Proactive Token Refresh Logic
   useEffect(() => {

@@ -1,4 +1,8 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+
+interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 // Định nghĩa base response của BE
 export interface ApiResponse<T = unknown> {
@@ -79,10 +83,10 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     // Tự động extract phần `data` từ response chuẩn của BE
     // Component chỉ cần quan tâm tới dữ liệu thực tế
-    return response.data as any;
+    return response.data as unknown as AxiosResponse<ApiResponse>;
   },
   async (error: AxiosError<ApiResponse>) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as CustomInternalAxiosRequestConfig;
 
     // Xử lý lỗi chung toàn cục
     if (error.response) {

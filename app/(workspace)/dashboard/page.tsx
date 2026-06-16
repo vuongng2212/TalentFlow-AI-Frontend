@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Badge from '../../../components/ui/badge';
+import Badge, { BadgeProps } from '../../../components/ui/badge';
 import WelcomeHeader from './WelcomeHeader';
 import RecruitmentTrendChart from './RecruitmentTrendChart';
 import { analyticsService } from '../../../services/api/analytics.service';
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant={job.status.toLowerCase() as any}>{job.status.toUpperCase()}</Badge>
+                          <Badge variant={job.status.toLowerCase() as BadgeProps['variant']}>{job.status.toUpperCase()}</Badge>
                         </td>
                       </tr>
                     ))}
@@ -268,7 +268,7 @@ export default function DashboardPage() {
                   return (
                     <div key={stage.stage} className="flex flex-col gap-2">
                       <div className="flex justify-between items-end">
-                        <Badge variant={stage.stage.toLowerCase() as any}>{stage.stage}</Badge>
+                        <Badge variant={stage.stage.toLowerCase() as BadgeProps['variant']}>{stage.stage}</Badge>
                         <div className="flex items-baseline gap-1.5">
                           <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data text-sm">{stage.count}</span>
                           <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 tabular-data w-8 text-right">{percentage}%</span>

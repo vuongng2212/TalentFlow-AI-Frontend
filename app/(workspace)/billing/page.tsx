@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getInvoices } from '../../../services/mockData';
 import { Invoice } from '../../../types';
-import Badge from '../../../components/ui/badge';
+import Badge, { BadgeProps } from '../../../components/ui/badge';
 
 export default function BillingPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -203,7 +203,7 @@ export default function BillingPage() {
                           {inv.amount}
                         </td>
                         <td className="px-4 py-3">
-                          <Badge variant={inv.status.toLowerCase() as any}>
+                          <Badge variant={inv.status.toLowerCase() as BadgeProps['variant']}>
                             {inv.status.toUpperCase()}
                           </Badge>
                         </td>

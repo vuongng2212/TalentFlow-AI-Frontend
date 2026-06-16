@@ -1,17 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
 
+import { UICandidate } from '../../../types';
+
 interface KanbanCardProps {
-  candidate: {
-    id: string;
-    avatar: string;
+  candidate: UICandidate & {
     name: string;
     title: string;
-    score: number;
-    skills: string[];
     appliedDate: string;
+    stage: string;
   };
-  onSelect: (candidate: any) => void;
+  onSelect: (candidate: UICandidate) => void;
   onDragStart: (e: React.DragEvent, id: string) => void;
 }
 

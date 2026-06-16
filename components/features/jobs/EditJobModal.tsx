@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { useUIStore } from '../../../lib/store/useUIStore';
 import { jobService } from '../../../services/api/job.service';
-import { Job } from '../../../types';
+import { Job, EmploymentType, JobStatus } from '../../../types';
 import { useModalStore } from '../../../lib/store/useModalStore';
 
 interface EditJobModalProps {
@@ -12,46 +12,52 @@ interface EditJobModalProps {
   onJobUpdated?: () => void;
 }
 
-export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: EditJobModalProps) {
+export default function EditJobModal({ onJobUpdated }: EditJobModalProps) {
   const activeModal = useModalStore((state) => state.activeModal);
   const modalData = useModalStore((state) => state.modalData);
   const closeModal = useModalStore((state) => state.closeModal);
 
-  const showModal = isOpen !== undefined ? isOpen : (activeModal === 'edit-job');
-  const activeJob = job !== undefined ? job : (modalData as Job | null);
-  const handleClose = onClose || closeModal;
+  const showModal = activeModal === 'edit-job';
+  const activeJob = modalData as Job | null;
+  const handleClose = closeModal;
 
+  return (
+    <EditJobForm
+      key={activeJob?.id || 'new'}
+      showModal={showModal}
+      activeJob={activeJob}
+      handleClose={handleClose}
+      onJobUpdated={onJobUpdated}
+    />
+  );
+}
+
+function EditJobForm({
+  showModal,
+  activeJob,
+  handleClose,
+  onJobUpdated
+}: {
+  showModal: boolean;
+  activeJob: Job | null;
+  handleClose: () => void;
+  onJobUpdated?: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showLoading, hideLoading } = useUIStore();
 
   const [formData, setFormData] = useState({
-    title: '',
-    department: '',
-    location: '',
-    employmentType: 'FULL_TIME',
-    description: '',
-    requirements: '',
-    salaryMin: '',
-    salaryMax: '',
-    status: 'OPEN'
+    title: activeJob?.title || '',
+    department: activeJob?.department || '',
+    location: activeJob?.location || '',
+    employmentType: activeJob?.employmentType || 'FULL_TIME',
+    description: activeJob?.description || '',
+    requirements: activeJob?.requirements ? activeJob.requirements.join('\n') : '',
+    salaryMin: activeJob?.salaryMin ? String(activeJob.salaryMin) : '',
+    salaryMax: activeJob?.salaryMax ? String(activeJob.salaryMax) : '',
+    status: activeJob?.status || 'OPEN'
   });
-
-  useEffect(() => {
-    if (activeJob) {
-      setFormData({
-        title: activeJob.title || '',
-        department: activeJob.department || '',
-        location: activeJob.location || '',
-        employmentType: activeJob.employmentType || 'FULL_TIME',
-        description: activeJob.description || '',
-        requirements: activeJob.requirements ? activeJob.requirements.join('\n') : '',
-        salaryMin: activeJob.salaryMin ? String(activeJob.salaryMin) : '',
-        salaryMax: activeJob.salaryMax ? String(activeJob.salaryMax) : '',
-        status: activeJob.status || 'OPEN'
-      });
-    }
-  }, [activeJob]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -70,12 +76,12 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
         title: formData.title,
         department: formData.department,
         location: formData.location,
-        employmentType: formData.employmentType as any,
+        employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
         requirements: formData.requirements.split('\n').filter(r => r.trim() !== ''),
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
-        status: formData.status as any,
+        status: formData.status as JobStatus,
       });
 
       if (onJobUpdated) onJobUpdated();

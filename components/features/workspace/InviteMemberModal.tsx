@@ -49,9 +49,10 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
       setTimeout(() => {
         onSuccess();
       }, 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       setError(
-        err?.message ||
+        error?.message ||
           (workspace.isBusiness
             ? 'Failed to send invitation. Please try again.'
             : 'Failed to add member. Make sure the user is registered in the system.'),

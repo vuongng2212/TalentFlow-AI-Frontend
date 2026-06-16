@@ -7,7 +7,7 @@ import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import { useUIStore } from '../../../lib/store/useUIStore';
 import { useMinDuration } from '../../../hooks/useMinDuration';
 import EmptyState from '../../../components/ui/EmptyState';
-import Badge from '../../../components/ui/badge';
+import Badge, { BadgeProps } from '../../../components/ui/badge';
 import ScheduleInterviewModal from '../../../components/features/interviews/ScheduleInterviewModal';
 
 export default function InterviewsPage() {
@@ -40,6 +40,7 @@ export default function InterviewsPage() {
   }, [minDur]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadInterviews();
 
     const onFocus = () => {
@@ -101,7 +102,7 @@ export default function InterviewsPage() {
                      <span className={`badge ${interview.status === 'COMPLETED' ? 'hired' : 'interview'}`}>
                        {new Date(interview.scheduledAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                      </span>
-                     <Badge variant={interview.status.toLowerCase() as any}>{interview.status}</Badge>
+                     <Badge variant={interview.status.toLowerCase() as BadgeProps['variant']}>{interview.status}</Badge>
                   </div>
                   <h3 style={{ marginTop: '12px' }}>
                     {interview.application?.candidate?.fullName || 'Unknown Candidate'} · {interview.type.replace('_', ' ')}

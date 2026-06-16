@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { useUIStore } from '../../../lib/store/useUIStore';
-import { jobService } from '../../../services/api/job.service';
 import { useModalStore } from '../../../lib/store/useModalStore';
+import { jobService } from '../../../services/api/job.service';
+import { EmploymentType } from '../../../types';
 
 interface CreateJobModalProps {
   isOpen?: boolean;
@@ -10,12 +11,28 @@ interface CreateJobModalProps {
   onJobCreated?: () => void;
 }
 
-export default function CreateJobModal({ isOpen, onClose, onJobCreated }: CreateJobModalProps) {
+export default function CreateJobModal({ onClose, onJobCreated }: CreateJobModalProps) {
   const activeModal = useModalStore((state) => state.activeModal);
   const closeModal = useModalStore((state) => state.closeModal);
 
-  const showModal = isOpen !== undefined ? isOpen : (activeModal === 'create-job');
-  const handleClose = onClose || closeModal;
+  const showModal = activeModal === 'create-job';
+  const handleClose = () => {
+    if (onClose) onClose();
+    else closeModal();
+
+    // Reset form when closing
+    setError(null);
+    setFormData({
+      title: '',
+      department: '',
+      location: '',
+      employmentType: 'FULL_TIME',
+      description: '',
+      requirements: '',
+      salaryMin: '',
+      salaryMax: '',
+    });
+  };
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,21 +49,9 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
     salaryMax: '',
   });
 
-  useEffect(() => {
-    if (showModal) {
-      setError(null);
-      setFormData({
-        title: '',
-        department: '',
-        location: '',
-        employmentType: 'FULL_TIME',
-        description: '',
-        requirements: '',
-        salaryMin: '',
-        salaryMax: '',
-      });
-    }
-  }, [showModal]);
+  // No more reset-on-open useEffect - it's handled in handleClose
+  // and initial state. For parent-controlled isOpen,
+  // we could use a key if needed, but manual reset is fine here.
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -64,7 +69,7 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
         title: formData.title,
         department: formData.department,
         location: formData.location,
-        employmentType: formData.employmentType as any,
+        employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
         requirements: formData.requirements.split('\n').filter(r => r.trim() !== ''),
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,

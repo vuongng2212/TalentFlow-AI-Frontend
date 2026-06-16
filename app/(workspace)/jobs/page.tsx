@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { jobService } from "../../../services/api/job.service";
 import { Job } from "../../../types";
 import Badge from "../../../components/ui/badge";
@@ -52,52 +51,47 @@ export default function JobsPage() {
     return type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
+  const loadAndSort = useCallback(async (isBackground = false) => {
+    if (!isBackground) {
+      startMinDuration();
+      setLoading(true);
+    } else setIsFetching(true);
+
+    try {
+      const queryStatus = status === "all" ? undefined : status.toUpperCase();
+
+      const response = await jobService.getJobs({
+        search: debouncedSearch || undefined,
+        status: queryStatus,
+        page,
+        limit: 10,
+      });
+
+      const list = [...response.data];
+
+      // Sort locally
+      if (sortBy === "newest") {
+        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } else if (sortBy === "oldest") {
+        list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      } else if (sortBy === "apps") {
+        list.sort((a, b) => (b._count?.applications ?? 0) - (a._count?.applications ?? 0));
+      }
+
+      setJobs(list);
+      setTotalPages(response.meta.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch jobs", error);
+    } finally {
+      if (!isBackground) endMinDuration(() => setLoading(false));
+      setIsFetching(false);
+    }
+  }, [debouncedSearch, status, page, sortBy, startMinDuration, endMinDuration]);
+
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return;
 
-    let ignore = false;
-
-    const loadAndSort = async (isBackground = false) => {
-      if (!isBackground) {
-        startMinDuration();
-        setLoading(true);
-      } else setIsFetching(true);
-
-      try {
-        const queryStatus = status === "all" ? undefined : status.toUpperCase();
-
-        const response = await jobService.getJobs({
-          search: debouncedSearch || undefined,
-          status: queryStatus,
-          page,
-          limit: 10,
-        });
-
-        if (!ignore) {
-          const list = [...response.data];
-
-          // Sort locally
-          if (sortBy === "newest") {
-            list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          } else if (sortBy === "oldest") {
-            list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-          } else if (sortBy === "apps") {
-            list.sort((a, b) => (b._count?.applications ?? 0) - (a._count?.applications ?? 0));
-          }
-
-          setJobs(list);
-          setTotalPages(response.meta.totalPages);
-        }
-      } catch (error) {
-        console.error("Failed to fetch jobs", error);
-      } finally {
-        if (!ignore) {
-          if (!isBackground) endMinDuration(() => setLoading(false));
-          setIsFetching(false);
-        }
-      }
-    };
-
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAndSort();
 
     const onFocus = () => {
@@ -107,18 +101,12 @@ export default function JobsPage() {
     window.addEventListener("focus", onFocus);
 
     return () => {
-      ignore = true;
       window.removeEventListener("focus", onFocus);
     };
   }, [
-    debouncedSearch,
-    status,
-    sortBy,
-    page,
     isAuthLoading,
     isAuthenticated,
-    startMinDuration,
-    endMinDuration,
+    loadAndSort,
     refreshKey,
   ]);
 

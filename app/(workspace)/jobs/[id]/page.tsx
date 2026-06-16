@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { jobService } from '../../../../services/api/job.service';
 import { applicationService } from '../../../../services/api/application.service';
 import { Job, Application } from '../../../../types';
-import Badge from '../../../../components/ui/badge';
-import LoadingSkeleton from '../../../../components/ui/LoadingSkeleton';
+import Badge, { BadgeProps } from '../../../../components/ui/badge';
 import { useUIStore } from '../../../../lib/store/useUIStore';
 
 interface PageProps {
@@ -132,7 +131,7 @@ export default function JobDetailPage({ params }: PageProps) {
           <div className="page-head mb-2">
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-zinc-50 flex items-center gap-3">
-                {job.title} <Badge variant={job.status.toLowerCase() as any}>{job.status}</Badge>
+                {job.title} <Badge variant={job.status.toLowerCase() as BadgeProps['variant']}>{job.status}</Badge>
               </h1>
               <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1.5">
                 {job.location} · {job.department} · <span className="tabular-data font-bold">{job._count?.applications || 0}</span> applicants
@@ -240,7 +239,7 @@ export default function JobDetailPage({ params }: PageProps) {
                               <span className="text-xs text-slate-500 dark:text-zinc-400">{app.status}</span>
                             </td>
                             <td className="px-4 py-3">
-                              <Badge variant={app.stage.toLowerCase() as any}>{app.stage}</Badge>
+                              <Badge variant={app.stage.toLowerCase() as BadgeProps['variant']}>{app.stage}</Badge>
                             </td>
                             <td className="px-4 py-3 text-sm text-slate-500 dark:text-zinc-400 tabular-data">
                               {new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -337,7 +336,7 @@ export default function JobDetailPage({ params }: PageProps) {
                 { label: 'Rejected', count: applications.filter(a => a.stage === 'REJECTED').length, variant: 'rejected' },
               ].map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-xs">
-                  <Badge variant={item.variant as any}>{item.label}</Badge>
+                  <Badge variant={item.variant as BadgeProps['variant']}>{item.label}</Badge>
                   <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data">{item.count}</span>
                 </div>
               ))}

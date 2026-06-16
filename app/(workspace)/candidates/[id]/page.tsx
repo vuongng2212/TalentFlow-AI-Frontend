@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { applicationService } from '../../../../services/api/application.service';
 import { Application, ApplicationStage } from '../../../../types';
-import Badge from '../../../../components/ui/badge';
+import Badge, { BadgeProps } from '../../../../components/ui/badge';
 import { useUIStore } from '../../../../lib/store/useUIStore';
 import { useMinDuration } from '../../../../hooks/useMinDuration';
 
@@ -132,7 +132,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                       {application.candidate.email} · {application.candidate.phone || 'N/A'}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-3">
-                      <Badge variant={application.stage.toLowerCase() as any}>{application.stage}</Badge>
+                      <Badge variant={application.stage.toLowerCase() as BadgeProps['variant']}>{application.stage}</Badge>
                       <span className="chip text-[10px] py-0.5 px-2 bg-slate-50 dark:bg-zinc-800">{application.job?.title || 'Unknown Job'}</span>
                       <span className="chip text-[10px] py-0.5 px-2 bg-slate-50 dark:bg-zinc-800 tabular-data">
                         Applied {new Date(application.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

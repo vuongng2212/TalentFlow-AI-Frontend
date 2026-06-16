@@ -7,7 +7,7 @@ import LoadingSkeleton from '../../../components/ui/LoadingSkeleton';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
 import { useMinDuration } from '../../../hooks/useMinDuration';
 import EmptyState from '../../../components/ui/EmptyState';
-import Badge from '../../../components/ui/badge';
+import Badge, { BadgeProps } from '../../../components/ui/badge';
 import InviteMemberModal from '../../../components/features/workspace/InviteMemberModal';
 
 const ROLE_BADGE: Record<WorkspaceMemberRole, { label: string; variant: string }> = {
@@ -35,27 +35,43 @@ export default function TeamPage() {
     activeWorkspace?.memberRole === 'OWNER' ||
     activeWorkspace?.memberRole === 'ADMIN';
 
-  const loadMembers = useCallback(async () => {
+  const loadMembers = useCallback(async (isBackground = false) => {
     if (!activeWorkspace?.id) return;
-    minDur.start();
-    setLoading(true);
+
+    if (!isBackground) {
+      minDur.start();
+      setLoading(true);
+    }
+
     try {
       const list = await workspaceService.listMembers(activeWorkspace.id);
       setMembers(list);
     } catch (e) {
       console.error('Failed to load workspace members', e);
     } finally {
-      minDur.end(() => setLoading(false));
+      if (!isBackground) {
+        minDur.end(() => setLoading(false));
+      }
     }
-  }, [activeWorkspace?.id]);
+  }, [activeWorkspace, minDur]);
 
   useEffect(() => {
-    loadMembers();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadMembers(false);
+
+    const onFocus = () => {
+      loadMembers(true);
+    };
+
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
   }, [loadMembers]);
 
   const handleRemove = async () => {
     if (!activeWorkspace?.id || !confirmDeleteMember) return;
-    const { id, userId } = confirmDeleteMember;
+    const { userId } = confirmDeleteMember;
     setRemoving(userId);
     setErrorMessage('');
     try {
@@ -155,7 +171,7 @@ export default function TeamPage() {
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-600 dark:text-zinc-400 tabular-data">{member.user?.email}</td>
                         <td className="px-4 py-3">
-                          <Badge variant={roleMeta.variant as any}>{roleMeta.label}</Badge>
+                          <Badge variant={roleMeta.variant as BadgeProps['variant']}>{roleMeta.label}</Badge>
                         </td>
                         <td className="px-4 py-3 text-sm text-slate-500 dark:text-zinc-400 tabular-data">
                           {member.createdAt

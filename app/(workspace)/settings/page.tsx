@@ -41,7 +41,7 @@ export default function SettingsPage() {
       setWorkspaceName(activeWorkspace.name);
       setIsBusiness(activeWorkspace.isBusiness);
     }
-  }, [activeWorkspace?.id]);
+  }, [activeWorkspace?.id, activeWorkspace?.name, activeWorkspace?.isBusiness]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,8 +67,9 @@ export default function SettingsPage() {
       await refreshWorkspaces();
       setSuccessMsg('Workspace settings saved successfully!');
       setTimeout(() => setSuccessMsg(''), 4000);
-    } catch (err: any) {
-      setErrorMsg(err?.message || 'Failed to save settings. Please try again.');
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setErrorMsg(error?.message || 'Failed to save settings. Please try again.');
     } finally {
       hideLoading();
       setIsSaving(false);

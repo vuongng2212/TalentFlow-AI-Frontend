@@ -51,8 +51,7 @@ export default function TeamPage() {
 
   useEffect(() => {
     loadMembers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWorkspace?.id]);
+  }, [loadMembers]);
 
   const handleRemove = async () => {
     if (!activeWorkspace?.id || !confirmDeleteMember) return;

@@ -80,9 +80,10 @@ export default function EditJobModal({ isOpen, onClose, job, onJobUpdated }: Edi
 
       if (onJobUpdated) onJobUpdated();
       handleClose();
-    } catch (err) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       hideLoading();
-      setError(err instanceof Error ? err.message : 'Failed to update job');
+      setError(error?.message || 'Failed to update job');
     } finally {
       hideLoading();
       setLoading(false);

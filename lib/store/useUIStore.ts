@@ -17,7 +17,7 @@ export interface UIState {
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set, get) => {
+    (set) => {
       const minDur = createMinDuration();
 
       return {

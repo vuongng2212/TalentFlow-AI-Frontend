@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { loginSchema } from '../../../services/schemas';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
 import { useUIStore } from '../../../lib/store/useUIStore';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('seed-admin@talentflow.invalid');
   const [password, setPassword] = useState('SeedPassword123!');
   const [rememberMe, setRememberMe] = useState(true);
@@ -17,7 +15,7 @@ export default function LoginPage() {
   const [successMsg, setSuccessMsg] = useState('');
 
   const { login, isLoading } = useAuth();
-  const { showLoading, hideLoading } = useUIStore();
+  const { hideLoading } = useUIStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +37,10 @@ export default function LoginPage() {
       await login({ email, password });
       setSuccessMsg('Login successful! Redirecting...');
       // Navigation is handled inside the login function in AuthProvider
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       hideLoading();
-      setErrors({ form: err?.message || 'Invalid credentials' });
+      setErrors({ form: error?.message || 'Invalid credentials' });
     }
   };
 

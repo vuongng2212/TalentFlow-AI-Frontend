@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useMemo } from "react";
 import { createMinDuration } from "../lib/minDuration";
 
 /**
@@ -32,5 +32,5 @@ export function useMinDuration(minDuration = 600) {
     minDurationRef.current.end(onDone);
   }, []);
 
-  return { start, end };
+  return useMemo(() => ({ start, end }), [start, end]);
 }

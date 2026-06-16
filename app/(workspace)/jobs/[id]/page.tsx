@@ -37,18 +37,19 @@ export default function JobDetailPage({ params }: PageProps) {
     if (!unwrappedParams) return;
 
     async function loadData() {
+      if (!unwrappedParams) return;
       setIsLoading(true);
       try {
-        const fetchedJob = await jobService.getJobById(unwrappedParams!.id);
+        const fetchedJob = await jobService.getJobById(unwrappedParams.id);
         setJob(fetchedJob);
 
         const appsRes = await applicationService.getApplications({
-            jobId: unwrappedParams!.id,
+            jobId: unwrappedParams.id,
             limit: 100
         });
         setApplications(appsRes.data);
 
-      } catch (e) {
+      } catch (e: unknown) {
           console.error("Failed to load job data", e);
       } finally {
           setIsLoading(false);
@@ -98,7 +99,7 @@ export default function JobDetailPage({ params }: PageProps) {
       const fetchedJob = await jobService.getJobById(job.id);
       setJob(fetchedJob);
       setConfirmCloseOpen(false);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error(e);
     } finally {
       hideLoading();

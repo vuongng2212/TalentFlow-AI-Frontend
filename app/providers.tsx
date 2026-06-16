@@ -13,14 +13,18 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
+  const updateTheme = React.useCallback(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme, mounted]);
+  }, [theme]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    updateTheme();
+  }, [mounted, updateTheme]);
 
   return (
     <AuthProvider>

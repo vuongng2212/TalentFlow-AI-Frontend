@@ -26,7 +26,7 @@ export default function InterviewsPage() {
   const { showLoading, hideLoading } = useUIStore();
   const minDur = useMinDuration();
 
-  const loadInterviews = async () => {
+  const loadInterviews = React.useCallback(async () => {
     minDur.start();
     setLoading(true);
     try {
@@ -37,11 +37,20 @@ export default function InterviewsPage() {
     } finally {
       minDur.end(() => setLoading(false));
     }
-  };
+  }, [minDur]);
 
   useEffect(() => {
-    loadInterviews();
-  }, []);
+    void loadInterviews();
+
+    const onFocus = () => {
+      void loadInterviews();
+    };
+
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loadInterviews]);
 
   const handleSubmitFeedback = (e: React.FormEvent) => {
     e.preventDefault();

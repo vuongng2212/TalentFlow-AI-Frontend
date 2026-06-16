@@ -57,10 +57,14 @@ export default function DashboardPage() {
   const { activeWorkspace } = useAuth();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (isBackground = false) => {
       if (!activeWorkspace?.id) return;
-      setIsLoading(true);
-      minDur.start();
+
+      if (!isBackground) {
+        setIsLoading(true);
+        minDur.start();
+      }
+
       try {
         const [overviewRes, topJobsRes, pipelineRes, trendsRes] = await Promise.all([
           analyticsService.getOverview(),
@@ -72,16 +76,26 @@ export default function DashboardPage() {
         setTopJobs(topJobsRes);
         setPipeline(pipelineRes);
         setTrends(trendsRes);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Failed to load dashboard stats', error);
       } finally {
-        minDur.end(() => setIsLoading(false));
+        if (!isBackground) {
+          minDur.end(() => setIsLoading(false));
+        }
       }
     };
 
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWorkspace?.id]);
+    void fetchData(false);
+
+    const onFocus = () => {
+      void fetchData(true);
+    };
+
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [activeWorkspace?.id, minDur]);
 
   const totalCandidates = pipeline.reduce((sum, stage) => sum + stage.count, 0);
 

@@ -64,11 +64,12 @@ export default function SignupPage() {
         localStorage.setItem('tf-role', role);
         router.push('/dashboard');
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       hideLoading();
       setIsLoading(false);
       setErrors({
-        email: err?.message || 'Failed to create account. Email may already be in use.',
+        email: error?.message || 'Failed to create account. Email may already be in use.',
       });
     }
   };

@@ -15,12 +15,12 @@ export const applicationService = {
     return api.get<Application>(`/applications/${id}`);
   },
 
-  createApplication: async (data: any) => {
+  createApplication: async (data: Partial<Application>) => {
     return api.post<Application>('/applications', data);
   },
 
   uploadApplicationCv: async (formData: FormData) => {
-    return apiClient.post<any, ApiResponse<Application>>('/applications/upload', formData, {
+    return apiClient.post<unknown, ApiResponse<Application>>('/applications/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

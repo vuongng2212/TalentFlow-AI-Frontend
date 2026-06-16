@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 // Định nghĩa base response của BE
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   status: number;
   message: string;
   data: T;
@@ -35,9 +35,13 @@ export const apiClient: AxiosInstance = axios.create({
 // Using a closure avoids circular imports with RoleContext.
 let _activeWorkspaceId: string | null = null;
 let _isRefreshing = false;
-let _failedQueue: any[] = [];
+interface FailedRequest {
+  resolve: (token: string | null) => void;
+  reject: (error: unknown) => void;
+}
+let _failedQueue: FailedRequest[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   _failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -156,17 +160,17 @@ apiClient.interceptors.response.use(
  */
 export const api = {
   get: <T>(url: string, params?: object) =>
-    apiClient.get<any, ApiResponse<T>>(url, { params }).then(res => res.data),
+    apiClient.get<unknown, ApiResponse<T>>(url, { params }).then(res => res.data),
 
   post: <T>(url: string, data?: object) =>
-    apiClient.post<any, ApiResponse<T>>(url, data).then(res => res.data),
+    apiClient.post<unknown, ApiResponse<T>>(url, data).then(res => res.data),
 
   put: <T>(url: string, data?: object) =>
-    apiClient.put<any, ApiResponse<T>>(url, data).then(res => res.data),
+    apiClient.put<unknown, ApiResponse<T>>(url, data).then(res => res.data),
 
   patch: <T>(url: string, data?: object) =>
-    apiClient.patch<any, ApiResponse<T>>(url, data).then(res => res.data),
+    apiClient.patch<unknown, ApiResponse<T>>(url, data).then(res => res.data),
 
   delete: <T>(url: string) =>
-    apiClient.delete<any, ApiResponse<T>>(url).then(res => res.data),
+    apiClient.delete<unknown, ApiResponse<T>>(url).then(res => res.data),
 };

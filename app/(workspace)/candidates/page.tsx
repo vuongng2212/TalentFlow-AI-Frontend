@@ -48,6 +48,8 @@ export default function ApplicationsPage() {
 
   const loadData = useCallback(
     async (isBackground = false) => {
+      if (!activeWorkspace?.id) return; // Must have workspace context
+
       if (!isBackground) {
         startMinDuration();
         setLoading(true);
@@ -77,7 +79,7 @@ export default function ApplicationsPage() {
         }
         setApplications(filtered);
         setTotalPages(response.meta.totalPages);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Failed to fetch applications", e);
       } finally {
         if (!isBackground) endMinDuration(() => setLoading(false));
@@ -85,6 +87,7 @@ export default function ApplicationsPage() {
       }
     },
     [
+      activeWorkspace?.id,
       endMinDuration,
       filters.search,
       filters.stage,
@@ -95,26 +98,20 @@ export default function ApplicationsPage() {
   );
 
   useEffect(() => {
-    if (isAuthLoading || !isAuthenticated) return;
+    if (isAuthLoading || !isAuthenticated || !activeWorkspace?.id) return;
 
-    let ignore = false;
-    queueMicrotask(() => {
-      if (!ignore) {
-        void loadData(false);
-      }
-    });
+    void loadData(false);
 
     const onFocus = () => {
-      if (!ignore) loadData(true);
+      loadData(true);
     };
 
     window.addEventListener("focus", onFocus);
 
     return () => {
-      ignore = true;
       window.removeEventListener("focus", onFocus);
     };
-  }, [isAuthLoading, isAuthenticated, loadData]);
+  }, [isAuthLoading, isAuthenticated, activeWorkspace?.id, loadData]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === applications.length && applications.length > 0) {

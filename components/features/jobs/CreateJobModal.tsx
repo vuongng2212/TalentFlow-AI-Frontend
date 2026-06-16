@@ -59,7 +59,7 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
     setError(null);
 
     showLoading('Creating job...');
-      try {
+    try {
       await jobService.createJob({
         title: formData.title,
         department: formData.department,
@@ -74,9 +74,10 @@ export default function CreateJobModal({ isOpen, onClose, onJobCreated }: Create
 
       if (onJobCreated) onJobCreated();
       handleClose();
-    } catch (err) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       hideLoading();
-      setError(err instanceof Error ? err.message : 'Failed to create job');
+      setError(error?.message || 'Failed to create job');
     } finally {
       hideLoading();
       setLoading(false);

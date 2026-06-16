@@ -72,9 +72,10 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
 
       onInterviewScheduled();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       hideLoading();
-      setError(err?.message || 'Failed to schedule interview');
+      setError(error?.message || 'Failed to schedule interview');
     } finally {
       hideLoading();
       setLoading(false);

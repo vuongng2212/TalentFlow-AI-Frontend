@@ -1,9 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
-import Badge from '../../ui/badge';
 
 interface KanbanCardProps {
-  candidate: any;
+  candidate: {
+    id: string;
+    avatar: string;
+    name: string;
+    title: string;
+    score: number;
+    skills: string[];
+    appliedDate: string;
+  };
   onSelect: (candidate: any) => void;
   onDragStart: (e: React.DragEvent, id: string) => void;
 }

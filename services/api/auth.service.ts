@@ -2,11 +2,11 @@ import { api } from '@/lib/api-client';
 import { User } from '@/types';
 
 export const authService = {
-  login: async (credentials: any) => {
+  login: async (credentials: Record<string, string>) => {
     return api.post<{ user: User }>('/auth/login', credentials);
   },
 
-  signup: async (data: any) => {
+  signup: async (data: Record<string, string>) => {
     return api.post<{ user: User }>('/auth/signup', data);
   },
 

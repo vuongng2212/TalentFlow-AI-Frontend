@@ -47,14 +47,15 @@ function AcceptInviteContent() {
 
         // Redirect to dashboard after 2.5s
         setTimeout(() => router.replace('/dashboard'), 2500);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string };
         setPageState('error');
-        setErrorMessage(err?.message || 'The invitation may have expired or already been used.');
+        setErrorMessage(error?.message || 'The invitation may have expired or already been used.');
       }
     };
 
     void accept();
-  }, [isLoading, user, token]);
+  }, [isLoading, user, token, refreshWorkspaces, router]);
 
   // After login redirect back with token
   const handleLoginRedirect = () => {

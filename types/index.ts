@@ -65,7 +65,7 @@ export interface AuthContextProps {
   activeWorkspace: Workspace | null;
   /** All workspaces the user belongs to (for the switcher) */
   workspaces: Workspace[];
-  login: (credentials: any) => Promise<void>;
+  login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   /** Switch the active workspace for the current user */
   switchWorkspace: (workspaceId: string) => Promise<void>;
@@ -196,8 +196,8 @@ export interface UICandidate extends Candidate {
   scoreCategory?: 'high' | 'mid' | 'low';
   skills?: string[];
   summary?: string;
-  timeline?: any[];
-  scorecard?: any[];
+  timeline?: unknown[];
+  scorecard?: unknown[];
 }
 
 // Billing

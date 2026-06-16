@@ -166,9 +166,7 @@ export default function JobsPage() {
     <>
       <header className="topbar bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
         <div className="crumb text-slate-500 dark:text-zinc-400">
-          <span>
-            {activeWorkspace?.name ?? 'Workspace'} <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">Jobs</strong>
-          </span>
+          {activeWorkspace?.name ?? 'Workspace'} <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">Jobs</strong>
           {isFetching && (
             <svg
               className="animate-spin h-4 w-4 text-primary ml-2 inline"

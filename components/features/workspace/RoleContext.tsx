@@ -139,6 +139,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!hasCheckedAuthRef.current || isLoading) return;
 
+    // Redirect logged-in users away from auth pages
+    const isAuthRoute = pathname === "/login" || pathname === "/signup";
+    if (isAuthRoute && user) {
+      router.replace("/dashboard");
+      return;
+    }
+
     // Skip protection logic on public routes
     const isPublicRoute =
       pathname === "/login" ||

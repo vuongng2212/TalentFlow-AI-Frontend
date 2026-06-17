@@ -5,9 +5,10 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
 }
 
-export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, title, children, size = 'lg' }: ModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -24,6 +25,17 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   if (!isOpen) return null;
 
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+  }[size];
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 dark:bg-black/60 backdrop-blur-md"
@@ -33,7 +45,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="bg-white/90 dark:bg-zinc-950/90 border border-slate-200/60 dark:border-zinc-800/60 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300 [animation-timing-function:cubic-bezier(0.34,1.56,0.64,1)] relative"
+        className={`bg-white/90 dark:bg-zinc-950/90 border border-slate-200/60 dark:border-zinc-800/60 backdrop-blur-xl rounded-2xl shadow-2xl w-full ${sizeClasses} max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300 [animation-timing-function:cubic-bezier(0.34,1.56,0.64,1)] relative`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Micro-noise overlay */}

@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { AuthProvider } from '../components/features/workspace/RoleContext';
+import { NotificationSocketProvider } from '../components/providers/NotificationSocketProvider';
+import { Toaster } from 'sonner';
 import GlobalLoadingOverlay from '../components/ui/GlobalLoadingOverlay';
 import { useUIStore } from '../lib/store/useUIStore';
 
@@ -29,8 +31,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthProvider>
-      {children}
-      <GlobalLoadingOverlay />
+      <NotificationSocketProvider>
+        {children}
+        <Toaster position="top-right" richColors closeButton />
+        <GlobalLoadingOverlay />
+      </NotificationSocketProvider>
     </AuthProvider>
   );
 }

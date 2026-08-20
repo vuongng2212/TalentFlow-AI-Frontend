@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { applicationService } from "../../../services/api/application.service";
 import { Application, ApplicationStage, UICandidate } from "../../../types";
+import { getScoreCategory } from "../../../lib/cv";
 import FilterCenter from "../../../components/features/candidates/FilterCenter";
 import KanbanBoard from "../../../components/features/candidates/KanbanBoard";
 import CandidateDossier from "../../../components/features/candidates/CandidateDossier";
@@ -77,6 +78,16 @@ export default function ApplicationsPage() {
               app.job?.title?.toLowerCase().includes(s),
           );
         }
+        // Client-side min-score filter (backend query has no score param yet).
+        // Only applied to applications that already have a parsed score.
+        if (filters.minScore > 0) {
+          filtered = filtered.filter(
+            (app) =>
+              app.aiScore !== null &&
+              app.aiScore !== undefined &&
+              app.aiScore >= filters.minScore,
+          );
+        }
         setApplications(filtered);
         setTotalPages(response.meta.totalPages);
       } catch (e: unknown) {
@@ -91,6 +102,7 @@ export default function ApplicationsPage() {
       endMinDuration,
       filters.search,
       filters.stage,
+      filters.minScore,
       pagination.page,
       startMinDuration,
       viewMode,
@@ -107,10 +119,17 @@ export default function ApplicationsPage() {
       loadData(true);
     };
 
+    const onCvParsingDone = () => {
+      // Backend finished parsing a CV → refresh the pipeline silently.
+      loadData(true);
+    };
+
     window.addEventListener("focus", onFocus);
+    window.addEventListener("cv-parsing-done", onCvParsingDone);
 
     return () => {
       window.removeEventListener("focus", onFocus);
+      window.removeEventListener("cv-parsing-done", onCvParsingDone);
     };
   }, [isAuthLoading, isAuthenticated, activeWorkspace?.id, loadData]);
 
@@ -159,7 +178,7 @@ export default function ApplicationsPage() {
     clearSelection();
   };
 
-  // UI Map Application
+  // UI Map Application — surfaces the REAL aiScore + cvParsingStatus from backend
   const mapToKanbanItem = (app: Application): UICandidate & { name: string; title: string; appliedDate: string; stage: string } => ({
     id: app.id,
     fullName: app.candidate?.fullName || "Unknown",
@@ -170,9 +189,11 @@ export default function ApplicationsPage() {
     title: app.job?.title || "Unknown Job",
     avatar: app.candidate?.fullName?.charAt(0) || "?",
     stage: app.stage.toLowerCase(),
-    score: 85, // Standard mock AI score
-    scoreCategory: "high",
-    skills: [],
+    // Real AI score from the parser pipeline (may be undefined until parsed)
+    score: app.aiScore ?? null,
+    scoreCategory: getScoreCategory(app.aiScore),
+    cvParsingStatus: app.cvParsingStatus,
+    skills: app.parsedData?.skills ?? [],
     appliedDate: new Date(app.appliedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     summary: app.notes || "",
     timeline: [],

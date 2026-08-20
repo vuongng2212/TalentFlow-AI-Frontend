@@ -129,6 +129,18 @@ export interface Job {
 export type ApplicationStage = 'APPLIED' | 'SCREENING' | 'INTERVIEW' | 'OFFER' | 'HIRED' | 'REJECTED';
 export type ApplicationStatus = 'SUBMITTED' | 'IN_REVIEW' | 'DECIDED';
 
+/** CV parsing lifecycle driven by the backend AI pipeline (CvParsingStatus enum) */
+export type CvParsingStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+/** Structured data extracted from the CV by the parser service */
+export interface ParsedCvData {
+  skills?: string[];
+  experienceYears?: number;
+  education?: string[];
+  summary?: string;
+  [key: string]: unknown;
+}
+
 export interface Candidate {
   id: string;
   email: string;
@@ -160,6 +172,14 @@ export interface Application {
   updatedAt: string;
   candidate?: Candidate;
   job?: Partial<Job>;
+  /** CV parsing lifecycle status from the AI pipeline */
+  cvParsingStatus?: CvParsingStatus;
+  /** AI-assigned fit score (0-100) after CV parsing; null until parsed */
+  aiScore?: number | null;
+  /** Human-readable rationale behind aiScore */
+  scoringReasoning?: string | null;
+  /** Structured data extracted from the CV by the parser */
+  parsedData?: ParsedCvData | null;
 }
 
 // Interviews
@@ -192,8 +212,9 @@ export interface CandidateFilters {
 // UI specific backward-compatible properties that might be computed on FE
 export interface UICandidate extends Candidate {
   avatar?: string;
-  score?: number;
-  scoreCategory?: 'high' | 'mid' | 'low';
+  score?: number | null;
+  scoreCategory?: 'high' | 'mid' | 'low' | 'none';
+  cvParsingStatus?: CvParsingStatus;
   skills?: string[];
   summary?: string;
   timeline?: unknown[];

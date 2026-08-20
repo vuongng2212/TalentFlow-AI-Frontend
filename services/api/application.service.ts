@@ -20,11 +20,13 @@ export const applicationService = {
   },
 
   uploadApplicationCv: async (formData: FormData) => {
-    return apiClient.post<unknown, ApiResponse<Application>>('/applications/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }).then((res) => res.data);
+    return apiClient
+      .post<unknown, ApiResponse<Application>>('/applications/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then((res) => res.data);
   },
 
   updateApplicationStage: async (id: string, stage: ApplicationStage) => {

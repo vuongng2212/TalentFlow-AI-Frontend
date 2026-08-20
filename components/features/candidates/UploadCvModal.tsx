@@ -26,6 +26,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
 
   const [selectedJobId, setSelectedJobId] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [coverLetter, setCoverLetter] = useState('');
   const [isDragActive, setIsDragActive] = useState(false);
 
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
       const formData = new FormData();
       formData.append('file', file);
       formData.append('jobId', selectedJobId);
+      if (coverLetter.trim()) formData.append('coverLetter', coverLetter);
 
       await applicationService.uploadApplicationCv(formData);
 
@@ -91,7 +93,12 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
       handleClose();
     } catch (err) {
       hideLoading();
-      setError(err instanceof Error ? err.message : 'Failed to upload CV');
+      // Surface backend validation / conflict messages (e.g. 409 Already applied).
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Failed to upload CV';
+      setError(message);
     } finally {
       hideLoading();
       setLoading(false);
@@ -155,6 +162,17 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
               </div>
             </div>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-1.5">Cover Letter (optional)</label>
+          <textarea
+            className="w-full px-3 py-2 rounded-lg border bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-50 outline-none transition-all border-slate-200 dark:border-zinc-800 focus:border-indigo-500 text-sm resize-none h-24"
+            placeholder="Add a short note to the recruiter…"
+            maxLength={2000}
+            value={coverLetter}
+            onChange={(e) => setCoverLetter(e.target.value)}
+          />
         </div>
 
         <div className="flex justify-end gap-3 pt-5 border-t border-slate-100 dark:border-zinc-800/60 mt-6 bg-slate-50/50 dark:bg-zinc-900/10 -mx-6 -mb-6 p-6">

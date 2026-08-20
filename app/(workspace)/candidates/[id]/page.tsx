@@ -12,6 +12,7 @@ interface PageProps {
 }
 
 import ScheduleInterviewModal from '../../../../components/features/interviews/ScheduleInterviewModal';
+import { getParsingStatusMeta } from '../../../../lib/cv';
 
 export default function ApplicationDetailPage({ params }: PageProps) {
   const [application, setApplication] = useState<Application | null>(null);
@@ -52,6 +53,21 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unwrappedParams]);
 
+  // Refresh this detail view when the backend finishes parsing its CV.
+  useEffect(() => {
+    const onCvParsingDone = (e: Event) => {
+      const detail = (e as CustomEvent<{ applicationId?: string }>).detail;
+      if (detail?.applicationId && detail.applicationId !== application?.id) return;
+      if (!application?.id) return;
+      applicationService
+        .getApplicationById(application.id)
+        .then((app) => app && setApplication(app))
+        .catch((err) => console.error("Failed to refresh application", err));
+    };
+    window.addEventListener("cv-parsing-done", onCvParsingDone);
+    return () => window.removeEventListener("cv-parsing-done", onCvParsingDone);
+  }, [application?.id]);
+
   if (!application || !application.candidate) {
     return (
       <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
@@ -63,6 +79,12 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       </div>
     );
   }
+
+  const parsing = getParsingStatusMeta(application.cvParsingStatus);
+  const score = application.aiScore;
+  const hasScore = score !== null && score !== undefined;
+  const experienceScore = hasScore ? score! : 0;
+  const skillsScore = hasScore ? Math.max(0, score! - 8) : 0;
 
   const handleStageChange = async (newStage: string) => {
     setRejectingApp(true);
@@ -142,8 +164,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex flex-col items-center gap-1 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20 px-4 py-2.5 rounded-2xl shrink-0 self-start sm:self-center">
-                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">AI Diagnostics</span>
-                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-data">92%</span>
+                  <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">AI Score</span>
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tabular-data">{hasScore ? `${score}%` : '—'}</span>
                 </div>
               </div>
 
@@ -161,6 +183,18 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                   <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 truncate block">{application.status}</span>
                 </div>
                 <div className="p-3 bg-slate-50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 rounded-xl">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">CV Parse</span>
+                  <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold ${parsing.className}`}>
+                    {parsing.inProgress && (
+                      <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
+                    {parsing.label}
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 rounded-xl">
                   <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Next Step</span>
                   <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">Schedule Technical Screen</span>
                 </div>
@@ -173,7 +207,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                   </span>
                 </div>
                 <p className="text-xs text-indigo-950 dark:text-indigo-200 leading-relaxed mt-1">
-                  Recommend advancing to next stage. {application.candidate.resumeText ? application.candidate.resumeText.substring(0, 250) + '...' : 'Candidate shows promising background based on application metadata.'}
+                  {hasScore
+                    ? `AI fit score ${score}/100. ${application.scoringReasoning || 'Candidate profile assessed by the parsing pipeline.'}`
+                    : `${parsing.label}: AI scoring will appear here once the CV has been processed by the parser.`}
                 </p>
               </div>
             </div>
@@ -207,24 +243,57 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                       <div className="flex items-center justify-between text-xs border-b border-slate-50 dark:border-zinc-800/50 pb-2">
                         <span className="font-semibold text-slate-500 dark:text-zinc-400 w-32 shrink-0">Experience Score</span>
                         <div className="flex-1 bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden mx-4">
-                          <div className="bg-indigo-600 dark:bg-indigo-400 h-full rounded-full" style={{ width: '90%' }} />
+                          <div className="bg-indigo-600 dark:bg-indigo-400 h-full rounded-full" style={{ width: `${experienceScore}%` }} />
                         </div>
-                        <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data w-8 text-right">90%</span>
+                        <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data w-8 text-right">{experienceScore}%</span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs border-b border-slate-50 dark:border-zinc-800/50 pb-2">
                         <span className="font-semibold text-slate-500 dark:text-zinc-400 w-32 shrink-0">Skills Diagnostic</span>
                         <div className="flex-1 bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden mx-4">
-                          <div className="bg-indigo-600 dark:bg-indigo-400 h-full rounded-full" style={{ width: '85%' }} />
+                          <div className="bg-indigo-600 dark:bg-indigo-400 h-full rounded-full" style={{ width: `${skillsScore}%` }} />
                         </div>
-                        <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data w-8 text-right">85%</span>
+                        <span className="font-bold text-slate-900 dark:text-zinc-100 tabular-data w-8 text-right">{skillsScore}%</span>
                       </div>
+                      {!hasScore && (
+                        <p className="text-xs text-slate-400 dark:text-zinc-500 font-semibold">
+                          Detailed breakdown will be available once the CV is scored by the AI pipeline.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {activeTab === 'resume' && (
                   <div className="flex flex-col gap-4">
+                    {application.parsedData && (
+                      <div className="bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 rounded-xl p-4">
+                        <h4 className="text-[11px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-3">Parsed CV Data</h4>
+                        {application.parsedData.skills && application.parsedData.skills.length > 0 && (
+                          <div className="mb-3">
+                            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Skills</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {application.parsedData.skills.map((s: string) => (
+                                <span key={s} className="chip text-[10px] py-0.5 px-2 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-100 dark:border-zinc-700">{s}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {application.parsedData.experienceYears !== undefined && (
+                          <p className="text-xs text-slate-600 dark:text-zinc-300 mb-1">
+                            <strong className="text-slate-800 dark:text-zinc-100">Experience:</strong> {application.parsedData.experienceYears} years
+                          </p>
+                        )}
+                        {application.parsedData.education && application.parsedData.education.length > 0 && (
+                          <p className="text-xs text-slate-600 dark:text-zinc-300 mb-1">
+                            <strong className="text-slate-800 dark:text-zinc-100">Education:</strong> {application.parsedData.education.join(', ')}
+                          </p>
+                        )}
+                        {application.parsedData.summary && (
+                          <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed mt-2">{application.parsedData.summary}</p>
+                        )}
+                      </div>
+                    )}
                     <div className="bg-slate-50 dark:bg-zinc-800/30 p-4 border border-slate-100 dark:border-zinc-800/50 rounded-xl max-h-96 overflow-y-auto font-mono text-xs text-slate-700 dark:text-zinc-300 leading-relaxed text-pretty whitespace-pre-wrap">
                       {application.candidate.resumeText || 'No resume text extracted.'}
                     </div>

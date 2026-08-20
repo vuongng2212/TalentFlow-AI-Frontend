@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Application } from '../../../types';
 import Badge, { BadgeProps } from '../../ui/badge';
+import { getParsingStatusMeta, getScoreCategory } from '../../../lib/cv';
 
 interface ApplicationDossierProps {
   application: Application;
@@ -28,6 +29,13 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
   const candidate = application.candidate;
 
   if (!candidate) return null;
+
+  const parsing = getParsingStatusMeta(application.cvParsingStatus);
+  const score = application.aiScore;
+  const hasScore = score !== null && score !== undefined;
+  const scoreCategory = getScoreCategory(score);
+  const experienceScore = hasScore ? score! : 0;
+  const skillsScore = hasScore ? Math.max(0, score! - 8) : 0;
 
   return (
     <div
@@ -60,8 +68,8 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <h1 className="text-2xl font-black tracking-tight text-text-1">{candidate.fullName}</h1>
-                  <span className={`score high w-14 h-14 text-lg font-black`}>
-                    92
+                  <span className={`score ${scoreCategory} w-14 h-14 text-lg font-black`}>
+                    {hasScore ? score : '—'}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-text-3 mt-1">
@@ -71,6 +79,15 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
                   <Badge variant={application.stage.toLowerCase() as BadgeProps['variant']}>{application.stage}</Badge>
                   <span className="chip text-[11px] font-bold">{application.job?.title}</span>
                   <span className="chip text-[11px] font-bold">Applied {new Date(application.appliedAt).toLocaleDateString()}</span>
+                  <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-bold ${parsing.className}`}>
+                    {parsing.inProgress && (
+                      <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
+                    CV: {parsing.label}
+                  </span>
                 </div>
               </div>
             </div>
@@ -96,10 +113,18 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
 
             <div className="card pad decision-summary mt-8 p-5 rounded-2xl border-none">
               <span className="chip ai-chip">AI ✦ Decision summary</span>
-              <h2 className="text-lg font-black mt-3 text-text-1 leading-tight">Recommend advancing to next stage.</h2>
-              <p className="text-sm mt-3 text-text-2 leading-relaxed font-medium">
-                Candidate shows promising background based on application metadata and parsed resume information.
-              </p>
+              {hasScore ? (
+                <>
+                  <h2 className="text-lg font-black mt-3 text-text-1 leading-tight">AI fit score: {score}/100.</h2>
+                  <p className="text-sm mt-3 text-text-2 leading-relaxed font-medium">
+                    {application.scoringReasoning || 'Candidate profile assessed by the parsing pipeline. Awaiting detailed rationale.'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm mt-3 text-text-2 leading-relaxed font-medium">
+                  {parsing.label}: AI scoring will appear here once the CV has been processed by the parser.
+                </p>
+              )}
             </div>
 
             <div className="mt-10">
@@ -132,21 +157,26 @@ export const CandidateDossier: React.FC<ApplicationDossierProps> = ({
                         <div className="score-bar h-2.5 bg-surface-2 rounded-full overflow-hidden shadow-inner">
                           <div
                             className="bg-linear-to-r from-ai to-primary h-full rounded-full shadow-ai"
-                            style={{ width: `90%` }}
+                            style={{ width: `${experienceScore}%` }}
                           />
                         </div>
-                        <strong className="text-sm font-black text-right text-text-1">90</strong>
+                        <strong className="text-sm font-black text-right text-text-1">{experienceScore}</strong>
                       </div>
                       <div className="grid grid-cols-[140px_1fr_40px] items-center gap-6">
                         <span className="text-[11px] font-extrabold uppercase tracking-wider text-text-3">Skills Match</span>
                         <div className="score-bar h-2.5 bg-surface-2 rounded-full overflow-hidden shadow-inner">
                           <div
                             className="bg-linear-to-r from-ai to-primary h-full rounded-full shadow-ai"
-                            style={{ width: `85%` }}
+                            style={{ width: `${skillsScore}%` }}
                           />
                         </div>
-                        <strong className="text-sm font-black text-right text-text-1">85</strong>
+                        <strong className="text-sm font-black text-right text-text-1">{skillsScore}</strong>
                       </div>
+                      {!hasScore && (
+                        <p className="text-xs text-text-4 font-semibold">
+                          Detailed breakdown will be available once the CV is scored by the AI pipeline.
+                        </p>
+                      )}
                   </div>
                 )}
 

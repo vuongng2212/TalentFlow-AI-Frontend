@@ -45,17 +45,26 @@ export const NotificationSocketProvider: React.FC<{ children: React.ReactNode }>
       socketInstance.emit('joinUserRoom');
     });
 
-    // Listen to push notifications from the backend
+    // Listen to push notifications from the backend.
+    // Backend emits `receiveNotification` with type 'application_result' for both
+    // cv.parsed and cv.failed, and 'application_confirmation' on new applications.
     socketInstance.on('receiveNotification', (notification: {
       type: string;
       title: string;
       message: string;
+      /** Present on cv.parsed / cv.failed payloads */
+      userId?: string;
+      applicationId?: string;
     }) => {
       console.log('🔔 Received real-time notification:', notification);
 
-      // Trigger toast based on type
-      if (notification.type === 'cv_failed') {
-        toast.error(notification.title || 'CV Processing Failed', {
+      const isFailure =
+        /fail|reject|error/i.test(notification.title) ||
+        /fail|reject|error/i.test(notification.message);
+
+      // Surface a toast for the user.
+      if (isFailure) {
+        toast.error(notification.title || 'Processing Failed', {
           description: notification.message,
           duration: 6000,
         });
@@ -64,6 +73,17 @@ export const NotificationSocketProvider: React.FC<{ children: React.ReactNode }>
           description: notification.message,
           duration: 5000,
         });
+      }
+
+      // Notify the pipeline views so they can refresh once CV parsing finishes.
+      if (notification.type === 'application_result') {
+        window.dispatchEvent(new CustomEvent('cv-parsing-done', {
+          detail: {
+            userId: notification.userId,
+            applicationId: notification.applicationId,
+            failed: isFailure,
+          },
+        }));
       }
     });
 

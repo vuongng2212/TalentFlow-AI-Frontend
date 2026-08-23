@@ -1,0 +1,71 @@
+{
+  "endpoints": {
+    "getOverview": {
+      "path": "/analytics/overview",
+      "method": "GET",
+      "response": {
+        "type": "object",
+        "properties": {
+          "totalJobs": { "type": "integer", "minimum": 0 },
+          "openJobs": { "type": "integer", "minimum": 0 },
+          "totalCandidates": { "type": "integer", "minimum": 0 },
+          "totalApplications": { "type": "integer", "minimum": 0 },
+          "hiredCount": { "type": "integer", "minimum": 0 },
+          "hireRate": { "type": "number", "minimum": 0, "maximum": 100 }
+        },
+        "required": ["totalJobs", "openJobs", "totalCandidates", "totalApplications", "hiredCount", "hireRate"]
+      }
+    },
+    "getPipeline": {
+      "path": "/analytics/pipeline",
+      "method": "GET",
+      "response": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "stage": {
+              "type": "string",
+              "enum": ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "HIRED", "REJECTED"]
+            },
+            "count": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["stage", "count"]
+        }
+      }
+    },
+    "getTrends": {
+      "path": "/analytics/trends",
+      "method": "GET",
+      "response": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": { "type": "string", "format": "date-time" },
+            "applications": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["date", "applications"]
+        }
+      }
+    },
+    "getTopJobs": {
+      "path": "/analytics/top-jobs",
+      "method": "GET",
+      "response": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "format": "uuid" },
+            "title": { "type": "string" },
+            "department": { "type": "string" },
+            "status": { "type": "string", "enum": ["OPEN", "DRAFT", "CLOSED"] },
+            "applicationCount": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["id", "title", "department", "status", "applicationCount"]
+        }
+      }
+    }
+  }
+}

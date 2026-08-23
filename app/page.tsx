@@ -1,42 +1,66 @@
-"use client";
+import React from "react";
+import Link from "next/link";
+import Header from "@/components/landing/Header";
+import HeroSection from "@/components/landing/HeroSection";
+import TrustedLogos from "@/components/landing/TrustedLogos";
+import ChallengesSection from "@/components/landing/ChallengesSection";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import WorkflowSection from "@/components/landing/WorkflowSection";
+import IntegrationsSection from "@/components/landing/IntegrationsSection";
+import SecuritySection from "@/components/landing/SecuritySection";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import ImpactMetrics from "@/components/landing/ImpactMetrics";
+import PricingSection from "@/components/landing/PricingSection";
+import FaqSection from "@/components/landing/FaqSection";
+import FinalCta from "@/components/landing/FinalCta";
+import Footer from "@/components/landing/Footer";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/auth-store";
-import { ROUTES } from "@/lib/constants";
-import LandingPage from "./(marketing)/landing/page";
+export default function LandingPage() {
+  return (
+    <div className="flex flex-col min-h-screen bg-zinc-50">
+      <Header />
 
-export default function Home() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
+      <main className="flex-1">
+        <HeroSection />
+        <TrustedLogos />
+        <ChallengesSection />
+        <FeaturesSection />
+        <WorkflowSection />
+        <IntegrationsSection />
+        <SecuritySection />
+        <TestimonialsSection />
+        <ImpactMetrics />
+        <PricingSection />
+        <FaqSection />
+        <FinalCta />
+      </main>
 
-  useEffect(() => {
-    // Check auth status and redirect if authenticated
-    if (isAuthenticated) {
-      router.push(ROUTES.DASHBOARD);
-    } else {
-      // Defer state update to avoid synchronous state update warning during render phase
-      // This is safe because we're just updating loading state
-      const timer = setTimeout(() => setIsLoading(false), 0);
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, router]);
+      <Footer />
 
-  // Show loading while checking auth
-  if (isLoading && isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-          <p className="mt-4 text-muted-foreground">
-            Redirecting to dashboard...
-          </p>
-        </div>
+      <div className="fixed bottom-4 right-4 z-10">
+        <Link
+          href="/screens"
+          className="btn secondary shadow-lg flex items-center gap-2"
+          style={{ cursor: "pointer" }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          All Screens
+        </Link>
       </div>
-    );
-  }
-
-  // Show landing page for non-authenticated users
-  return <LandingPage />;
+    </div>
+  );
 }

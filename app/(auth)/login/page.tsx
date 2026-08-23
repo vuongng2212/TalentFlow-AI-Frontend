@@ -1,257 +1,226 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuthStore } from "@/store/auth-store";
-import { ROUTES, APP_NAME } from "@/lib/constants";
-import { featureFlags } from "@/lib/api";
-import { ApiError } from "@/lib/api/errors";
-import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { loginSchema } from '../../../services/schemas';
+import { useAuth } from '../../../components/features/workspace/RoleContext';
+import { useUIStore } from '../../../lib/store/useUIStore';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { login, isLoading, error, clearError, isAuthenticated } =
-    useAuthStore();
+  const [email, setEmail] = useState('seed-admin@talentflow.invalid');
+  const [password, setPassword] = useState('SeedPassword123!');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
+  const [successMsg, setSuccessMsg] = useState('');
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors: fieldErrors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
+  const { login, isLoading } = useAuth();
+  const { hideLoading } = useUIStore();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const searchParams = new URLSearchParams(window.location.search);
-      const callbackUrl = searchParams.get("callbackUrl");
-      const targetUrl = callbackUrl || ROUTES.DASHBOARD;
-      if (window.location.pathname !== targetUrl) {
-        router.push(targetUrl);
-      }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setSuccessMsg('');
+
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const fieldErrors: typeof errors = {};
+      validation.error.issues.forEach((err) => {
+        if (err.path[0] === 'email') fieldErrors.email = err.message;
+        if (err.path[0] === 'password') fieldErrors.password = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
     }
-  }, [isAuthenticated, router]);
-
-  useEffect(() => {
-    clearError();
-  }, [clearError]);
-
-  const onSubmit = async (data: LoginFormData) => {
-    clearError();
 
     try {
-      await login(data);
-      toast.success("Welcome back!", {
-        description: "You have successfully signed in.",
-      });
-      const searchParams = new URLSearchParams(window.location.search);
-      const callbackUrl = searchParams.get("callbackUrl");
-      const targetUrl = callbackUrl || ROUTES.DASHBOARD;
-      if (window.location.pathname !== targetUrl) {
-        router.push(targetUrl);
-      }
+      await login({ email, password });
+      setSuccessMsg('Login successful! Redirecting...');
+      // Navigation is handled inside the login function in AuthProvider
     } catch (err: unknown) {
-      if (err instanceof ApiError) {
-        // Account lockout detection
-        if (err.message.includes("Account temporarily locked")) {
-          toast.error("Account locked", { description: err.message });
-          return;
-        }
-        // Validation errors from backend
-        if (err.isValidationError && err.validationErrors.length > 0) {
-          toast.error("Validation failed", {
-            description: err.validationErrors.join(". "),
-          });
-          return;
-        }
-        toast.error("Sign in failed", { description: err.message });
-      } else {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Please check your credentials and try again.";
-        toast.error("Sign in failed", { description: errorMessage });
-      }
+      const error = err as { message?: string };
+      hideLoading();
+      setErrors({ form: error?.message || 'Invalid credentials' });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 gradient-mesh">
-      <div className="w-full max-w-md">
-        {/* Logo & Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-            {APP_NAME}
-          </h1>
-          <p className="text-muted-foreground">
-            Welcome back! Please sign in to continue
-          </p>
+    <main className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      {/* Left side: Brand/Illustration */}
+      <section className="relative hidden lg:flex flex-col justify-between overflow-hidden bg-slate-900 p-12 lg:p-16 xl:p-24 border-r border-slate-800 dark:bg-zinc-950 dark:border-zinc-900">
+        {/* Ambient glowing effect */}
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 w-150 h-150 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative z-10">
+          <Link href="/" className="inline-flex items-center gap-2.5 text-white group">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white font-black text-[11px] tracking-wider shadow-md group-hover:bg-indigo-500 transition-colors">
+              TF
+            </div>
+            <span className="font-jakarta text-xl font-bold tracking-tight">TalentFlow AI</span>
+          </Link>
+
+          <div className="mt-24">
+            <h1 className="font-jakarta text-4xl font-extrabold tracking-tight text-white sm:text-5xl leading-[1.05] text-balance">
+              Recruiting intelligence for serious hiring teams.
+            </h1>
+            <p className="mt-6 text-lg text-slate-300 dark:text-zinc-400 max-w-md leading-relaxed text-pretty">
+              Score candidates, manage pipelines, and keep every hiring stakeholder aligned from one enterprise workspace.
+            </p>
+          </div>
         </div>
 
-        {/* Login Card */}
-        <div className="glass rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                {...register("email")}
-                disabled={isLoading}
-                autoComplete="email"
-              />
-              {fieldErrors.email && (
-                <p className="text-xs text-destructive">
-                  {fieldErrors.email.message}
-                </p>
-              )}
+        <div className="relative z-10 mt-24">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-md">
+            <div className="absolute -top-3 -left-2 text-6xl font-serif text-indigo-300/20 select-none pointer-events-none">
+              &ldquo;
             </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </Link>
+            <p className="relative z-10 text-slate-200 text-[15px] leading-relaxed italic mb-6">
+              We cut the first review loop from two days to one morning, and the score explanation made hiring managers trust the shortlist.
+            </p>
+            <div className="flex items-center gap-3.5 pt-4 border-t border-white/10">
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-indigo-200/20">
+                <Image src="https://i.pravatar.cc/150?u=elena" alt="Elena Brooks" fill className="object-cover" unoptimized />
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-                disabled={isLoading}
-                autoComplete="current-password"
-              />
-              {fieldErrors.password && (
-                <p className="text-xs text-destructive">
-                  {fieldErrors.password.message}
-                </p>
-              )}
+              <div>
+                <h4 className="font-jakarta text-sm font-bold text-white">Elena Brooks</h4>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">Head of Talent <span className="mx-1 text-slate-600">&bull;</span> Helios AI</p>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Store Error */}
-            {error && (
-              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
-                {error}
+      {/* Right side: Form */}
+      <section className="flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-white dark:bg-zinc-950 relative">
+        {/* Mobile Header (Hidden on LG) */}
+        <div className="absolute top-6 left-6 lg:hidden">
+          <Link href="/" className="inline-flex items-center gap-2.5 text-slate-900 dark:text-white">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white font-black text-[11px] tracking-wider shadow-md">
+              TF
+            </div>
+            <span className="font-jakarta text-xl font-bold tracking-tight">TalentFlow AI</span>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-md space-y-8 mt-12 lg:mt-0">
+          <div className="text-center lg:text-left">
+            <h2 className="font-jakarta text-3xl font-extrabold text-slate-900 dark:text-zinc-50 tracking-tight">
+              Welcome back
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
+              Login to continue reviewing candidates.
+            </p>
+
+            <div className="mt-6 text-xs text-slate-600 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-900/50 p-4 rounded-xl border border-slate-200 dark:border-zinc-800/80 text-left">
+              <span className="font-bold text-slate-800 dark:text-zinc-200 block mb-2 uppercase tracking-wider text-[10px]">Default Test Accounts</span>
+              <div className="space-y-1">
+                <div className="flex justify-between items-center"><span className="font-medium">Admin:</span> <code className="bg-slate-200/50 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[11px]">seed-admin@talentflow.invalid</code></div>
+                <div className="flex justify-between items-center"><span className="font-medium">Recruiter:</span> <code className="bg-slate-200/50 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[11px]">seed-recruiter@talentflow.invalid</code></div>
+                <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-200 dark:border-zinc-800"><span className="font-medium">Password:</span> <code className="bg-slate-200/50 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[11px]">SeedPassword123!</code></div>
+              </div>
+            </div>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+            {errors.form && (
+              <div className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm font-medium border border-red-100 dark:border-red-900/30 flex items-start gap-2">
+                <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>{errors.form}</span>
               </div>
             )}
 
-            {/* Remember Me */}
-            <div className="flex items-center">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Email address</label>
               <input
-                id="remember"
-                type="checkbox"
-                className="w-4 h-4 rounded border-border text-primary focus:ring-2 focus:ring-ring"
+                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 dark:border-red-900/50 dark:focus:border-red-500' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 dark:border-zinc-800 dark:focus:border-indigo-500'} bg-white dark:bg-zinc-900/50 text-slate-900 dark:text-zinc-50 outline-none transition-all duration-200 shadow-xs`}
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <label
-                htmlFor="remember"
-                className="ml-2 text-sm text-muted-foreground"
-              >
-                Remember me for 30 days
-              </label>
+              {errors.email && <span className="text-xs text-red-500 font-medium mt-1 block">{errors.email}</span>}
             </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-zinc-300">Password</label>
+              <input
+                className={`w-full px-4 py-3 rounded-xl border ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 dark:border-red-900/50 dark:focus:border-red-500' : 'border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 dark:border-zinc-800 dark:focus:border-indigo-500'} bg-white dark:bg-zinc-900/50 text-slate-900 dark:text-zinc-50 outline-none transition-all duration-200 shadow-xs`}
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              {errors.password && <span className="text-xs text-red-500 font-medium mt-1 block">{errors.password}</span>}
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-zinc-400 cursor-pointer group">
+                <div className="relative flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    className="peer appearance-none w-4 h-4 border border-slate-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 checked:bg-indigo-600 checked:border-indigo-600 transition-colors cursor-pointer"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 8L6 11L11 3.5" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" />
+                  </svg>
+                </div>
+                <span className="group-hover:text-slate-900 dark:group-hover:text-zinc-300 transition-colors">Remember me</span>
+              </label>
+
+              <Link href="#" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className={`w-full h-11 inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 text-sm font-semibold text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-500 hover:shadow-indigo-600/20 transition-all duration-200 active:scale-[0.98] active:translate-y-0.5 hover:-translate-y-0.5 mt-4 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Loader2
-                    className="h-4 w-4 animate-spin mr-2"
-                    aria-hidden="true"
-                  />
-                  Signing in…
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
                 </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
+              ) : 'Login'}
+            </button>
+
+            {successMsg && (
+              <p className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm text-center mt-3 bg-emerald-50 dark:bg-emerald-500/10 p-2.5 rounded-lg">
+                {successMsg}
+              </p>
+            )}
+
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200 dark:border-zinc-800"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white dark:bg-zinc-950 px-4 text-xs text-slate-500 dark:text-zinc-500 uppercase tracking-wider font-semibold">
+                  or
+                </span>
+              </div>
+            </div>
+
+            <p className="text-center text-sm text-slate-600 dark:text-zinc-400">
+              Don&apos;t have an account?{' '}
+              <Link className="font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors" href="/signup">
+                Sign up
+              </Link>
+            </p>
           </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          {/* Social Login - Visual Only */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" disabled>
-              <svg
-                className="w-5 h-5 mr-2"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              Google
-            </Button>
-            <Button variant="outline" disabled>
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-              </svg>
-              GitHub
-            </Button>
-          </div>
-
-          {/* Sign Up Link */}
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Don&apos;t have an account?{" "}
-            <Link
-              href={ROUTES.SIGNUP}
-              className="text-primary font-medium hover:underline"
-            >
-              Sign up
-            </Link>
-          </p>
         </div>
-
-        {/* Demo Credentials */}
-        {featureFlags.enableMockApi && (
-          <div className="mt-4 p-4 glass rounded-lg text-sm text-muted-foreground">
-            <p className="font-medium mb-1">Demo Credentials:</p>
-            <p>Email: recruiter@talentflow.ai</p>
-            <p>Password: Any password works (demo mode)</p>
-          </div>
-        )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

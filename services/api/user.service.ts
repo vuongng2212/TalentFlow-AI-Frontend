@@ -10,11 +10,6 @@ export const userService = {
     return api.get<User>(`/users/${id}`);
   },
 
-  /** @deprecated The backend does not expose POST /users. Use authService.signup instead. */
-  createUser: async (data: Partial<User>) => {
-    return api.post<User>('/users', data);
-  },
-
   updateUser: async (id: string, data: Partial<User>) => {
     return api.patch<User>(`/users/${id}`, data);
   },

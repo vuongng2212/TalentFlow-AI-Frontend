@@ -53,7 +53,11 @@ function EditJobForm({
     location: activeJob?.location || '',
     employmentType: activeJob?.employmentType || 'FULL_TIME',
     description: activeJob?.description || '',
-    requirements: activeJob?.requirements ? activeJob.requirements.join('\n') : '',
+    requirements: Array.isArray(activeJob?.requirements)
+      ? activeJob.requirements.join('\n')
+      : activeJob?.requirements && typeof activeJob.requirements === 'object' && Array.isArray((activeJob.requirements as any).skills)
+      ? (activeJob.requirements as any).skills.join('\n')
+      : '',
     salaryMin: activeJob?.salaryMin ? String(activeJob.salaryMin) : '',
     salaryMax: activeJob?.salaryMax ? String(activeJob.salaryMax) : '',
     status: activeJob?.status || 'OPEN'
@@ -78,7 +82,9 @@ function EditJobForm({
         location: formData.location,
         employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
-        requirements: formData.requirements.split('\n').filter(r => r.trim() !== ''),
+        requirements: {
+          skills: formData.requirements.split('\n').map((r: string) => r.trim()).filter(Boolean),
+        } as any,
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
         status: formData.status as JobStatus,
@@ -87,9 +93,10 @@ function EditJobForm({
       if (onJobUpdated) onJobUpdated();
       handleClose();
     } catch (err: unknown) {
-      const error = err as { message?: string };
+      const error = err as { response?: { data?: { message?: string; details?: string[] } }; message?: string };
       hideLoading();
-      setError(error?.message || 'Failed to update job');
+      const detailsMsg = error?.response?.data?.details?.join(', ');
+      setError(detailsMsg || error?.response?.data?.message || error?.message || 'Failed to update job');
     } finally {
       hideLoading();
       setLoading(false);

@@ -135,10 +135,11 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
               onChange={handleChange}
               className="select w-full"
             >
-              <option value="SCREENING">Screening</option>
-              <option value="TECHNICAL">Technical</option>
-              <option value="CULTURE_FIT">Culture Fit</option>
-              <option value="FINAL">Final</option>
+              <option value="TECHNICAL">Technical Interview</option>
+              <option value="VIDEO">Video Call</option>
+              <option value="PHONE">Phone Screen</option>
+              <option value="IN_PERSON">In-Person</option>
+              <option value="PANEL">Panel Interview</option>
             </select>
           </div>
           <div>

@@ -139,6 +139,27 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       </header>
 
       <section className="content bg-noise">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-zinc-800/80 rounded-xl mb-6 border border-slate-200 dark:border-zinc-800 relative z-10">
+          {(['APPLIED', 'SCREENING', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED'] as ApplicationStage[]).map((stg) => {
+            const isCurrent = application.stage === stg;
+            return (
+              <button
+                key={stg}
+                type="button"
+                onClick={() => handleStageChange(stg)}
+                disabled={rejectingApp}
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  isCurrent
+                    ? 'bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/80 dark:border-zinc-700'
+                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-slate-200/50 dark:hover:bg-zinc-700/50'
+                }`}
+              >
+                {stg.charAt(0) + stg.slice(1).toLowerCase()}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
           {/* Main Content Info */}
           <div className="lg:col-span-2 flex flex-col gap-6">

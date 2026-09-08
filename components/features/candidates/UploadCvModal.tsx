@@ -91,13 +91,12 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
 
       if (onUploadSuccess) onUploadSuccess();
       handleClose();
-    } catch (err) {
+    } catch (err: unknown) {
       hideLoading();
-      // Surface backend validation / conflict messages (e.g. 409 Already applied).
+      const apiErr = err as { response?: { data?: { message?: string } }; message?: string };
       const message =
-        err instanceof Error
-          ? err.message
-          : 'Failed to upload CV';
+        apiErr?.response?.data?.message ||
+        (err instanceof Error ? err.message : 'Failed to upload CV');
       setError(message);
     } finally {
       hideLoading();

@@ -71,7 +71,9 @@ export default function CreateJobModal({ onClose, onJobCreated }: CreateJobModal
         location: formData.location,
         employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
-        requirements: formData.requirements.split('\n').filter(r => r.trim() !== ''),
+        requirements: {
+          skills: formData.requirements.split('\n').map(r => r.trim()).filter(Boolean),
+        } as any,
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
         status: 'DRAFT' // Always create as draft first
@@ -80,9 +82,10 @@ export default function CreateJobModal({ onClose, onJobCreated }: CreateJobModal
       if (onJobCreated) onJobCreated();
       handleClose();
     } catch (err: unknown) {
-      const error = err as { message?: string };
+      const error = err as { response?: { data?: { message?: string; details?: string[] } }; message?: string };
       hideLoading();
-      setError(error?.message || 'Failed to create job');
+      const detailsMsg = error?.response?.data?.details?.join(', ');
+      setError(detailsMsg || error?.response?.data?.message || error?.message || 'Failed to create job');
     } finally {
       hideLoading();
       setLoading(false);

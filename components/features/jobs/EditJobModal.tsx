@@ -55,8 +55,6 @@ function EditJobForm({
     description: activeJob?.description || '',
     requirements: Array.isArray(activeJob?.requirements)
       ? activeJob.requirements.join('\n')
-      : activeJob?.requirements && typeof activeJob.requirements === 'object' && Array.isArray((activeJob.requirements as any).skills)
-      ? (activeJob.requirements as any).skills.join('\n')
       : '',
     salaryMin: activeJob?.salaryMin ? String(activeJob.salaryMin) : '',
     salaryMax: activeJob?.salaryMax ? String(activeJob.salaryMax) : '',
@@ -82,9 +80,7 @@ function EditJobForm({
         location: formData.location,
         employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
-        requirements: {
-          skills: formData.requirements.split('\n').map((r: string) => r.trim()).filter(Boolean),
-        } as any,
+        requirements: formData.requirements.split('\n').map((r: string) => r.trim()).filter(Boolean),
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
         status: formData.status as JobStatus,

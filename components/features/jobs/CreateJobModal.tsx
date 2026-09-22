@@ -71,9 +71,7 @@ export default function CreateJobModal({ onClose, onJobCreated }: CreateJobModal
         location: formData.location,
         employmentType: formData.employmentType as EmploymentType,
         description: formData.description,
-        requirements: {
-          skills: formData.requirements.split('\n').map(r => r.trim()).filter(Boolean),
-        } as any,
+        requirements: formData.requirements.split('\n').map((r: string) => r.trim()).filter(Boolean),
         salaryMin: formData.salaryMin ? Number(formData.salaryMin) : undefined,
         salaryMax: formData.salaryMax ? Number(formData.salaryMax) : undefined,
         status: 'DRAFT' // Always create as draft first

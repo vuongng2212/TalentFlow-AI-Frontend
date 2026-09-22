@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { applicationService } from '../../../../services/api/application.service';
 import { Application, ApplicationStage } from '../../../../types';
 import Badge, { BadgeProps } from '../../../../components/ui/badge';
@@ -93,8 +94,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       const updated = await applicationService.updateApplicationStage(application.id, newStage as ApplicationStage);
       setApplication(prev => prev ? { ...prev, stage: updated.stage } : null);
       setConfirmRejectOpen(false);
+      toast.success(`Stage updated to ${newStage.charAt(0) + newStage.slice(1).toLowerCase()}`);
     } catch (err) {
       console.error(err);
+      toast.error('Failed to update stage');
     } finally {
       hideLoading();
       setRejectingApp(false);
@@ -233,6 +236,18 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                     : `${parsing.label}: AI scoring will appear here once the CV has been processed by the parser.`}
                 </p>
               </div>
+
+              {application.cvParsingStatus === 'FAILED' && (
+                <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-xl p-4 flex items-start gap-3">
+                  <span className="text-sm">⚠️</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-rose-800 dark:text-rose-300">CV Parsing Incomplete</h4>
+                    <p className="text-xs text-rose-700 dark:text-rose-400 mt-0.5">
+                      {application.scoringReasoning || 'The parsing pipeline encountered an issue extracting full details from this file.'}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="card p-6 bg-white dark:bg-zinc-900 border-slate-200/80 dark:border-zinc-800/80 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] dark:shadow-none">

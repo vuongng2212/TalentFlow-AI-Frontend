@@ -24,11 +24,11 @@ test.describe('Jobs Flow', () => {
     
     // Verify Job details rendered
     await expect(page.locator('h1:has-text("Senior Backend Engineer")')).toBeVisible();
-    await expect(page.locator('button:has-text("Edit")')).toBeVisible();
-    await expect(page.locator('button:has-text("Close Job")')).toBeVisible();
+    await expect(page.locator('button:has-text("Edit Job")')).toBeVisible();
+    await expect(page.locator('button:has-text("Close Position")')).toBeVisible();
 
     // Open Edit Modal
-    await page.click('button:has-text("Edit")');
+    await page.click('button:has-text("Edit Job")');
     
     // Check Modal rendered
     const modal = page.locator('div[role="dialog"]:not([data-nextjs-dialog])');

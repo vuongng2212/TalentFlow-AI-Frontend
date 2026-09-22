@@ -13,6 +13,7 @@ import BulkActionBar from "../../../components/ui/BulkActionBar";
 import LoadingSkeleton from "../../../components/ui/LoadingSkeleton";
 import EmptyState from "../../../components/ui/EmptyState";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import UploadCvModal from "../../../components/features/candidates/UploadCvModal";
 import { useModalStore } from "../../../lib/store/useModalStore";
 import { useApplicationsStore } from "../../../lib/store/useApplicationsStore";
@@ -89,7 +90,13 @@ export default function ApplicationsPage() {
           );
         }
         setApplications(filtered);
-        setTotalPages(response.meta.totalPages);
+        if (filters.search || filters.minScore > 0) {
+          setTotalPages(
+            Math.max(1, Math.ceil(filtered.length / (viewMode === "kanban" ? 100 : 10))),
+          );
+        } else {
+          setTotalPages(response.meta.totalPages);
+        }
       } catch (e: unknown) {
         console.error("Failed to fetch applications", e);
       } finally {
@@ -100,9 +107,9 @@ export default function ApplicationsPage() {
     [
       activeWorkspace?.id,
       endMinDuration,
+      filters.minScore,
       filters.search,
       filters.stage,
-      filters.minScore,
       pagination.page,
       startMinDuration,
       viewMode,
@@ -142,13 +149,28 @@ export default function ApplicationsPage() {
   };
 
   const handleDropCandidate = async (appId: string, newStage: string) => {
+    const previousApplications = [...applications];
+    const previousSelected = selectedApplication;
+
+    // Optimistic update
+    setApplications((prev) =>
+      prev.map((a) =>
+        a.id === appId ? { ...a, stage: newStage as ApplicationStage } : a,
+      ),
+    );
+
+    if (selectedApplication && selectedApplication.id === appId) {
+      setSelectedApplication((prev) =>
+        prev ? { ...prev, stage: newStage as ApplicationStage } : null,
+      );
+    }
+
     try {
       const updated = await applicationService.updateApplicationStage(
         appId,
         newStage as ApplicationStage,
       );
 
-      // Optimistic update
       setApplications((prev) =>
         prev.map((a) => (a.id === appId ? { ...a, stage: updated.stage } : a)),
       );
@@ -158,24 +180,39 @@ export default function ApplicationsPage() {
           prev ? { ...prev, stage: updated.stage } : null,
         );
       }
+      toast.success(
+        `Candidate moved to ${newStage.charAt(0) + newStage.slice(1).toLowerCase()}`,
+      );
     } catch (err) {
-      console.error(err);
-      loadData(false);
+      console.error("Failed to update candidate stage:", err);
+      setApplications(previousApplications);
+      setSelectedApplication(previousSelected);
+      toast.error("Failed to update candidate stage. Reverting changes.");
     }
   };
 
   const handleBulkStageChange = async (newStage: string) => {
     setLoading(true);
-    await Promise.all(
-      selectedIds.map((id) =>
-        applicationService.updateApplicationStage(
-          id,
-          newStage as ApplicationStage,
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          applicationService.updateApplicationStage(
+            id,
+            newStage as ApplicationStage,
+          ),
         ),
-      ),
-    );
-    await loadData(false);
-    clearSelection();
+      );
+      toast.success(
+        `Updated ${selectedIds.length} candidate(s) to ${newStage.charAt(0) + newStage.slice(1).toLowerCase()}`,
+      );
+      await loadData(false);
+      clearSelection();
+    } catch (err) {
+      console.error("Failed to perform bulk stage update:", err);
+      toast.error("Failed to update all selected candidates.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // UI Map Application — surfaces the REAL aiScore + cvParsingStatus from backend

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../features/workspace/RoleContext';
+import { useNotificationStore } from '@/lib/store/useNotificationStore';
 import { toast } from 'sonner';
 
 interface NotificationSocketContextProps {
@@ -57,6 +58,15 @@ export const NotificationSocketProvider: React.FC<{ children: React.ReactNode }>
       applicationId?: string;
     }) => {
       console.log('🔔 Received real-time notification:', notification);
+
+      // Add to reactive notification center store
+      useNotificationStore.getState().addRealtimeNotification({
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        userId: notification.userId,
+        applicationId: notification.applicationId,
+      });
 
       const isFailure =
         /fail|reject|error/i.test(notification.title) ||

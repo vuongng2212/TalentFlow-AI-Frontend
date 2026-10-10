@@ -5,6 +5,7 @@ import { interviewService } from '../../../services/api/interview.service';
 import { applicationService } from '../../../services/api/application.service';
 import { userService } from '../../../services/api/user.service';
 import { Application, User, InterviewType } from '../../../types';
+import { toast } from 'sonner';
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -70,12 +71,15 @@ export default function ScheduleInterviewModal({ isOpen, onClose, onInterviewSch
         notes: formData.notes,
       });
 
+      toast.success('Interview scheduled successfully');
       onInterviewScheduled();
       onClose();
     } catch (err: unknown) {
-      const error = err as { message?: string };
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
       hideLoading();
-      setError(error?.message || 'Failed to schedule interview');
+      const msg = error?.response?.data?.message || error?.message || 'Failed to schedule interview';
+      setError(msg);
+      toast.error(msg);
     } finally {
       hideLoading();
       setLoading(false);

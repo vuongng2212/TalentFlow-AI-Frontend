@@ -5,6 +5,7 @@ import { workspaceService } from '../../../services/api/workspace.service';
 import { useAuth } from '../../../components/features/workspace/RoleContext';
 import { useUIStore } from '../../../lib/store/useUIStore';
 import { Workspace } from '../../../types';
+import { toast } from 'sonner';
 
 interface AuditLog {
   event: string;
@@ -81,10 +82,13 @@ function SettingsForm({
       });
       await refreshWorkspaces();
       setSuccessMsg('Workspace settings saved successfully!');
+      toast.success('Workspace settings updated successfully');
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setErrorMsg(error?.message || 'Failed to save settings. Please try again.');
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = error?.response?.data?.message || error?.message || 'Failed to save settings. Please try again.';
+      setErrorMsg(msg);
+      toast.error(msg);
     } finally {
       hideLoading();
       setIsSaving(false);

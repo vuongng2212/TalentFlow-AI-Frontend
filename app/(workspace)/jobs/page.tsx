@@ -9,6 +9,7 @@ import LoadingSkeleton from "../../../components/ui/LoadingSkeleton";
 import EmptyState from "../../../components/ui/EmptyState";
 import FilterChips from "../../../components/ui/FilterChips";
 import BulkActionBar from "../../../components/ui/BulkActionBar";
+import { toast } from 'sonner';
 
 import CreateJobModal from "../../../components/features/jobs/CreateJobModal";
 import { useModalStore } from "../../../lib/store/useModalStore";
@@ -456,7 +457,11 @@ export default function JobsPage() {
               <button
                 className={`btn text-xs h-9 cursor-pointer ${confirmBulkAction === 'close' ? 'danger' : 'primary'}`}
                 onClick={() => {
-                  alert(confirmBulkAction === 'close' ? `Closed ${selectedIds.size} jobs` : `Exported data for ${selectedIds.size} jobs`);
+                  if (confirmBulkAction === 'close') {
+                    toast.success(`Closed ${selectedIds.size} selected positions`);
+                  } else {
+                    toast.success(`Exported data for ${selectedIds.size} positions to CSV`);
+                  }
                   setSelectedIds(new Set());
                   setConfirmBulkAction(null);
                 }}

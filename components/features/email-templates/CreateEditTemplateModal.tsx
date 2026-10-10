@@ -5,6 +5,7 @@ import Modal from '../../ui/dialog/Modal';
 import { useUIStore } from '../../../lib/store/useUIStore';
 import { emailTemplateService } from '../../../services/api/email-template.service';
 import { EmailTemplate } from '../../../types';
+import { toast } from 'sonner';
 
 interface CreateEditTemplateModalProps {
   isOpen: boolean;
@@ -110,19 +111,23 @@ export default function CreateEditTemplateModal({
           subject: formData.subject,
           body: formData.body,
         });
+        toast.success('Email template updated successfully');
       } else {
         await emailTemplateService.createEmailTemplate({
           name: formData.name,
           subject: formData.subject,
           body: formData.body,
         });
+        toast.success('Email template created successfully');
       }
 
       onSaved();
       onClose();
     } catch (err: unknown) {
-      const apiError = err as { message?: string };
-      setError(apiError?.message || 'Failed to save email template');
+      const apiError = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = apiError?.response?.data?.message || apiError?.message || 'Failed to save email template';
+      setError(msg);
+      toast.error(msg);
     } finally {
       hideLoading();
       setLoading(false);

@@ -9,6 +9,7 @@ import CreateEditTemplateModal from '../../../components/features/email-template
 import { useAuth } from '../../../components/features/workspace/RoleContext';
 import { useMinDuration } from '../../../hooks/useMinDuration';
 import { useDebouncedValue } from '../../../hooks/useDebouncedValue';
+import { toast } from 'sonner';
 
 export default function EmailTemplatesPage() {
   const { isLoading: isAuthLoading, isAuthenticated, activeWorkspace } = useAuth();
@@ -99,11 +100,14 @@ export default function EmailTemplatesPage() {
 
     try {
       await emailTemplateService.deleteEmailTemplate(confirmDeleteId);
+      toast.success('Email template deleted successfully');
       setConfirmDeleteId(null);
       setRefreshKey((prev) => prev + 1);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setDeleteError(error?.message || 'Failed to delete template');
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = error?.response?.data?.message || error?.message || 'Failed to delete template';
+      setDeleteError(msg);
+      toast.error(msg);
     } finally {
       setIsDeleting(false);
     }
@@ -282,7 +286,7 @@ export default function EmailTemplatesPage() {
 
       {/* Confirmation Dialog */}
       {confirmDeleteId && (
-        <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+        <div role="dialog" aria-modal="true" className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-2xl max-w-md w-full flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="font-jakarta text-lg font-bold text-slate-900 dark:text-zinc-50">
               Delete Email Template

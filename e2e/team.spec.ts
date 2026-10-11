@@ -4,7 +4,7 @@ test('team page flow', async ({ page }) => {
   // Login first
   await page.goto('/login');
   await page.fill('input[type="email"]', 'seed-admin@talentflow.invalid');
-  await page.fill('input[type="password"]', 'SeedPassword123!');
+  await page.fill('input[type="password"]', 'Password123!');
   await page.click('button:has-text("Login")');
   await expect(page).toHaveURL('/dashboard');
 

@@ -5,7 +5,7 @@ test('login flow', async ({ page }) => {
   
   // Fill in login form
   await page.fill('input[type="email"]', 'seed-admin@talentflow.invalid');
-  await page.fill('input[type="password"]', 'SeedPassword123!');
+  await page.fill('input[type="password"]', 'Password123!');
   
   // Submit
   await page.click('button:has-text("Login")');

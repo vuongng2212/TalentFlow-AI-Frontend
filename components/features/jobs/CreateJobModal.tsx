@@ -4,6 +4,7 @@ import { useUIStore } from '../../../lib/store/useUIStore';
 import { useModalStore } from '../../../lib/store/useModalStore';
 import { jobService } from '../../../services/api/job.service';
 import { EmploymentType } from '../../../types';
+import { toast } from 'sonner';
 
 interface CreateJobModalProps {
   isOpen?: boolean;
@@ -77,13 +78,16 @@ export default function CreateJobModal({ onClose, onJobCreated }: CreateJobModal
         status: 'DRAFT' // Always create as draft first
       });
 
+      toast.success('Job requisition created successfully');
       if (onJobCreated) onJobCreated();
       handleClose();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string; details?: string[] } }; message?: string };
       hideLoading();
       const detailsMsg = error?.response?.data?.details?.join(', ');
-      setError(detailsMsg || error?.response?.data?.message || error?.message || 'Failed to create job');
+      const msg = detailsMsg || error?.response?.data?.message || error?.message || 'Failed to create job';
+      setError(msg);
+      toast.error(msg);
     } finally {
       hideLoading();
       setLoading(false);

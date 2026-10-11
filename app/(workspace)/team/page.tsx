@@ -9,6 +9,7 @@ import { useMinDuration } from '../../../hooks/useMinDuration';
 import EmptyState from '../../../components/ui/EmptyState';
 import Badge, { BadgeProps } from '../../../components/ui/badge';
 import InviteMemberModal from '../../../components/features/workspace/InviteMemberModal';
+import { toast } from 'sonner';
 
 const ROLE_BADGE: Record<WorkspaceMemberRole, { label: string; variant: string }> = {
   OWNER:     { label: 'Owner',     variant: 'offer' },
@@ -78,11 +79,15 @@ export default function TeamPage() {
       await workspaceService.removeMember(activeWorkspace.id, userId);
       setMembers((prev) => prev.filter((m) => m.userId !== userId));
       setSuccessMessage('Member removed successfully.');
+      toast.success('Team member removed successfully');
       setTimeout(() => setSuccessMessage(''), 4000);
       setConfirmDeleteMember(null);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error('Failed to remove member', e);
-      setErrorMessage('Failed to remove member. Please try again.');
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      const msg = err?.response?.data?.message || err?.message || 'Failed to remove member. Please try again.';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setRemoving(null);
     }

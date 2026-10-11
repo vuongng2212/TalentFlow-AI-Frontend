@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Modal from '../../ui/dialog/Modal';
 import { workspaceService } from '@/services/api/workspace.service';
 import { Workspace, WorkspaceMemberRole } from '@/types';
+import { toast } from 'sonner';
 
 interface Props {
   workspace: Workspace;
@@ -39,24 +40,28 @@ export default function InviteMemberModal({ workspace, onClose, onSuccess }: Pro
       if (workspace.isBusiness) {
         // Business workspaces: send email invitation token
         await workspaceService.createInvitation(workspace.id, { email: email.trim(), role });
-        setSuccess(`Invitation sent to ${email}. They will receive an email to accept.`);
+        const msg = `Invitation sent to ${email}. They will receive an email to accept.`;
+        setSuccess(msg);
+        toast.success(msg);
       } else {
         // Personal/Plus workspaces: add existing user directly
         await workspaceService.addMember(workspace.id, { email: email.trim(), role });
-        setSuccess(`${email} has been added to the workspace.`);
+        const msg = `${email} has been added to the workspace.`;
+        setSuccess(msg);
+        toast.success(msg);
       }
 
       setTimeout(() => {
         onSuccess();
       }, 1500);
     } catch (err: unknown) {
-      const error = err as { message?: string };
-      setError(
-        error?.message ||
-          (workspace.isBusiness
-            ? 'Failed to send invitation. Please try again.'
-            : 'Failed to add member. Make sure the user is registered in the system.'),
-      );
+      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const fallbackMsg = workspace.isBusiness
+        ? 'Failed to send invitation. Please try again.'
+        : 'Failed to add member. Make sure the user is registered in the system.';
+      const msg = error?.response?.data?.message || error?.message || fallbackMsg;
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

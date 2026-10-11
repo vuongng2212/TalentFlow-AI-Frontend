@@ -4,6 +4,7 @@ import { useUIStore } from '../../../lib/store/useUIStore';
 import { jobService } from '../../../services/api/job.service';
 import { Job, EmploymentType, JobStatus } from '../../../types';
 import { useModalStore } from '../../../lib/store/useModalStore';
+import { toast } from 'sonner';
 
 interface EditJobModalProps {
   isOpen?: boolean;
@@ -86,13 +87,16 @@ function EditJobForm({
         status: formData.status as JobStatus,
       });
 
+      toast.success('Job requisition updated successfully');
       if (onJobUpdated) onJobUpdated();
       handleClose();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string; details?: string[] } }; message?: string };
       hideLoading();
       const detailsMsg = error?.response?.data?.details?.join(', ');
-      setError(detailsMsg || error?.response?.data?.message || error?.message || 'Failed to update job');
+      const msg = detailsMsg || error?.response?.data?.message || error?.message || 'Failed to update job';
+      setError(msg);
+      toast.error(msg);
     } finally {
       hideLoading();
       setLoading(false);

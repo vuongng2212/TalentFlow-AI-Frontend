@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getInvoices } from '../../../services/mockData';
 import { Invoice } from '../../../types';
 import Badge, { BadgeProps } from '../../../components/ui/badge';
+import { toast } from 'sonner';
 
 export default function BillingPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -17,6 +18,22 @@ export default function BillingPage() {
     load();
   }, []);
 
+  const handlePlanAction = async (plan: 'update' | 'free' | 'plus' | 'business') => {
+    setUpdatingPlan(plan);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      if (plan === 'free') {
+        toast.info('Downgrade request scheduled at the end of the current billing cycle.');
+      } else if (plan === 'plus' || plan === 'update') {
+        toast.success('Redirecting to Stripe Billing Portal to manage payment methods and seats.');
+      } else if (plan === 'business') {
+        toast.success('Enterprise inquiry submitted. A TalentFlow account executive will contact you shortly.');
+      }
+    } finally {
+      setUpdatingPlan(null);
+    }
+  };
+
   return (
     <>
       <header className="topbar bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
@@ -24,9 +41,9 @@ export default function BillingPage() {
           Workspace <span className="mx-2 text-slate-300 dark:text-zinc-700">/</span> <strong className="text-slate-900 dark:text-zinc-50 font-bold">Billing</strong>
         </div>
         <button
-          className="btn primary text-xs h-8 px-3"
+          className="btn primary text-xs h-8 px-3 cursor-pointer"
           disabled={!!updatingPlan}
-          onClick={() => setUpdatingPlan('update')}
+          onClick={() => handlePlanAction('update')}
         >
           {updatingPlan === 'update' ? 'Updating...' : 'Update plan'}
         </button>
@@ -59,7 +76,7 @@ export default function BillingPage() {
             <button
               className="btn secondary w-full cursor-pointer mt-4"
               disabled={!!updatingPlan}
-              onClick={() => setUpdatingPlan('free')}
+              onClick={() => handlePlanAction('free')}
             >
               {updatingPlan === 'free' ? 'Downgrading...' : 'Downgrade'}
             </button>
@@ -86,7 +103,7 @@ export default function BillingPage() {
             <button
               className="btn primary w-full cursor-pointer mt-4"
               disabled={!!updatingPlan}
-              onClick={() => setUpdatingPlan('plus')}
+              onClick={() => handlePlanAction('plus')}
             >
               {updatingPlan === 'plus' ? 'Loading...' : 'Manage Subscription'}
             </button>
@@ -109,7 +126,7 @@ export default function BillingPage() {
             <button
               className="btn secondary w-full cursor-pointer mt-4"
               disabled={!!updatingPlan}
-              onClick={() => setUpdatingPlan('business')}
+              onClick={() => handlePlanAction('business')}
             >
               {updatingPlan === 'business' ? 'Loading...' : 'Contact Sales'}
             </button>

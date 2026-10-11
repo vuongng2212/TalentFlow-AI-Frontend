@@ -27,6 +27,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [notes, setNotes] = useState<string[]>([]);
   const [unwrappedParams, setUnwrappedParams] = useState<{ id: string } | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Unwrap params client-side
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unwrappedParams]);
+  }, [unwrappedParams, refreshKey]);
 
   // Refresh this detail view when the backend finishes parsing its CV.
   useEffect(() => {
@@ -442,7 +443,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       <ScheduleInterviewModal
         isOpen={isScheduleModalOpen}
         onClose={() => setIsScheduleModalOpen(false)}
-        onInterviewScheduled={() => {}}
+        onInterviewScheduled={() => setRefreshKey((k) => k + 1)}
       />
 
       {/* Reject Confirmation Dialog */}

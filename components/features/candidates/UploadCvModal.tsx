@@ -5,6 +5,7 @@ import { jobService } from '../../../services/api/job.service';
 import { applicationService } from '../../../services/api/application.service';
 import { Job } from '../../../types';
 import { useModalStore } from '../../../lib/store/useModalStore';
+import { toast } from 'sonner';
 
 interface UploadCvModalProps {
   isOpen?: boolean;
@@ -89,6 +90,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
 
       await applicationService.uploadApplicationCv(formData);
 
+      toast.success('CV uploaded successfully! AI parsing is in progress.');
       if (onUploadSuccess) onUploadSuccess();
       handleClose();
     } catch (err: unknown) {
@@ -98,6 +100,7 @@ export default function UploadCvModal({ isOpen, onClose, onUploadSuccess }: Uplo
         apiErr?.response?.data?.message ||
         (err instanceof Error ? err.message : 'Failed to upload CV');
       setError(message);
+      toast.error(message);
     } finally {
       hideLoading();
       setLoading(false);

@@ -1,0 +1,11 @@
+node_modules
+.next
+!.next/standalone
+!.next/static
+.git
+.gitignore
+*.md
+.env*.local
+test-results
+playwright-report
+e2e
